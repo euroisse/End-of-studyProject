@@ -5,27 +5,48 @@
       <div class="flex items-center">
         <h1 class="text-2xl font-bold text-indigo-700">OpenCRM</h1>
       </div>
-      <nav class="hidden md:flex items-center space-x-8">
-        <NuxtLink
-          class="text-gray-700 hover:text-indigo-600 font-medium cursor-pointer"
-          >Accueil</NuxtLink
-        >
-        <NuxtLink
-        to="contacts"
-          class="text-gray-700 hover:text-indigo-600 font-medium cursor-pointer"
-          >Contacts</NuxtLink
-        >
-      </nav>
-      <div class="flex items-center space-x-4">
-        <Button
-          content="Se connecter"
-          customClass="text-indigo-600 hover:text-indigo-800 font-medium whitespace-nowrap cursor-pointer !rounded-button"
-        />
+      <div
+        :class="[
+          isMenuOpen ? 'left-0' : 'left-[-100%]',
+          'absolute top-0 min-h-[80vh] w-full bg-white backdrop-blur-sm flex flex-col items-center justify-center gap-8 duration-300 overflow-hidden',
+          'lg:static lg:min-h-fit lg:bg-transparent lg:w-auto lg:flex lg:flex-row lg:opacity-100 lg:left-auto',
+        ]"
+      >
+        <nav class="hidden md:flex items-center space-x-8">
+          <NuxtLink
+            class="text-gray-700 hover:text-indigo-600 font-medium cursor-pointer"
+            >Accueil</NuxtLink
+          >
+          <NuxtLink
+            to="contacts"
+            class="text-gray-700 hover:text-indigo-600 font-medium cursor-pointer"
+            >Contacts</NuxtLink
+          >
+        </nav>
+        <div class="flex items-center space-x-4">
+          <Button
+            content="Se connecter"
+            customClass="text-indigo-600 hover:text-indigo-800 font-medium whitespace-nowrap cursor-pointer !rounded-button"
+          />
 
-        <Button
-          content=" Créer un compte"
-          customClass="bg-indigo-500 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-md transition-all whitespace-nowrap cursor-pointer !rounded-button"
-        />
+          <Button
+            content=" Créer un compte"
+            customClass="bg-indigo-500 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-md transition-all whitespace-nowrap cursor-pointer !rounded-button"
+          />
+        </div>
+      </div>
+      <div
+        class="text-xl sm:text-3xl cursor-pointer z-50 lg:hidden"
+        @click="toggleMenu"
+      >
+        <i
+          :class="
+            isMenuOpen
+              ? 'ri-close-line text-[#6B7280]'
+              : 'ri-menu-line text-[#6B7280]'
+          "
+        >
+        </i>
       </div>
     </div>
   </header>
@@ -33,6 +54,10 @@
 
 <script setup lang="ts">
 import Button from "./Button.vue";
+const isMenuOpen = ref(false);
+const toggleMenu = () => {
+  isMenuOpen.value = !isMenuOpen.value;
+};
 </script>
 
 <style scoped></style>

@@ -64,7 +64,7 @@
       <h2 class="text-3xl font-bold text-center text-gray-800 mb-16">
         Pourquoi choisir OpenCRM
       </h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
         <div
           v-for="(feature, index) in features"
           :key="index"
@@ -92,7 +92,7 @@
       </h2>
       <div class="swiper-container">
         <swiper
-         direction="horizontal"
+          direction="horizontal"
           :modules="swiperModules"
           :speed="400"
           :loop="true"
@@ -134,8 +134,9 @@ import avatar1 from "~/assets/Images/avatar1.jpg";
 import fondEcran from "~/assets/Images/fondEcran.jpg";
 import Footer from "~/components/iu/Footer.vue";
 import { Swiper, SwiperSlide } from "swiper/vue";
-import 'swiper/css/pagination';
+import "swiper/css/pagination";
 import { Pagination, Autoplay } from "swiper/modules";
+
 const swiperModules = [Pagination, Autoplay];
 const swiperBreakpoints = {
   640: {
@@ -152,6 +153,7 @@ const swiperBreakpoints = {
   },
 };
 const heroImage = fondEcran;
+
 const processSteps = [
   {
     title: "Analyse",
@@ -231,6 +233,7 @@ const testimonials = [
   },
 ];
 </script>
+
 <style scoped>
 .swiper {
   width: 100%;
