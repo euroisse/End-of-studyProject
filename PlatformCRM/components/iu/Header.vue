@@ -11,7 +11,7 @@
           >Accueil</NuxtLink
         >
         <NuxtLink
-          href="#"
+        to="contacts"
           class="text-gray-700 hover:text-indigo-600 font-medium cursor-pointer"
           >Contacts</NuxtLink
         >
@@ -24,7 +24,7 @@
 
         <Button
           content=" Créer un compte"
-          customClass="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-md transition-all whitespace-nowrap cursor-pointer !rounded-button"
+          customClass="bg-indigo-500 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-md transition-all whitespace-nowrap cursor-pointer !rounded-button"
         />
       </div>
     </div>

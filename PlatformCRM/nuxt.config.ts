@@ -2,7 +2,8 @@
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
-  css: ['~/assets/css/main.css'],
+  css: ['~/assets/css/main.css',  'swiper/css',
+    'swiper/css/pagination',],
   modules: ['@nuxtjs/tailwindcss'],
   postcss: {
     plugins: {
@@ -18,7 +19,9 @@ export default defineNuxtConfig({
           {  name: 'description', content: 'CRM pour agences digitales' }
         ],
         link: [
-          { rel: 'styleshee', type: 'image/x-icon', href: 'https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css' }
+          {      rel: 'stylesheet',
+            href: 'https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css',
+       }
         ]
       }
     }
