@@ -14,24 +14,27 @@
       >
         <nav class="hidden md:flex items-center space-x-8">
           <NuxtLink
-            class="text-gray-700 hover:text-indigo-600 font-medium cursor-pointer"
+          to="/"
+            class="text-gray-700 hover:text-indigo-700 font-medium cursor-pointer"
+            active-class="text-indigo-800 font-semibold border-b-2 border-indigo-700"
             >Accueil</NuxtLink
           >
           <NuxtLink
             to="contacts"
-            class="text-gray-700 hover:text-indigo-600 font-medium cursor-pointer"
+            class="text-gray-700 hover:text-indigo-700 font-medium cursor-pointer"
+            active-class="text-indigo-800 font-semibold border-b-2 border-indigo-700"
             >Contacts</NuxtLink
           >
         </nav>
         <div class="flex items-center space-x-4">
           <Button
             content="Se connecter"
-            customClass="text-indigo-600 hover:text-indigo-800 font-medium whitespace-nowrap cursor-pointer !rounded-button"
+            customClass="text-indigo-500 hover:text-indigo-800 font-medium whitespace-nowrap cursor-pointer !rounded-button"
           />
 
           <Button
             content=" Créer un compte"
-            customClass="bg-indigo-500 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-md transition-all whitespace-nowrap cursor-pointer !rounded-button"
+            customClass="bg-indigo-500 hover:bg-indigo-800 text-white px-4 py-2 rounded-lg shadow-md transition-all whitespace-nowrap cursor-pointer !rounded-button"
           />
         </div>
       </div>

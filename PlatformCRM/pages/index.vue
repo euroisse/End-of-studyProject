@@ -127,6 +127,8 @@
       </div>
     </div>
   </section>
+
+  <!-- footer -->
   <Footer />
 </template>
 <script lang="ts" setup>
@@ -138,6 +140,7 @@ import "swiper/css/pagination";
 import { Pagination, Autoplay } from "swiper/modules";
 
 const swiperModules = [Pagination, Autoplay];
+
 const swiperBreakpoints = {
   640: {
     slidesPerView: 1,
@@ -152,6 +155,7 @@ const swiperBreakpoints = {
     spaceBetween: 30,
   },
 };
+
 const heroImage = fondEcran;
 
 const processSteps = [
@@ -192,6 +196,7 @@ const processSteps = [
       "Nous déployons votre solution et assurons un suivi pour votre satisfaction.",
   },
 ];
+
 const features = [
   {
     title: "Gestion de projets simplifiée",
@@ -212,6 +217,7 @@ const features = [
       "Accédez à des tableaux de bord intuitifs pour analyser vos performances et prendre des décisions éclairées.",
   },
 ];
+
 const testimonials = [
   {
     name: "Sophie Martin",
@@ -232,6 +238,7 @@ const testimonials = [
     text: "La plateforme nous a permis de centraliser toutes nos communications client et de suivre chaque étape du projet avec précision. Un outil indispensable !",
   },
 ];
+
 </script>
 
 <style scoped>

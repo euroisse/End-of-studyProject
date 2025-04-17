@@ -3,7 +3,7 @@
     <!-- Footer -->
     <footer class="bg-gray-900 text-white py-12 mt-auto">
       <div class="container mx-auto px-6">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           <div>
             <h3 class="text-xl font-bold mb-4">OpenCRM</h3>
             <p class="text-gray-400 mb-6">
