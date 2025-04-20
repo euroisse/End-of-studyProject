@@ -12,21 +12,21 @@
             <div class="flex space-x-4">
               <NuxtLink
                 href="#"
-                class=" text-gray-400 hover:text-white transition-colors cursor-pointer"
+                class="text-gray-400 hover:text-white transition-colors cursor-pointer"
               >
-                <i class="ri-facebook-fill "></i>
+                <i class="ri-facebook-fill"></i>
               </NuxtLink>
               <NuxtLink
                 href="#"
-                class=" text-gray-400 hover:text-white transition-colors cursor-pointer"
+                class="text-gray-400 hover:text-white transition-colors cursor-pointer"
               >
-                <i class="ri-twitter-fill "></i>
+                <i class="ri-twitter-fill"></i>
               </NuxtLink>
               <NuxtLink
                 href="#"
-                class=" text-gray-400 hover:text-white transition-colors cursor-pointer"
+                class="text-gray-400 hover:text-white transition-colors cursor-pointer"
               >
-                <i class="ri-linkedin-box-fill "></i>
+                <i class="ri-linkedin-box-fill"></i>
               </NuxtLink>
               <NuxtLink
                 href="#"
@@ -41,11 +41,11 @@
             <ul class="space-y-2 text-gray-400">
               <li class="flex items-center">
                 <i class="ri-map-pin-fill mr-3 text-indigo-400"></i>
-                <span>123 Avenue des Champs-Élysées, Paris</span>
+                <span>Yaoundé, Entrée Simbock</span>
               </li>
               <li class="flex items-center">
                 <i class="ri-phone-fill mr-3 text-indigo-400"></i>
-                <span>+33 1 23 45 67 89</span>
+                <span>+237 656 488 879</span>
               </li>
               <li class="flex items-center">
                 <i class="ri-mail-line mr-3 text-indigo-400"></i>
