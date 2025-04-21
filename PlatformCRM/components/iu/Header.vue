@@ -20,10 +20,16 @@
             >Accueil</NuxtLink
           >
           <NuxtLink
-            to="contacts"
+            to="/contacts"
             class="text-gray-700 hover:text-indigo-700 font-medium cursor-pointer"
             active-class="text-indigo-800 font-semibold border-b-2 border-indigo-700"
             >Contacts</NuxtLink
+          >
+          <NuxtLink
+            to="/dashboard"
+            class="text-gray-700 hover:text-indigo-700 font-medium cursor-pointer"
+            active-class="text-indigo-800 font-semibold border-b-2 border-indigo-700"
+            >dashboard</NuxtLink
           >
         </nav>
         <div class="flex items-center space-x-4">

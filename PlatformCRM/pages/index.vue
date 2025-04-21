@@ -139,6 +139,10 @@ import { Swiper, SwiperSlide } from "swiper/vue";
 import "swiper/css/pagination";
 import { Pagination, Autoplay } from "swiper/modules";
 
+definePageMeta({
+  layout: 'default'
+});
+
 const swiperModules = [Pagination, Autoplay];
 
 const swiperBreakpoints = {
