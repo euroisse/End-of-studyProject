@@ -10,17 +10,18 @@
               class="flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 cursor-pointer"
               @click="toggleSubMenu(item.label)"
               :class="{
-                'bg-indigo-50 text-indigo-600 border-r-4 border-indigo-600': isSubMenuOpen(item.label) && !isChildActive(item),
-                'font-semibold': isSubMenuOpen(item.label) && !isChildActive(item),
+                'bg-indigo-50 text-indigo-600 border-r-4 border-indigo-600': isSubMenuOpen(item.label) || isChildActive(item),
+                'font-semibold': isSubMenuOpen(item.label) || isChildActive(item),
               }"
             >
               <i :class="`${item.icon} w-5`"></i>
               <span class="mx-4">{{ item.label }}</span>
               <i class="ri-arrow-right-s-line ml-auto" :class="{ 'rotate-90': isSubMenuOpen(item.label) }"></i>
             </div>
+            <!-- Modification: affichage vertical du sous-menu plutôt qu'horizontal -->
             <div
               v-if="isSubMenuOpen(item.label)"
-              class="absolute left-full top-0 mt-1 bg-white shadow-md rounded-md w-48 z-30"
+              class="bg-white absolute left-full top-0 shadow-md rounded-md w-48 p-3"
             >
               <NuxtLink
                 v-for="child in item.children"
@@ -28,6 +29,7 @@
                 :to="child.to"
                 class="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-100"
                 :class="isActive(child.to) ? 'font-semibold text-indigo-600' : ''"
+                @click="closeSubMenus"
               >
                 {{ child.label }}
               </NuxtLink>
@@ -87,16 +89,31 @@
   ];
   const menuItems = computed(() => (userRole === 'admin' ? adminMenu : clientMenu));
   const activeSubMenu = ref<string | null>(null);
+  
+  // Modification: Ferme tous les sous-menus quand on clique sur un lien enfant
+  const closeSubMenus = () => {
+    activeSubMenu.value = null;
+  };
+  
   const toggleSubMenu = (label: string) => {
+    // Si on clique sur un menu dont le sous-menu est déjà ouvert, on le ferme
+    // Sinon, on ferme tous les autres sous-menus et on ouvre celui-ci
     activeSubMenu.value = activeSubMenu.value === label ? null : label;
   };
+  
   const isSubMenuOpen = (label: string) => {
     return activeSubMenu.value === label;
   };
+  
+  // Modification: n'active qu'un seul lien à la fois
   const isActive = (path: string) => route.path === path;
-  const isChildActive = (item: any) => item.children?.some((child: any) => isActive(child.to));
+  
+  // Modification: vérifie si un des enfants du menu est actif
+  const isChildActive = (item: any) => {
+    return item.children?.some((child: any) => isActive(child.to));
+  };
   </script>
   
   <style scoped>
-  /* Styles supplémentaires */
+
   </style>
