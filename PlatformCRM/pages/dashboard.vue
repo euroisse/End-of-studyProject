@@ -1,5 +1,5 @@
 <template>
-  <div class="pt-20">
+  <div>
     <ProjectProgress />
     <div class="flex flex-col xl:flex-row gap-6 xl:gap-10 mt-6">
       <!-- Recent Messages -->
