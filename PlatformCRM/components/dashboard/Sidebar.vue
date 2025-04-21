@@ -70,7 +70,7 @@
       ],
     },
     { label: 'Tâches', to: '/taches', icon: 'ri-task-line' },
-    { label: 'Messages', to: '/messages', icon: 'ri-chat-3-line', badge: 3 },
+    { label: 'Messages', to: '/messages', icon: 'ri-chat-3-line', badge: 0 },
     { label: 'Paramètres', to: '/parametres', icon: 'ri-settings-3-line' },
   ];
   const clientMenu = [
@@ -84,7 +84,7 @@
         { label: 'Devis', to: '/devis' },
       ],
     },
-    { label: 'Messages', to: '/messages', icon: 'ri-chat-3-line', badge: 3 },
+    { label: 'Messages', to: '/messages', icon: 'ri-chat-3-line', badge: 0 },
     { label: 'Profil', to: '/profil', icon: 'ri-user-line' },
   ];
   const menuItems = computed(() => (userRole === 'admin' ? adminMenu : clientMenu));

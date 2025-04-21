@@ -17,7 +17,7 @@
       <div class="flex items-center space-x-4 gap-3">
         <button class="relative cursor-pointer">
           <i class="ri-notification-3-fill text-gray-600 text-xl"></i>
-          <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">2</span>
+          <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">0</span>
         </button>
         
         <div class="flex items-center space-x-3">
