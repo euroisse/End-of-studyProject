@@ -2,11 +2,7 @@
     <div>
  <!-- Top Navigation -->
  <header class="bg-white shadow-sm fixed top-0 left-64 right-0 z-10">
-<<<<<<< HEAD
     <div class="flex items-center justify-between gap-7 px-8 py-4">
-=======
-    <div class="flex items-center justify-between px-8 py-4">
->>>>>>> feature/pages
       <div class="flex items-center space-x-4">
         <div class="relative w-64">
           <input 
