@@ -1,8 +1,8 @@
 <template>
-    <div class="bg-white rounded-lg shadow-md">
-      <div class="p-6">
-        <div class="flex items-center justify-between mb-4">
-          <div class="relative">
+    <div class="bg-white rounded-lg  shadow-md">
+      <div class="p-6 ">
+        <div class="flex items-center justify-between container mb-4">
+          <div class="relative ">
             <input
               type="text"
               v-model="searchQuery"
@@ -56,9 +56,9 @@
             </button>
           </div>
         </div>
-  
-        <div class="overflow-x-auto">
-          <table class="w-full">
+        <div class="container mx-auto">
+            <div class="overflow-x-auto overflow-y-auto">
+          <table class="w-full min-w-[700px]">
             <thead>
               <tr class="bg-gray-50">
                 <th
@@ -131,10 +131,10 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <div class="flex space-x-2">
-                    <button
+                    <button @click="previewQuote(quote)"
                       class="text-indigo-600 hover:text-indigo-900 cursor-pointer"
                     >
-                      <i class="ri-eye-line"  @click="previewQuote(quote)"></i>
+                      <i class="ri-eye-line"  ></i>
                     </button>
                     <button
                       @click="convertToInvoice(quote)"
@@ -162,6 +162,8 @@
             </tbody>
           </table>
         </div>
+        </div>
+     
       </div>
     </div>
   </template>
@@ -171,6 +173,7 @@
   
   const searchQuery = ref("");
   const filterStatus = ref("all");
+
   const quotes = ref([
     {
       id: 1,
