@@ -5,7 +5,7 @@
       <div class="flex items-center space-x-4">
         <button
           @click="showCreateQuote = true"
-          class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-md transition-all whitespace-nowrap cursor-pointer !rounded-button"
+          class="bg-indigo-500 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-md transition-all whitespace-nowrap cursor-pointer !rounded-button"
         >
           <i class="ri-add-line mr-2"></i>
           Créer un devis
