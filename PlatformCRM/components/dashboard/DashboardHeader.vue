@@ -15,14 +15,6 @@
 
 </script>
   <style scoped>
-  .btn {
-    @apply flex items-center px-4 py-2 rounded-lg shadow-md text-white whitespace-nowrap transition-all;
-  }
-  .btn-primary {
-    @apply bg-indigo-500 hover:bg-indigo-700;
-  }
-  .btn-success {
-    @apply bg-green-500 hover:bg-green-700;
-  }
+ 
   </style>
   
