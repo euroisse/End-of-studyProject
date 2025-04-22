@@ -17,7 +17,7 @@
             <button
               @click="filterStatus = 'all'"
               :class="{
-                'bg-indigo-600 text-white': filterStatus === 'all',
+                'bg-indigo-500 text-white': filterStatus === 'all',
                 'bg-gray-100 text-gray-600': filterStatus !== 'all',
               }"
               class="px-4 py-2 rounded-lg transition-all whitespace-nowrap cursor-pointer !rounded-button"
