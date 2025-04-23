@@ -5,7 +5,7 @@
       <li
         v-for="(message, index) in messages"
         :key="index"
-        class="py-3 flex items-start gap-3"
+        class="py-3 flex items-start gap-3 hover:bg-gray-50 cursor-pointer"
       >
         <i class="ri-user-3-line text-xl text-indigo-500"></i>
         <div>

@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white rounded-lg shadow-md p-6">
+  <div class="bg-white rounded-lg  p-6  hover:shadow-md transition-shadow">
     <div class="flex items-center justify-between">
       <div>
         <p class="text-gray-500">{{ title }}</p>

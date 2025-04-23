@@ -5,7 +5,7 @@
       <li
         v-for="(invoice, index) in invoices"
         :key="index"
-        class="flex justify-between items-center border-b pb-2 last:border-b-0"
+        class="flex justify-between items-center border-b pb-2 last:border-b-0 hover:bg-gray-50 cursor-pointer"
       >
         <div>
           <p class="font-medium text-gray-700">
