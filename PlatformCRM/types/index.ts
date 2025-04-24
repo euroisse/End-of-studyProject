@@ -21,3 +21,10 @@ export interface Message {
     };
    
 }
+export interface Invoice {
+    numero: string;
+    projet: string;
+    date: string;
+    montant: string;
+    statut: string;
+  }
