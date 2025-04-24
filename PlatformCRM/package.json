@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@nuxtjs/tailwindcss": "^6.13.2",
+    "@vueuse/core": "^13.1.0",
+    "date-fns": "^4.1.0",
     "nuxt": "^3.16.2",
     "remixicon": "^4.6.0",
     "swiper": "^11.2.6",
