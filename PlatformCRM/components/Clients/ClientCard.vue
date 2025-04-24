@@ -38,11 +38,11 @@
       <div class="mt-4 flex items-center justify-between">
         <div class="flex items-center gap-4">
           <span class="text-sm text-gray-500">
-            <i class="ri-folder-line mr-1"></i>
+            <i class="ri-folder-line mr-1 hover:text-gray-800"></i>
             {{ client.projectCount }} projets
           </span>
           <span class="text-sm text-gray-500">
-            <i class="ri-time-line mr-1"></i>
+            <i class="ri-time-line mr-1 hover:text-gray-800"></i>
             {{ formatJoinDate(client.joinDate) }}
           </span>
         </div>

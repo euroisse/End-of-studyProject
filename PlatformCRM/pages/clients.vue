@@ -17,7 +17,7 @@
           <h2 class="text-xl font-semibold text-gray-900">Liste des clients</h2>
           <button
             @click="openNewClientModal"
-            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 cursor-pointer whitespace-nowrap rounded-md flex items-center"
+            class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 cursor-pointer whitespace-nowrap rounded-md flex items-center"
           >
             <i class="ri-add-line mr-2"></i>
             Nouveau client
@@ -82,6 +82,7 @@ interface Client {
   projectCount: number;
   joinDate: string;
   avatar?: string;
+ 
 }
 
 

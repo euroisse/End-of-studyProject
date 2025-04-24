@@ -89,7 +89,8 @@
     status: string;
     projectCount: number;
     joinDate: string;
-    avatar?: string;
+    avatar?: string ;
+   
   }
   
   const props = defineProps<{
