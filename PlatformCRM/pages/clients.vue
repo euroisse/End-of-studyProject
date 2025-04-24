@@ -49,63 +49,67 @@
 </template>
 
 <script lang="ts" setup>
-import { ClientsClientSideBar } from '#components';
-import { ref, computed } from 'vue';
-import { useStorage } from '@vueuse/core';
-definePageMeta({ layout: 'admin' });
+import { ClientsClientSideBar } from "#components";
+import { ref, computed } from "vue";
+import { useStorage } from "@vueuse/core";
+definePageMeta({ layout: "admin" });
 // State
-const searchQuery = useStorage('searchQuery', '');
+const searchQuery = useStorage("searchQuery", "");
 const showClientModal = ref(false);
 const isEditing = ref(false);
-const currentClient = ref<Client | null>(null);
-const selectedClientStatuses = useStorage('selectedClientStatuses', ['active', 'pending', 'inactive']);
-const selectedProjectRanges = useStorage('selectedProjectRanges', ['0-5', '6-10', '10+']);
+const currentClient = ref<Client | undefined>();
+const selectedClientStatuses = useStorage("selectedClientStatuses", [
+  "active",
+  "pending",
+  "inactive",
+]);
+const selectedProjectRanges = useStorage("selectedProjectRanges", [
+  "0-5",
+  "6-10",
+  "10+",
+]);
 
 // Constants
 const clientStatuses = [
-  { value: 'active', label: 'Actif' },
-  { value: 'pending', label: 'En attente' },
-  { value: 'inactive', label: 'Inactif' },
+  { value: "active", label: "Actif" },
+  { value: "pending", label: "En attente" },
+  { value: "inactive", label: "Inactif" },
 ];
 
 const projectRanges = [
-  { value: '0-5', label: '0-5 projets' },
-  { value: '6-10', label: '6-10 projets' },
-  { value: '10+', label: '10+ projets' },
+  { value: "0-5", label: "0-5 projets" },
+  { value: "6-10", label: "6-10 projets" },
+  { value: "10+", label: "10+ projets" },
 ];
 
 interface Client {
-  id: number;
+  id?: number;
   name: string;
   email: string;
   status: string;
   projectCount: number;
   joinDate: string;
   avatar?: string;
- 
 }
 
-
-const clients = useStorage<Client[]>('clients', [
+const clients = useStorage<Client[]>("clients", [
   {
     id: 1,
-    name: 'Entreprise ABC',
-    email: 'contact@abc.com',
-    status: 'active',
+    name: "Entreprise ABC",
+    email: "contact@abc.com",
+    status: "active",
     projectCount: 8,
-    joinDate: '2024-01-15',
-    avatar:
-      '',
+    joinDate: "2024-01-15",
+    avatar: "",
   },
   {
     id: 2,
-    name: 'Studio Design XYZ',
-    email: 'hello@xyz-design.com',
-    status: 'pending',
+    name: "Studio Design XYZ",
+    email: "hello@xyz-design.com",
+    status: "pending",
     projectCount: 3,
-    joinDate: '2025-02-01',
-    avatar:''
-      ,
+    joinDate: "2025-02-01",
+    avatar: "",
   },
 ]);
 
@@ -119,8 +123,9 @@ const filteredClients = computed(() => {
     const matchesStatus = selectedClientStatuses.value.includes(client.status);
 
     const matchesProjects = selectedProjectRanges.value.some((range) => {
-      if (range === '0-5') return client.projectCount <= 5;
-      if (range === '6-10') return client.projectCount > 5 && client.projectCount <= 10;
+      if (range === "0-5") return client.projectCount <= 5;
+      if (range === "6-10")
+        return client.projectCount > 5 && client.projectCount <= 10;
       return client.projectCount > 10;
     });
 
@@ -148,7 +153,7 @@ const toggleProjectRange = (range: string) => {
 };
 
 const openNewClientModal = () => {
-  currentClient.value = null;
+  currentClient.value = undefined;
   isEditing.value = false;
   showClientModal.value = true;
 };
@@ -161,18 +166,22 @@ const editClient = (client: Client) => {
 
 const closeClientModal = () => {
   showClientModal.value = false;
-  currentClient.value = null;
+  currentClient.value = undefined;
 };
 
 const saveClient = (client: Client) => {
   if (isEditing.value) {
     const index = clients.value.findIndex((c) => c.id === client.id);
     if (index !== -1) {
-      
-      clients.value = clients.value.map((c) => (c.id === client.id ? client : c));
+      clients.value = clients.value.map((c) =>
+        c.id === client.id ? client : c
+      );
     }
   } else {
-    const newId = clients.value.length > 0 ? Math.max(...clients.value.map((c) => c.id)) + 1 : 1;
+    const newId =
+      clients.value.length > 0
+        ? Math.max(...clients.value.map((c) => c.id as number)) + 1
+        : 1;
     clients.value.push({ ...client, id: newId });
   }
   showClientModal.value = false;
