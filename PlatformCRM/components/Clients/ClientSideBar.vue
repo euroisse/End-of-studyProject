@@ -25,7 +25,7 @@
                 @click="toggleClientStatus(status.value)"
                 :class="[
                   'px-3 py-1 text-sm cursor-pointer whitespace-nowrap rounded-md',
-                  selectedClientStatuses.includes(status.value) ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'
+                  selectedClientStatuses.includes(status.value) ? 'bg-blue-500 hover:bg-blue-700 text-white' : 'bg-gray-100 text-gray-700'
                 ]"
               >
                 {{ status.label }}
@@ -41,7 +41,7 @@
                 @click="toggleProjectRange(range.value)"
                 :class="[
                   'px-3 py-1 text-sm cursor-pointer whitespace-nowrap rounded-md',
-                  selectedProjectRanges.includes(range.value) ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'
+                  selectedProjectRanges.includes(range.value) ? 'bg-blue-500 hover:bg-blue-700 text-white' : 'bg-gray-100 text-gray-700'
                 ]"
               >
                 {{ range.label }}

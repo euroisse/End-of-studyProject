@@ -108,13 +108,13 @@
   interface Project {
     id: number;
     name: string;
-    avatar: string;
+    avatar?: string;
   }
   
   interface Employee {
     id: number;
     name: string;
-    avatar: string;
+    avatar?: string;
   }
   
   interface NewTaskData {
@@ -176,7 +176,7 @@
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/%3E%3C/svg%3E");
+    background-image: url("");
     background-repeat: no-repeat;
     background-position: right 0.5rem center;
     background-size: 1.5em 1.5em;
