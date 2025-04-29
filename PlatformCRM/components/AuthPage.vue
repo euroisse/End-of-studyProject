@@ -7,10 +7,10 @@
           alt="Illustration connexion"
           class="w-full h-full object-cover object-top"
         />
-        <div class="absolute inset-0 bg-gradient-to-r from-blue-900/70 to-transparent flex flex-col justify-center p-8">
-          <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">Bienvenue sur notre plateforme</h1>
-          <p class="text-white text-lg mb-6">Gérez vos projets et clients en toute simplicité</p>
-          <p class="text-white/80 text-sm">{{ formattedDate }}</p>
+        <div class="absolute inset-0 bg-gradient-to-r from-blue-900/70 to-transparent flex flex-col justify-center text-center p-8">
+          <h1 class="text-3xl md:text-4xl  font-bold text-white mb-4">OpenCRM</h1>
+          <h4 class="text-white text-lg mb-6">Gérez vos projets et clients en toute simplicité</h4>
+          <!-- <p class="text-white/80 text-sm">{{ formattedDate }}</p> -->
         </div>
       </div>
 
@@ -44,8 +44,8 @@
 
 <script lang="ts" setup>
 import { ref, computed } from 'vue';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+// import { format } from 'date-fns';
+// import { fr } from 'date-fns/locale';
 
 import image1 from '~/assets/Images/image1.jpg';
 import Login from './authentification/Login.vue';
@@ -80,9 +80,9 @@ const handleRegister = (registerData: any) => {
 
 };
 
-const formattedDate = computed(() => {
-  return format(new Date(), "EEEE dd MMMM", { locale: fr });
-});
+// const formattedDate = computed(() => {
+//   return format(new Date(), "EEEE dd MMMM", { locale: fr });
+// });
 </script>
 
 <style scoped>
