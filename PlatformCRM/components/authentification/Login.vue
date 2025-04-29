@@ -23,12 +23,12 @@
           >
             <div
               @click="
-                selectUserType('Membre de l\'agence');
+                selectUserType('Employé');
                 showUserTypeDropdown = false;
               "
               class="px-4 py-2 hover:bg-blue-50 cursor-pointer"
             >
-              Membre de l'agence
+              Employé
             </div>
             <div
               @click="
@@ -147,16 +147,16 @@ const selectUserType = (type: string) => {
   userType.value = type;
 };
 
-const login = () => {
+const login = async () => {
   console.log("Login en cours", {
     email: email.value,
     password: password.value,
-    userType: userType.value,
+    roleId: userType.value,
   });
-
-  //vide les champs
-  email.value = "";
-  password.value = "";
+  await useFetch("/api/auth/login", {
+    method: "POST",
+    body: { email, password },
+  });
 };
 
 defineEmits(["login"]);

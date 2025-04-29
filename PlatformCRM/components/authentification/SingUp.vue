@@ -13,8 +13,8 @@
           class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
         >
           <option value="">Sélectionnez votre profil</option>
-          <option value="Employé">Employé</option>
-          <option value="Client">Client</option>
+          <option value="1">Employé</option>
+          <option value="2">Client</option>
         </select>
         <div
           class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none"
@@ -170,7 +170,7 @@
     </div>
 
     <!-- Employee Fields -->
-    <div v-if="userType === 'Employé'" class="space-y-4">
+    <div v-if="userType === '1'" class="space-y-4">
       <div>
         <label
           for="register-poste"
@@ -216,7 +216,7 @@
     </div>
 
     <!-- Client Fields -->
-    <div v-if="userType === 'Client'" class="space-y-4">
+    <div v-if="userType === '2'" class="space-y-4">
       <div>
         <label
           for="register-company"
@@ -361,13 +361,13 @@ const passwordStrength = computed(() => {
   return "very-strong";
 });
 
-const register = () => {
+const register = async () => {
   const userData = {
     name: fullName.value,
     email: email.value,
     password: password.value,
-    userType: userType.value,
-    ...(userType.value === "Employé"
+    roleId: userType.value,
+    ...(userType.value === "1"
       ? {
           poste: employeeDetails.value.poste,
           department: employeeDetails.value.department,
@@ -378,6 +378,10 @@ const register = () => {
           address: clientDetails.value.address,
         }),
   };
+  await useFetch("/api/users/create", {
+    method: "POST",
+    body: userData,
+  });
 
   console.log("Register attempt", userData);
 
