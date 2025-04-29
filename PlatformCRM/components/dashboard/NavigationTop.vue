@@ -5,14 +5,14 @@
       <div class="flex items-center justify-between px-8 py-4">
         <!-- Search -->
         <div class="flex items-center space-x-4">
-          <div class="relative w-64">
+          <!-- <div class="relative w-64">
             <input
               type="text"
               placeholder="Rechercher..."
               class="pl-10 w-full pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
             />
             <i class="ri-search-line absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-          </div>
+          </div> -->
         </div>
 
         <!-- Right side -->
