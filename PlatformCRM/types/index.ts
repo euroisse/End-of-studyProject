@@ -28,3 +28,17 @@ export interface Invoice {
     montant: string;
     statut: string;
   }
+
+ export interface LoginResponse {
+    user?: {
+      id: number;
+      name: string;
+      email: string;
+      UserRole?: { role: { name: string } }[];
+      poste?: string;
+      department?: string;
+      adresse?: string;
+      company?: string;
+      industry?: string;
+      
+    };}

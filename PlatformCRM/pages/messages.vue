@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50 flex">
+  <div class="min-h-screen bg-gray-50 flex container">
     <MessagesConversationSidebar
       :conversations="conversations"
       @select="selectConversation"
@@ -9,10 +9,7 @@
     <main class="flex-1 flex flex-col">
       <MessagesChatHeader :conversation="currentConversation" />
 
-      <div
-        class="flex-1  p-6 bg-gray-50"
-        ref="messagesContainer"
-      >
+      <div class="flex-1 p-6 bg-gray-50" ref="messagesContainer">
         <div
           v-for="message in currentMessages"
           :key="message.id"
@@ -125,7 +122,7 @@ const conversations = ref<Conversation[]>([
     timestamp: new Date().getTime() - 2 * 60 * 60 * 1000,
     online: true,
     active: false,
-    messages: [], 
+    messages: [],
   },
   {
     id: 3,
@@ -135,11 +132,13 @@ const conversations = ref<Conversation[]>([
     timestamp: new Date().getTime() - 24 * 60 * 60 * 1000, // Yesterday
     online: false,
     active: false,
-    messages: [], 
+    messages: [],
   },
 ]);
 
-const currentConversation = ref<Conversation | undefined>(conversations.value[0]);
+const currentConversation = ref<Conversation | undefined>(
+  conversations.value[0]
+);
 const messagesContainer = ref<HTMLElement | null>(null);
 
 const currentMessages = computed(() => {
@@ -184,12 +183,9 @@ const sendMessage = (content: string, file?: File) => {
     };
     const newConversation: Conversation = {
       ...currentConversation.value,
-      messages:  [
-        ...currentConversation.value.messages,
-        newMessage
-      ]
-    } 
-   
+      messages: [...currentConversation.value.messages, newMessage],
+    };
+
     currentConversation.value = newConversation;
 
     const conversationIndex = conversations.value.findIndex(
@@ -239,7 +235,6 @@ const deleteMessage = (messageId: number) => {
 
 // Fonction temporaire pour simuler l'URL du fichier
 const getFileUrl = (fileName: string): string => {
-  
   return `https://example.com/fichiers/${encodeURIComponent(fileName)}`;
 };
 
