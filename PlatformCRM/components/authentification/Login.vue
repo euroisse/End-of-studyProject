@@ -150,15 +150,11 @@ const login = async () => {
     if (response && response?.user) {
       const user = response.user;
 
-      const roles = user.UserRole;
-      // ? user.UserRole.map((ur: { role: { name: string } }) => ur.role.name)
-      // : [];
-
       const userData = {
         id: user.id,
         name: user.name,
         email: user.email,
-        roles: roles,
+        roles: user?.roles ? user.roles[0] : undefined,
         poste: user.poste || null,
         department: user.department || null,
         adresse: user.adresse || null,
