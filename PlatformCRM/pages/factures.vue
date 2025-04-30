@@ -7,9 +7,7 @@
       @generate-invoice="handleGenerateInvoice"
     />
 
-   
-    <main class="max-w-7xl mx-auto px-4 py-6">
-
+    <main class="max-w-7xl mx-auto px-4 py-6 container">
       <InvoicesFilterSearch
         searchPlaceholder="Rechercher une facture..."
         @search="handleSearch"
@@ -425,7 +423,6 @@ const displayedPages = computed(() => {
   const maxVisiblePages = 5;
 
   if (totalPages.value <= maxVisiblePages) {
-  
     for (let i = 1; i <= totalPages.value; i++) {
       pages.push(i);
     }
@@ -471,9 +468,10 @@ const displayedPages = computed(() => {
 
 // Méthodes de pagination
 const goToPage = (page: number | string) => {
-  if (typeof page === 'number') {
+  if (typeof page === "number") {
     currentPage.value = page;
-  }}
+  }
+};
 
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
@@ -518,27 +516,23 @@ const handleSort = (sortOption: string) => {
   const [field, direction] = sortOption.split("-");
   sortField.value = field;
   sortDirection.value = direction;
-  currentPage.value = 1; 
+  currentPage.value = 1;
 };
 
 // Méthodes de gestion des factures
 const handleGenerateInvoice = () => {
- 
   alert("Ouverture de la page de génération de facture");
 };
 
 const viewInvoiceDetails = (facture: Invoice) => {
-
   alert(`Affichage des détails de la facture ${facture.numero}`);
 };
 
 const editInvoice = (facture: Invoice) => {
-
   alert(`Modification de la facture ${facture.numero}`);
 };
 
 const deleteInvoice = (facture: Invoice) => {
-
   alert(`Options supplémentaires pour la facture ${facture.numero}`);
 };
 </script>

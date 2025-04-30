@@ -140,7 +140,7 @@ import "swiper/css/pagination";
 import { Pagination, Autoplay } from "swiper/modules";
 
 definePageMeta({
-  layout: 'default'
+  layout: "default",
 });
 
 const swiperModules = [Pagination, Autoplay];
@@ -242,7 +242,6 @@ const testimonials = [
     text: "La plateforme nous a permis de centraliser toutes nos communications client et de suivre chaque étape du projet avec précision. Un outil indispensable !",
   },
 ];
-
 </script>
 
 <style scoped>

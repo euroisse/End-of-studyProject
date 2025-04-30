@@ -43,10 +43,16 @@
                   class="p-4 border-b hover:bg-gray-50"
                 >
                   <div class="flex items-start space-x-3">
-                    <i :class="notification.icon + ' text-indigo-600 text-lg'"></i>
+                    <i
+                      :class="notification.icon + ' text-indigo-600 text-lg'"
+                    ></i>
                     <div>
-                      <p class="text-sm text-gray-800">{{ notification.message }}</p>
-                      <p class="text-xs text-gray-500 mt-1">{{ notification.time }}</p>
+                      <p class="text-sm text-gray-800">
+                        {{ notification.message }}
+                      </p>
+                      <p class="text-xs text-gray-500 mt-1">
+                        {{ notification.time }}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -56,7 +62,9 @@
 
           <!-- Profile -->
           <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+            <div
+              class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center"
+            >
               <i class="ri-user-line text-indigo-600 text-xl"></i>
             </div>
             <span class="font-medium">{{ user.name }}</span>
@@ -68,11 +76,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-
+import { ref } from "vue";
 
 const user = ref({
-  name: "Jean Dupont"
+  name: "Jean Dupont",
 });
 
 const notifications = [
@@ -102,6 +109,4 @@ const toggleNotifications = () => {
 };
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

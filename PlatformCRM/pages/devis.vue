@@ -1,5 +1,5 @@
 <template>
-  <div class="p-8 overflow-x-hidden">
+  <div class="p-8 overflow-x-hidden container">
     <div class="flex justify-between items-center mb-8">
       <h1 class="text-2xl font-bold text-gray-800">Gestion des devis</h1>
       <div class="flex items-center space-x-4">
