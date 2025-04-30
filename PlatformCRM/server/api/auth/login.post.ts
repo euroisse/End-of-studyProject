@@ -1,38 +1,39 @@
-import prisma from '~/server/database' 
+import prisma from '~/server/database'
 
 export default defineEventHandler(async (event) => {
-    try {
-      const body = await readBody(event)
-     const {email, password} = body
+  try {
+    const body = await readBody(event)
+    const { email, password, roleId } = body
 
-      if (!email || !password) {
-        return createError({
-          statusCode: 400,
-          message: 'Email et mot de passe requis'
-        })
-      } 
-      const user = await prisma.user.findUnique({
-        where: { email },
-        include: {
-          UserRole: {
-            include: {
-              role: true
-            }
+    const user = await prisma.user.findUnique({
+      where: { email },
+      include: {
+        UserRole: {
+          include: {
+            role: true
           }
         }
-      })
-      
-      // Vérifier si l'utilisateur existe
-      if (!user) {
-        return createError({
-          statusCode: 401,
-          message: 'Email ou mot de passe incorrect'
-        })
       }
-   
+    })
+
     
-   
+    if (!user || !password) {
+      return createError({
+        statusCode: 401,
+        message: 'Email ou mot de passe incorrect'
+      })
+    }
+
     
+    const userHasRole = user.UserRole.some(ur => ur.roleId === parseInt(roleId))
+
+    if (!userHasRole) {
+      
+      return createError({
+        statusCode: 403, 
+        message: 'Type d\'utilisateur incorrect'
+      })
+    }
 
     return {
       user: {
@@ -55,3 +56,5 @@ export default defineEventHandler(async (event) => {
     })
   }
 })
+
+

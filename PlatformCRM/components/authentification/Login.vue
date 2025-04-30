@@ -10,36 +10,26 @@
           >Type d'utilisateur</label
         >
         <div class="relative">
-          <button
-            @click="showUserTypeDropdown = !showUserTypeDropdown"
+          <select
+            id="user-type"
+            v-model="userType"
             class="w-full flex items-center justify-between px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-left focus:outline-none focus:ring-2 focus:ring-blue-500 whitespace-nowrap cursor-pointer"
           >
-            {{ userType || "Sélectionnez votre profil" }}
-            <i class="ri-arrow-down-s-line text-gray-400"></i>
-          </button>
-          <div
-            v-if="showUserTypeDropdown"
-            class="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-lg py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto"
-          >
-            <div
-              @click="
-                selectUserType('Employé');
-                showUserTypeDropdown = false;
-              "
-              class="px-4 py-2 hover:bg-blue-50 cursor-pointer"
+            <option
+              value=""
+              disabled
+              selected
+              class="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-lg py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto"
             >
+              Selectionner votre profil
+            </option>
+            <option value="1" class="px-4 py-2 hover:bg-blue-50 cursor-pointer">
               Employé
-            </div>
-            <div
-              @click="
-                selectUserType('Client');
-                showUserTypeDropdown = false;
-              "
-              class="px-4 py-2 hover:bg-blue-50 cursor-pointer"
-            >
+            </option>
+            <option value="2" class="px-4 py-2 hover:bg-blue-50 cursor-pointer">
               Client
-            </div>
-          </div>
+            </option>
+          </select>
         </div>
       </div>
 
@@ -136,27 +126,62 @@
 
 <script lang="ts" setup>
 import { ref } from "vue";
-
+import { useRouter } from "vue-router";
+import type { LoginResponse } from "~/types";
 const email = ref("");
 const password = ref("");
 const userType = ref("");
 const showPassword = ref(false);
-const showUserTypeDropdown = ref(false);
+const router = useRouter();
+const loginError = ref("");
 
-const selectUserType = (type: string) => {
-  userType.value = type;
-};
-
+const utilisateur = ref({ email: "", password: "", roleId: "" });
 const login = async () => {
-  console.log("Login en cours", {
-    email: email.value,
-    password: password.value,
-    roleId: userType.value,
-  });
-  await useFetch("/api/auth/login", {
-    method: "POST",
-    body: { email, password },
-  });
+  utilisateur.value.email = email.value;
+  utilisateur.value.password = password.value;
+  utilisateur.value.roleId = userType.value;
+
+  console.log("Login en cours", utilisateur.value);
+  try {
+    const response = (await $fetch("/api/auth/login", {
+      method: "POST",
+      body: utilisateur.value,
+    })) as LoginResponse;
+    if (response && response?.user) {
+      const user = response.user;
+
+      const roles = user.UserRole;
+      // ? user.UserRole.map((ur: { role: { name: string } }) => ur.role.name)
+      // : [];
+
+      const userData = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        roles: roles,
+        poste: user.poste || null,
+        department: user.department || null,
+        adresse: user.adresse || null,
+        company: user.company || null,
+        industry: user.industry || null,
+      };
+      localStorage.setItem("user", JSON.stringify(userData));
+      router.push("/dashboard");
+      email.value = "";
+      password.value = "";
+      userType.value = "";
+    } else {
+      console.error(
+        "Erreur de connexion: Utilisateur non trouvé ou informations incorrectes."
+      );
+    }
+  } catch (error: any) {
+    console.error("Erreur lors de la requête de connexion:", error);
+    loginError.value = "Une erreur s'est produite lors de la connexion.";
+    if (error?.statusCode === 403) {
+      loginError.value = "Type d'utilisateur incorrect.";
+    }
+  }
 };
 
 defineEmits(["login"]);
