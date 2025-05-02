@@ -1,5 +1,5 @@
 <template>
-  <div class="flex-1 p-4 md:p-8 lg:p-12 xl:p-16">
+  <div v-if="isEmploye" class="flex-1 p-4 md:p-8 lg:p-12 xl:p-16">
     <DashboardHeader />
     <DashboardSummary />
     <div class="bg-white rounded-lg shadow-md p-6 md:p-8 mb-6 overflow-x-auto">
@@ -66,7 +66,7 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: "admin" });
-
+const { isEmploye } = useIsRole();
 const projectProgress = [
   {
     name: "Projet E-commerce",

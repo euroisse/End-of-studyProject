@@ -1,6 +1,6 @@
 <template>
   <div class="container mx-auto p-4 md:p-6 lg:p-8">
-    <ProjectsProjectHeader />
+    <ProjectsProjectHeader v-if="isEmploye" />
 
     <ProjectsProjectFilter
       :searchQuery="searchQuery"
@@ -27,7 +27,7 @@
 import { ref, computed } from "vue";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-
+import { useIsRole } from "#imports";
 definePageMeta({
   layout: "admin",
 });
@@ -40,7 +40,7 @@ interface Project {
   progress: number;
   lastUpdate: Date;
 }
-
+const { isEmploye } = useIsRole();
 const searchQuery = ref("");
 const showStatusFilter = ref(false);
 const showDateFilter = ref(false);

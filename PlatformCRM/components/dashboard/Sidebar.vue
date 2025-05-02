@@ -70,15 +70,6 @@
       </template>
     </nav>
 
-    <div class="absolute bottom-4 left-0 right-0 flex justify-center">
-      <button
-        @click="toggleUserRole"
-        class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm hover:bg-gray-300"
-      >
-        Changer de rôle (Démo)
-      </button>
-    </div>
-
     <div
       v-if="showLogoutConfirmation"
       class="fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center z-30"
@@ -107,20 +98,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, provide } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import type { LoginResponse } from "~/types";
+
+import { useIsRole } from "#imports";
+
 const route = useRoute();
 const router = useRouter();
 
-const userRole = ref("admin");
 const showLogoutConfirmation = ref(false);
 
-const toggleUserRole = () => {
-  userRole.value = userRole.value === "admin" ? "client" : "admin";
-};
-
-provide("userRole", userRole);
+const { isEmploye, isClient } = useIsRole();
 
 const adminMenu = [
   { label: "Tableau de bord", to: "/dashboard", icon: "ri-dashboard-line" },
@@ -157,7 +145,14 @@ const clientMenu = [
 ];
 
 const currentMenuItems = computed(() => {
-  return userRole.value === "admin" ? adminMenu : clientMenu;
+  console.log(isEmploye.value, isClient.value);
+  if (isEmploye.value) {
+    return adminMenu;
+  } else if (isClient.value) {
+    return clientMenu;
+  } else {
+    return [];
+  }
 });
 
 const activeSubMenu = ref<string | null>(null);
@@ -223,7 +218,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Animation de rotation pour la flèche du sous-menu */
 .rotate-90 {
   transform: rotate(90deg);
   transition: transform 0.2s;

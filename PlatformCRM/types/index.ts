@@ -34,7 +34,7 @@ export interface Invoice {
       id: number;
       name: string;
       email: string;
-      roles?: string[];
+      roles?: string |string[];
       poste?: string;
       department?: string;
       adresse?: string;

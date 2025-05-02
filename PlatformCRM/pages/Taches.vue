@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50 flex container">
+  <div v-if="isEmploye" class="min-h-screen bg-gray-50 flex container">
     <TasksTaskSidebar
       @update:search-query="searchQuery = $event"
       @update:group-by="groupBy = $event"
@@ -112,6 +112,7 @@ interface NewTaskData {
 }
 
 // State
+const { isEmploye } = useIsRole();
 const searchQuery = ref("");
 const groupBy = ref<"project" | "employee">("project");
 const selectedStatuses = ref<string[]>(["todo", "in_progress", "done"]);

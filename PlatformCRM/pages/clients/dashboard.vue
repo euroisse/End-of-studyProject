@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="isClient">
     <ProjectProgress />
     <div class="flex flex-col xl:flex-row gap-6 xl:gap-10 mt-6">
       <!-- Recent Messages -->
@@ -14,7 +14,9 @@
 
         <div class="space-y-4">
           <div class="flex items-start p-4 bg-gray-50 rounded-lg">
-            <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center mr-4">
+            <div
+              class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center mr-4"
+            >
               <i class="ri-user-line text-indigo-600"></i>
             </div>
             <div class="flex-1">
@@ -23,13 +25,16 @@
                 <span class="text-sm text-gray-500">Il y a 2h</span>
               </div>
               <p class="text-gray-600 text-sm">
-                Les maquettes sont prêtes pour validation. Pouvez-vous les examiner ?
+                Les maquettes sont prêtes pour validation. Pouvez-vous les
+                examiner ?
               </p>
             </div>
           </div>
 
           <div class="flex items-start p-4 bg-gray-50 rounded-lg">
-            <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center mr-4">
+            <div
+              class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center mr-4"
+            >
               <i class="ri-user-line text-indigo-600"></i>
             </div>
             <div class="flex-1">
@@ -56,7 +61,9 @@
         </div>
 
         <div class="space-y-4">
-          <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+          <div
+            class="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+          >
             <div class="flex items-center">
               <i class="ri-bill-line text-indigo-600 mr-4"></i>
               <div>
@@ -65,12 +72,17 @@
               </div>
             </div>
             <div class="flex items-center">
-              <span class="px-3 py-1 bg-green-100 text-green-600 rounded-full text-sm font-medium">Payée</span>
+              <span
+                class="px-3 py-1 bg-green-100 text-green-600 rounded-full text-sm font-medium"
+                >Payée</span
+              >
               <span class="ml-4 font-medium">2 500 €</span>
             </div>
           </div>
 
-          <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+          <div
+            class="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+          >
             <div class="flex items-center">
               <i class="ri-bill-line text-indigo-600 mr-4"></i>
               <div>
@@ -79,7 +91,10 @@
               </div>
             </div>
             <div class="flex items-center">
-              <span class="px-3 py-1 bg-yellow-100 text-yellow-600 rounded-full text-sm font-medium">En attente</span>
+              <span
+                class="px-3 py-1 bg-yellow-100 text-yellow-600 rounded-full text-sm font-medium"
+                >En attente</span
+              >
               <span class="ml-4 font-medium">1 800 €</span>
             </div>
           </div>
@@ -90,14 +105,15 @@
 </template>
 
 <script lang="ts" setup>
+import { useIsRole } from "#imports";
 import Button from "~/components/iu/Button.vue";
 import ProjectProgress from "~/components/Projects/ProjectProgress.vue";
 
 definePageMeta({
-  layout: 'admin'
+  layout: "admin",
 });
+
+const { isClient } = useIsRole();
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
