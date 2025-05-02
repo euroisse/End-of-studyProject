@@ -1,5 +1,5 @@
 <template>
-  <div v-if="isClient" class="min-h-screen bg-gray-50 flex container">
+  <div v-if="isClient" class="min-h-screen bg-gray-50 flex">
     <MessagesConversationSidebar
       :conversations="conversations"
       @select="selectConversation"
@@ -70,7 +70,6 @@ import { ref, computed, onMounted, nextTick } from "vue";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import type { Conversation, Message } from "@/types";
-import { useIsRole } from "#imports";
 
 definePageMeta({ layout: "admin" });
 
