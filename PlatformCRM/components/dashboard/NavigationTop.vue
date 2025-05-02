@@ -95,20 +95,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
-
-const userName = computed(() => {
-  const userString = localStorage.getItem("user");
-  try {
-    const user = userString ? JSON.parse(userString) : null;
-    return user?.name || "User";
-  } catch (error) {
-    console.error(
-      "Erreur lors de la récupération du nom d'utilisateur:",
-      error
-    );
-    return "User";
-  }
-});
+const { userName } = useIsRole();
 
 const user = computed(() => {
   const userString = localStorage.getItem("user");

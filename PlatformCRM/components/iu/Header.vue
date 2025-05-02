@@ -75,13 +75,10 @@
 
 <script setup lang="ts">
 import Button from "./Button.vue";
-import { useIsLogin } from "~/composables/isLogin";
-
 const isMenuOpen = ref(false);
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value;
 };
-
 const { isLoggedIn, updateLoginStatus } = useIsLogin();
 
 defineEmits(["open-login", "open-register"]);
