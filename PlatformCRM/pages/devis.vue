@@ -1,7 +1,10 @@
 <template>
   <div class="p-8 overflow-x-hidden container">
     <div class="flex justify-between items-center mb-8">
-      <h1 class="text-2xl font-bold text-gray-800">Gestion des devis</h1>
+      <h1 v-if="isEmploye" class="text-2xl font-bold text-gray-800">
+        Gestion des devis
+      </h1>
+      <h1 v-else class="text-2xl font-bold text-gray-800">Mes devis</h1>
       <div class="flex items-center space-x-4">
         <button
           v-if="isEmploye"
