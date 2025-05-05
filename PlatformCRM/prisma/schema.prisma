@@ -16,12 +16,13 @@ datasource db {
 
 // Base User model
 model User {
-  id             Int      @id @default(autoincrement())
-  name           String
-  email          String   @unique
-  password       String
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // employe
   poste          String?
   department     String?
@@ -30,6 +31,7 @@ model User {
   adresse        String?
   company        String?
   industry       String?
+  projects       Project[]
 
   UserRole UserRole[]
 }
@@ -56,3 +58,43 @@ model UserRole {
   // Composite primary key
   @@id([userId, roleId])
 }
+
+model Project {
+  id           Int            @id @default(autoincrement())
+  customer     User           @relation(fields: [customerId], references: [id])
+  customerId   Int
+  title        String
+  description  String?
+  projectstage ProjectStage[]
+  startDate    DateTime       @default(now()) @map("start_date")
+  endDate      DateTime?      @map("end_date")
+}
+
+model ProjectStage {
+  id          Int                @id @default(autoincrement())
+  project     Project            @relation(fields: [projectId], references: [id])
+  projectId   Int
+  title       String
+  description String?
+  status      ProjectStageStatus @default(A_VENIR)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+}
+
+enum ProjectStageStatus {
+  En_COURS
+  A_VENIR
+  TERMINE
+  EN_ATTENTE
+}
+
+// model Tasks {
+//   id    Int @id @default(autoincrement())
+//   employee User @relation(fields: [employeeId], references: [id])
+//   employeeId Int
+//   title String
+//   description String
+//   deadline String
+//   status String
+
+// }
