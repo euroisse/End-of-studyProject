@@ -1,17 +1,18 @@
-import { computed } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 
 export const useIsRole = () => {
-  const userString = ref<string|null>(null);
+  const userString = ref<string | null>(null);
 
-  onMounted(()=> {
+  onMounted(() => {
     userString.value = localStorage.getItem('user');
-  })
+  });
 
   const user = computed(() => {
     try {
-      if(userString.value){
-        return userString ? JSON.parse(userString.value) : null;
+      if (userString.value) {
+        return userString.value ? JSON.parse(userString.value) : null;
       }
+      return null;
     } catch (error) {
       console.error("Erreur lors de la recuperation des informations utilisateur depuis le localStorage:", error);
       return null;
@@ -26,6 +27,10 @@ export const useIsRole = () => {
     return user.value?.roles?.includes('client') ?? false;
   });
 
+  const isAdmin = computed(() => {
+    return user.value?.roles?.includes('admin') ?? false;
+  });
+
   const userName = computed(() => {
     return user.value?.name ?? null;
   });
@@ -33,6 +38,7 @@ export const useIsRole = () => {
   return {
     isEmploye,
     isClient,
+    isAdmin,
     userName,
   };
 };

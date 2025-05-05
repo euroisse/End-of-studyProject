@@ -3,11 +3,13 @@ import { ref } from "vue";
 
 export interface Project {
   id: number;
-  name: string;
-  client: string;
-  status: string;
+  title: string;
+  customerId: string;
   progress: number;
   lastUpdate: Date;
+  startDate: Date | null;
+  endDate: Date | null;
+  description: String;
 }
 
 export const projects = ref<Project[]>([]);

@@ -23,16 +23,19 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // employe
+  // Employee related fields
   poste          String?
   department     String?
   profilePicture String?
-  //client
+  projects       EmployeeOnProjects[]
+
+  // Client related fields
   adresse        String?
   company        String?
   industry       String?
-  projects       Project[]
+  clientProjects Project[] @relation("CustomerProjects")
 
+  // Role management
   UserRole UserRole[]
 }
 
@@ -60,14 +63,24 @@ model UserRole {
 }
 
 model Project {
-  id           Int            @id @default(autoincrement())
-  customer     User           @relation(fields: [customerId], references: [id])
-  customerId   Int
-  title        String
-  description  String?
-  projectstage ProjectStage[]
-  startDate    DateTime       @default(now()) @map("start_date")
-  endDate      DateTime?      @map("end_date")
+  id            Int                  @id @default(autoincrement())
+  customer      User                 @relation("CustomerProjects", fields: [customerId], references: [id])
+  customerId    Int
+  title         String
+  description   String?
+  users         EmployeeOnProjects[]
+  projectStages ProjectStage[]
+  startDate     DateTime             @default(now()) @map("start_date")
+  endDate       DateTime?            @map("end_date")
+}
+
+model EmployeeOnProjects {
+  project    Project @relation(fields: [projectId], references: [id])
+  projectId  Int
+  employee   User    @relation(fields: [employeeId], references: [id])
+  employeeId Int
+
+  @@id([projectId, employeeId])
 }
 
 model ProjectStage {
@@ -89,12 +102,11 @@ enum ProjectStageStatus {
 }
 
 // model Tasks {
-//   id    Int @id @default(autoincrement())
-//   employee User @relation(fields: [employeeId], references: [id])
-//   employeeId Int
-//   title String
+//   id          Int      @id @default(autoincrement())
+//   employee    User     @relation(fields: [employeeId], references: [id])
+//   employeeId  Int
+//   title       String
 //   description String
-//   deadline String
-//   status String
-
+//   deadline    String
+//   status      String
 // }
