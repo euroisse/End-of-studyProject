@@ -4,35 +4,6 @@
       <h2 class="text-2xl font-bold text-gray-800 mb-6">
         Connectez-vous à votre compte
       </h2>
-
-      <div class="relative">
-        <label class="block text-sm font-medium text-gray-700 mb-1"
-          >Type d'utilisateur</label
-        >
-        <div class="relative">
-          <select
-            id="user-type"
-            v-model="userType"
-            class="w-full flex items-center justify-between px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-left focus:outline-none focus:ring-2 focus:ring-blue-500 whitespace-nowrap cursor-pointer"
-          >
-            <option
-              value=""
-              disabled
-              selected
-              class="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-lg py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto"
-            >
-              Selectionner votre profil
-            </option>
-            <option value="1" class="px-4 py-2 hover:bg-blue-50 cursor-pointer">
-              Employé
-            </option>
-            <option value="2" class="px-4 py-2 hover:bg-blue-50 cursor-pointer">
-              Client
-            </option>
-          </select>
-        </div>
-      </div>
-
       <div>
         <label
           for="login-email"
@@ -140,8 +111,7 @@ const login = async () => {
   utilisateur.value.email = email.value;
   utilisateur.value.password = password.value;
   utilisateur.value.roleId = userType.value;
-
-  console.log("Login en cours", utilisateur.value);
+  console.log("login en cours", utilisateur.value);
   try {
     const response = (await $fetch("/api/auth/login", {
       method: "POST",

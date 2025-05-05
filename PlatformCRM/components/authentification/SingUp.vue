@@ -15,6 +15,7 @@
           <option value="">Sélectionnez votre profil</option>
           <option value="1">Employé</option>
           <option value="2">Client</option>
+          <option value="3">admin</option>
         </select>
         <div
           class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none"

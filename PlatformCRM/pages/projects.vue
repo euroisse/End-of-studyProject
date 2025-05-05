@@ -1,6 +1,6 @@
 <template>
   <div class="mx-auto p-4 md:p-6 lg:p-8">
-    <ProjectsProjectHeader v-if="isEmploye" />
+    <ProjectsProjectHeader v-if="isAdmin" />
 
     <ProjectsProjectFilter
       :searchQuery="searchQuery"
@@ -17,105 +17,96 @@
         :key="project.id"
         :project="project"
         :getStatusClass="getStatusClass"
-        :formatDate="formatDate"
       />
     </div>
+    <div v-if="loading">Loading projects...</div>
+    <div v-if="error">{{ error.message }}</div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from "vue";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { ref, computed, onMounted } from "vue";
+
 definePageMeta({
   layout: "admin",
 });
 
+type ProjectStatus = "En_COURS" | "A_VENIR" | "TERMINE" | "EN_ATTENTE";
+
 interface Project {
   id: number;
-  name: string;
-  client: string;
-  status: string;
-  progress: number;
-  lastUpdate: Date;
+  title: string;
+  status: ProjectStatus;
+  customerId: number;
+  customer?: {
+    name: string;
+  };
+  projectStages: {
+    id: number;
+    name: string;
+    status: string;
+    order: number;
+  }[];
+  users: {
+    employee: {
+      id: number;
+      name: string;
+    };
+  }[];
+  updatedAt: Date;
 }
-const { isEmploye } = useIsRole();
+
+const { isAdmin } = useIsRole();
 const searchQuery = ref("");
 const showStatusFilter = ref(false);
 const showDateFilter = ref(false);
+const projects = ref<Project[]>([]);
+const loading = ref(true);
+const error = ref<any>(null);
 
-const projects = ref<Project[]>([
-  {
-    id: 1,
-    name: "Refonte Site E-commerce",
-    client: "BankSecure",
-    status: "En cours",
-    progress: 75,
-    lastUpdate: new Date("2025-04-10"),
-  },
-  {
-    id: 2,
-    name: "Application Mobile",
-    client: "BankSecure",
-    status: "En attente",
-    progress: 30,
-    lastUpdate: new Date("2025-04-12"),
-  },
-  {
-    id: 3,
-    name: "Campagne Marketing",
-    client: "BankSecure",
-    status: "Terminé",
-    progress: 100,
-    lastUpdate: new Date("2025-04-14"),
-  },
-  {
-    id: 4,
-    name: "Intégration CRM",
-    client: "BankSecure",
-    status: "En cours",
-    progress: 60,
-    lastUpdate: new Date("2025-04-15"),
-  },
-  {
-    id: 5,
-    name: "Optimisation SEO",
-    client: "BankSecure",
-    status: "En attente",
-    progress: 15,
-    lastUpdate: new Date("2025-04-13"),
-  },
-  {
-    id: 6,
-    name: "Refonte UX/UI",
-    client: "BankSecure",
-    status: "En cours",
-    progress: 45,
-    lastUpdate: new Date("2025-04-11"),
-  },
-]);
+onMounted(async () => {
+  const userString = localStorage.getItem("user");
+  if (!userString) {
+    error.value = {
+      message: "Utilisateur non connecté. Veuillez vous connecter.",
+    };
+    loading.value = false;
+    return;
+  }
 
-const filteredProjects = computed(() => {
-  return projects.value.filter((project) =>
-    project.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
+  try {
+    const user = JSON.parse(userString);
+    const userId = user.id;
+    const data = await $fetch<Project[]>(`/api/Projects/user/${userId}`);
+    projects.value = data;
+    loading.value = false;
+  } catch (err: any) {
+    error.value = err;
+    loading.value = false;
+    console.error("Error fetching projects:", err);
+  }
 });
 
-const getStatusClass = (status: string): string => {
+const filteredProjects = computed(() => {
+  return projects.value.filter((project) => {
+    const projectName = project.title || "";
+    return projectName.toLowerCase().includes(searchQuery.value.toLowerCase());
+  });
+});
+
+const getStatusClass = (status: ProjectStatus): string => {
   switch (status) {
-    case "En cours":
+    case "En_COURS":
       return "bg-blue-100 text-blue-800";
-    case "En attente":
+    case "EN_ATTENTE":
       return "bg-yellow-100 text-yellow-800";
-    case "Terminé":
+    case "TERMINE":
       return "bg-green-100 text-green-800";
+    case "A_VENIR":
+      return "bg-gray-100 text-gray-800";
     default:
       return "bg-gray-100 text-gray-800";
   }
-};
-
-const formatDate = (date: Date): string => {
-  return format(date, "dd/MM/yyyy", { locale: fr });
 };
 </script>
 

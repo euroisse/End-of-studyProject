@@ -6,7 +6,7 @@
         Gérez et suivez vos projets digitaux
       </p>
     </div>
-    <div>
+    <div v-if="isAdmin">
       <button
         @click="showCreateProject = true"
         class="bg-indigo-500 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-md transition-all whitespace-nowrap cursor-pointer !rounded-button"
@@ -16,9 +16,14 @@
     </div>
   </div>
 
-  <!-- Modal -->
-  <div v-if="showCreateProject" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-    <div ref="modalRef" class="bg-white rounded-lg shadow-lg max-w-3xl w-full p-6 relative">
+  <div
+    v-if="showCreateProject"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto"
+  >
+    <div
+      ref="modalRef"
+      class="bg-white rounded-lg shadow-lg max-w-3xl w-full p-6 relative"
+    >
       <button
         @click="showCreateProject = false"
         class="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
@@ -26,91 +31,107 @@
         <i class="ri-close-line text-2xl"></i>
       </button>
 
-      <!-- Formulaire -->
-      <form @submit.prevent="soumettreFormulaire" class="space-y-6">
+      <form
+        @submit.prevent="soumettreFormulaire"
+        class="space-y-6 overflow-y-auto max-h-[80vh] pr-4"
+      >
         <h2 class="text-lg font-medium text-gray-900 mb-6">
           Informations du projet
         </h2>
 
-        <!-- Nom projet -->
         <div>
-          <label for="nom-projet" class="block text-sm font-medium text-gray-700 mb-1">
-            Nom du projet <span class="text-red-500">*</span>
+          <label
+            for="nom-projet"
+            class="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Titre du projet <span class="text-red-500">*</span>
           </label>
           <input
             id="nom-projet"
-            v-model="projet.nom"
+            v-model="projet.title"
             type="text"
             placeholder="Entrez le nom du projet"
             class="w-full px-4 py-2 border rounded-button focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
             :class="{ 'border-red-500': erreurs.nom }"
             @focus="erreurs.nom = ''"
           />
-          <p v-if="erreurs.nom" class="mt-1 text-sm text-red-600">{{ erreurs.nom }}</p>
+          <p v-if="erreurs.nom" class="mt-1 text-sm text-red-600">
+            {{ erreurs.nom }}
+          </p>
         </div>
 
-        <!-- Client -->
         <div>
-          <label for="client" class="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            for="client"
+            class="block text-sm font-medium text-gray-700 mb-1"
+          >
             Client <span class="text-red-500">*</span>
           </label>
-          <input
+          <select
             id="client"
-            v-model="projet.client"
-            type="text"
-            placeholder="Entrez le nom du client"
-            class="w-full px-4 py-2 border rounded-button focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            v-model="projet.customerId"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
             :class="{ 'border-red-500': erreurs.client }"
-            @focus="erreurs.client = ''"
+            @change="erreurs.client = ''"
+          >
+            <option value="" disabled>Sélectionner un client</option>
+            <option
+              v-for="client in clients"
+              :key="client.value"
+              :value="client.value"
+            >
+              {{ client.label }}
+            </option>
+          </select>
+          <p v-if="erreurs.client" class="mt-1 text-sm text-red-600">
+            {{ erreurs.client }}
+          </p>
+        </div>
+
+        <div>
+          <label
+            for="Description"
+            class="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Description</label
+          >
+          <textarea
+            class="w-full px-4 py-2 border rounded-button focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            name=""
+            id=""
+            rows="10"
+            v-model="projet.description"
+          ></textarea>
+        </div>
+        <div>
+          <label
+            for="date-limite"
+            class="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Date debut
+          </label>
+          <input
+            id="date_debut"
+            v-model="projet.dateDebut"
+            type="date"
+            class="w-full px-4 py-2 border rounded-button focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           />
-          <p v-if="erreurs.client" class="mt-1 text-sm text-red-600">{{ erreurs.client }}</p>
+        </div>
+        <div>
+          <label
+            for="date-limite"
+            class="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Date fin
+          </label>
+          <input
+            id="date_fin"
+            v-model="projet.dateFin"
+            type="date"
+            class="w-full px-4 py-2 border rounded-button focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          />
         </div>
 
-        <!-- Date et statut -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Date limite -->
-          <div>
-            <label for="date-limite" class="block text-sm font-medium text-gray-700 mb-1">
-              Date limite
-            </label>
-            <input
-              id="date-limite"
-              v-model="projet.dateLimite"
-              type="date"
-              class="w-full px-4 py-2 border rounded-button focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-            />
-          </div>
-
-          <!-- Statut -->
-          <div>
-            <label for="statut" class="block text-sm font-medium text-gray-700 mb-1">
-              Statut
-            </label>
-            <div class="relative">
-              <button
-                type="button"
-                id="statut"
-                @click="toggleStatutDropdown"
-                class="w-full px-4 py-2 border rounded-button bg-white text-left focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm flex justify-between items-center cursor-pointer"
-              >
-                <span>{{ projet.statut || "Sélectionner un statut" }}</span>
-                <i class="ri-arrow-down-s-line text-gray-400"></i>
-              </button>
-              <div v-if="statutDropdownOuvert" class="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border py-1">
-                <div
-                  v-for="statut in statuts"
-                  :key="statut"
-                  @click="selectStatut(statut)"
-                  class="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
-                >
-                  {{ statut }}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Boutons -->
         <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
           <button
             type="button"
@@ -132,17 +153,26 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, onMounted, onBeforeUnmount } from "vue";
-import { parseISO } from "date-fns"; 
-import { projects } from "~/composables/useProjects"; 
+import { ref, reactive, onMounted } from "vue";
+import { useRouter } from "vue-router";
 
+const { isAdmin } = useIsRole();
 const showCreateProject = ref(false);
+const router = useRouter();
+
+interface Client {
+  value: string;
+  label: string;
+}
+
+const clients = ref<Client[]>([]);
 
 const projet = reactive({
-  nom: "",
-  client: "",
-  dateLimite: "",
-  statut: "En cours",
+  title: "",
+  customerId: "",
+  dateDebut: "",
+  dateFin: "",
+  description: "",
 });
 
 const erreurs = reactive({
@@ -150,64 +180,69 @@ const erreurs = reactive({
   client: "",
 });
 
-const statutDropdownOuvert = ref(false);
-const statuts = ["En cours", "En attente", "Terminé", "En retard"];
-
-const modalRef = ref<HTMLElement | null>(null);
-
-const toggleStatutDropdown = () => {
-  statutDropdownOuvert.value = !statutDropdownOuvert.value;
-};
-
-const selectStatut = (statut: string) => {
-  projet.statut = statut;
-  statutDropdownOuvert.value = false;
-};
+onMounted(async () => {
+  try {
+    const data = await $fetch<Client[]>("/api/users/customers");
+    clients.value = data;
+  } catch (err: any) {
+    console.error("Erreur lors de la récupération des clients");
+  }
+});
 
 const validerFormulaire = (): boolean => {
   let valide = true;
-  if (!projet.nom.trim()) {
-    erreurs.nom = "Le nom du projet est obligatoire";
+  if (!projet.title.trim()) {
+    erreurs.nom = "Le titre du projet est obligatoire";
     valide = false;
   }
-  if (!projet.client.trim()) {
-    erreurs.client = "Le nom du client est obligatoire";
+  if (!projet.customerId) {
+    erreurs.client = "Le client est obligatoire";
     valide = false;
   }
   return valide;
 };
 
-const soumettreFormulaire = () => {
-  if (validerFormulaire()) {
-    projects.value.unshift({
-      id: Date.now(),
-      name: projet.nom,
-      client: projet.client,
-      status: projet.statut,
-      progress: 0,
-      lastUpdate: projet.dateLimite ? parseISO(projet.dateLimite) : new Date()
-    });
-    projet.nom = "";
-    projet.client = "";
-    projet.dateLimite = "";
-    projet.statut = "En cours";
-    showCreateProject.value = false;
-  }
+const resetForm = () => {
+  projet.title = "";
+  projet.customerId = "";
+  projet.dateDebut = "";
+  projet.dateFin = "";
+  projet.description = "";
+  erreurs.nom = "";
+  erreurs.client = "";
 };
 
-const clickOutside = (event: MouseEvent) => {
-  if (statutDropdownOuvert.value) {
-    const target = event.target as Node;
-    if (modalRef.value && !modalRef.value.contains(target)) {
-      statutDropdownOuvert.value = false;
+const soumettreFormulaire = async () => {
+  if (validerFormulaire()) {
+    try {
+      const response = await $fetch("/api/Projects/projects", {
+        method: "POST",
+        body: {
+          customerId: projet.customerId,
+          title: projet.title,
+          description: projet.description,
+          startDate: projet.dateDebut,
+          endDate: projet.dateFin,
+        },
+      });
+
+      console.log("Projet créé avec succès:", response);
+      showCreateProject.value = false;
+      resetForm();
+
+      router.push("/projects");
+    } catch (error: any) {
+      console.error("Erreur lors de la création du projet:", error);
+
+      if (error.data) {
+        if (error.data.statusMessage) {
+          erreurs.nom = error.data.statusMessage;
+        } else {
+        }
+      } else {
+        erreurs.nom = "Une erreur inattendue s'est produite.";
+      }
     }
   }
 };
-
-onMounted(() => {
-  document.addEventListener("click", clickOutside);
-});
-onBeforeUnmount(() => {
-  document.removeEventListener("click", clickOutside);
-});
 </script>
