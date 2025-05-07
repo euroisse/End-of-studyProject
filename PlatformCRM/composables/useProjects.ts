@@ -5,6 +5,9 @@ export interface Project {
   id: number;
   title: string;
   customerId: string;
+  customer?:{
+    name:string
+  };
   progress: number;
   lastUpdate: Date;
   startDate: Date | null;

@@ -95,7 +95,7 @@ model ProjectStage {
 }
 
 enum ProjectStageStatus {
-  En_COURS
+  EN_COURS
   A_VENIR
   TERMINE
   EN_ATTENTE
