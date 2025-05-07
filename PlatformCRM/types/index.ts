@@ -1,3 +1,6 @@
+import type { Prisma, User } from "~/generated/prisma";
+
+
 // types/index.ts
 export interface Conversation {
     id: number;
@@ -41,4 +44,9 @@ export interface Invoice {
       company?: string;
       industry?: string;
       
-    };}
+};}
+
+
+export type ProjectWithProjectStages = Prisma.ProjectGetPayload<{
+  include: { customer: true ; projectStages: true };
+}>;
