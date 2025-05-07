@@ -1,98 +1,148 @@
 <template>
   <div class="mb-8">
-    <h2 class="text-xl font-bold mb-6">Étapes du projet</h2>
+    <h2 class="text-xl font-bold font-Roboto mb-6">Étapes du projet</h2>
     <div class="relative">
       <div
         class="absolute top-5 left-5 h-[calc(100%-40px)] w-0.5 bg-gray-200"
       ></div>
       <div class="space-y-8">
-        <div v-for="(step, index) in steps" :key="index" class="relative flex">
+        <div
+          v-for="(step, index) in steps"
+          :key="step.id"
+          class="relative flex"
+        >
           <div
             :class="`w-10 h-10 rounded-full flex items-center justify-center z-10
-                ${
-                  step.status === 'TERMINE'
-                    ? 'bg-green-500'
-                    : step.status === 'EN_COURS'
-                    ? 'bg-indigo-500'
-                    : 'bg-gray-200'
-                }`"
+            ${
+              step.status === 'TERMINE'
+                ? 'bg-green-500'
+                : step.status === 'EN_COURS'
+                ? 'bg-indigo-500'
+                : 'bg-gray-200'
+            } text-white font-medium text-[14px] font-Roboto`"
           >
-            <i :class="` ${getIconClass(step.status)} text-white`"></i>
+            <i :class="getIconClass(step.status)"></i>
           </div>
+
           <div
             class="ml-8 bg-gray-50 shadow-sm md:p-6 hover:shadow-md transition-shadow rounded-lg p-4 flex-1"
           >
             <div class="flex justify-between items-start mb-4">
-              <h3 class="font-medium">{{ step.name }}</h3>
+              <h1 class="font-medium text-[16px]">{{ step.title }}</h1>
               <span
                 :class="`px-3 py-1 rounded-full text-sm font-medium
-                    ${
-                      step.status === 'TERMINE'
-                        ? 'bg-green-100 text-green-600'
-                        : step.status === 'EN_COURS'
-                        ? 'bg-indigo-100 text-indigo-600'
-                        : 'bg-gray-100 text-gray-600'
-                    }`"
+                ${
+                  step.status === 'TERMINE'
+                    ? 'bg-green-100 text-green-600'
+                    : step.status === 'EN_COURS'
+                    ? 'bg-indigo-100 text-indigo-600'
+                    : 'bg-gray-100 text-gray-600'
+                }`"
               >
                 {{ getStatusText(step.status) }}
               </span>
             </div>
-            <h3 class="font-medium">{{ step.description }}</h3>
-            <!-- <p class="text-sm text-gray-500">Date de livraison estimée: {{ step.endDate }}</p> */ -->
+
+            <div class="flex justify-between items-center">
+              <p class="text-gray-500">{{ step.description }}</p>
+              <div class="flex space-x-2">
+                <i
+                  class="ri-pencil-line text-gray-600 cursor-pointer hover:text-indigo-600"
+                  @click="editProjectStage(step)"
+                ></i>
+                <i
+                  class="ri-delete-bin-6-line text-gray-600 cursor-pointer hover:text-red-600"
+                  @click="deleteProjectStage(step.id)"
+                ></i>
+              </div>
+            </div>
+
+            <p class="text-sm text-gray-500 mt-2">
+              Date de livraison estimée: {{ step.updatedAt }}
+            </p>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- <div v-else>
-      Chargement des étapes du projet...
-    </div> -->
+    <ProjectStageModal
+      v-if="showModal"
+      :project-stage="selectedProjectStage"
+      @close="closeModal"
+      @save="handleSaveProjectStage"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
-import { defineProps } from "vue";
+import { ref } from "vue";
+import type { ProjectStage, ProjectStageStatus } from "~/generated/prisma";
+import ProjectStageModal from "./ProjectStageModal.vue";
 
-interface ProjectStage {
-  id: number;
-  name: string;
-  description: string;
-  status: "TERMINE" | "EN_COURS" | "A_VENIR" | "EN_ATTENTE";
-  // order: number;
-}
-[];
+const props = defineProps<{ steps: ProjectStage[] }>();
 
-defineProps<{
-  steps: ProjectStage[] | null;
-}>();
+const showModal = ref(false);
+const selectedProjectStage = ref<ProjectStage | null>(null);
 
-const getStatusText = (status: ProjectStage["status"]): string => {
-  switch (status) {
-    case "TERMINE":
-      return "Terminé";
-    case "EN_COURS":
-      return "En cours";
-    case "A_VENIR":
-      return "À venir";
-    case "EN_ATTENTE":
-      return "En attente";
-    default:
-      return "Inconnu";
-  }
+const getStatusText = (status: ProjectStageStatus) => {
+  return (
+    {
+      TERMINE: "Terminé",
+      EN_COURS: "En cours",
+      A_VENIR: "À venir",
+      EN_ATTENTE: "En attente",
+    }[status] || "Inconnu"
+  );
 };
 
-const getIconClass = (status: ProjectStage["status"]): string => {
-  switch (status) {
-    case "TERMINE":
-      return "ri-checkbox-circle-fill";
-    case "EN_COURS":
-      return "ri-code-fill";
-    case "A_VENIR":
-      return "ri-time-line";
-    case "EN_ATTENTE":
-      return "ri-pause-circle-line";
-    default:
-      return "ri-question-line";
+const getIconClass = (status: ProjectStageStatus) => {
+  return (
+    {
+      TERMINE: "ri-checkbox-circle-fill",
+      EN_COURS: "ri-code-fill",
+      A_VENIR: "ri-time-line",
+      EN_ATTENTE: "ri-pause-circle-line",
+    }[status] || "ri-question-line"
+  );
+};
+
+const editProjectStage = (stage: ProjectStage) => {
+  selectedProjectStage.value = { ...stage };
+  showModal.value = true;
+};
+
+const closeModal = () => {
+  selectedProjectStage.value = null;
+  showModal.value = false;
+};
+
+const handleSaveProjectStage = (updatedStage: ProjectStage) => {
+  const index = props.steps?.findIndex((step) => step.id === updatedStage.id);
+  console.log(index);
+
+  closeModal();
+};
+
+const deleteProjectStage = async (id: number) => {
+  if (window.confirm("Êtes-vous sûr de vouloir supprimer cette étape ?")) {
+    try {
+      const response = await $fetch(`/api/projectStage/${id}`, {
+        method: "DELETE",
+      });
+      if (response) {
+        const index = props.steps?.findIndex((step) => step.id === id);
+        if (index !== undefined && props.steps && Array.isArray(props.steps)) {
+          props.steps.splice(index, 1);
+          console.log("Étape de projet supprimée avec succès");
+        }
+      } else {
+        console.error("La suppression de l'étape a échoué.");
+      }
+    } catch (error: any) {
+      console.error(
+        `Erreur lors de la suppression de l'étape: ${error.message}`
+      );
+    }
   }
 };
 </script>

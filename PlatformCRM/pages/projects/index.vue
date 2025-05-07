@@ -39,7 +39,7 @@ definePageMeta({
   layout: "admin",
 });
 
-type ProjectStatus = "En_COURS" | "A_VENIR" | "TERMINE" | "EN_ATTENTE";
+type ProjectStatus = "EN_COURS" | "A_VENIR" | "TERMINE" | "EN_ATTENTE";
 
 interface Project {
   id: number;
@@ -109,7 +109,7 @@ const filteredProjects = computed(() => {
 
 const getStatusClass = (status: ProjectStatus): string => {
   switch (status) {
-    case "En_COURS":
+    case "EN_COURS":
       return "bg-blue-100 text-blue-800";
     case "EN_ATTENTE":
       return "bg-yellow-100 text-yellow-800";

@@ -120,7 +120,7 @@
   <div>
     <div class="mt-8">
       <button
-        @click="showCreateStageProject = true"
+        @click="openModal"
         class="w-full flex items-center justify-center py-6 px-4 text-sm font-medium text-gray-500 dark:text-gray-400 rounded-md border border-dashed border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
       >
         <i class="ri-add-line mr-1"></i>
@@ -131,12 +131,15 @@
   <AddModal
     v-if="showCreateStageProject"
     @close="showCreateStageProject = false"
+    @stageAdded="stageAdded"
   />
 </template>
 
 <script setup lang="ts">
 import ProjectNavbar from "~/components/Projects/ProjectNavbar.vue";
 import ProjectTimeline from "~/components/Projects/ProjectTimeline.vue";
+import type { ProjectStage, Project } from "~/generated/prisma";
+import type { ProjectWithProjectStages } from "~/types";
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { format } from "date-fns";
@@ -145,115 +148,46 @@ import AddModal from "./ProjectStage/AddModal.vue";
 
 definePageMeta({ layout: "admin" });
 const showCreateStageProject = ref(false);
-type ProjectStatus = "EN_COURS" | "A_VENIR" | "TERMINE" | "EN_ATTENTE";
-
-interface Project {
-  id: number;
-  title: string;
-  status: ProjectStatus;
-  customerId: number;
-  customer?: {
-    name: string;
-  };
-  startDate?: Date | null;
-  endDate?: Date | null;
-}
-
-interface ProjectStage {
-  id: number;
-  name: string;
-  description: String;
-  status: "TERMINE" | "EN_COURS" | "A_VENIR" | "EN_ATTENTE";
-  // order: number;
-}
 
 const route = useRoute();
-const projectId = ref<number | null>(null);
-const project = ref<Project | null>({
-  id: 1,
-  title: "Refonte Site E-commerce",
-  status: "EN_COURS",
-  customerId: 123,
-  customer: { name: "Example Client" },
-  startDate: new Date(""),
-  endDate: new Date(""),
-});
-const projectStages = ref<ProjectStage[] | null>([
-  {
-    id: 1,
-    name: "Analyse des besoins",
-    status: "TERMINE",
-    description:
-      "Définition des objectifs et analyse détaillée des besoins du client",
-  },
-  {
-    id: 2,
-    name: "Design UX/UI",
-    status: "TERMINE",
-    description: "Création des maquettes et validation du design",
-  },
-  {
-    id: 3,
-    name: "Développement Frontend",
-    status: "EN_COURS",
-    description: "Tests fonctionnels et corrections des bugs",
-  },
-  {
-    id: 4,
-    name: "Tests et Validation",
-    status: "A_VENIR",
-    description: "Tests fonctionnels et corrections des bugs",
-  },
-  {
-    id: 5,
-    name: "Mise en production",
-    status: "A_VENIR",
-    description: "Déploiement et formation des utilisateurs",
-  },
-]);
-const loadingProject = ref(true);
-const loadingStages = ref(true);
-const errorProject = ref<any>(null);
-const errorStages = ref<any>(null);
+const projectId = computed(() => Number(route.params.id) ?? null);
+const project = ref<ProjectWithProjectStages | null>(null);
+const projectStages = ref<ProjectStage[]>();
+
+function openModal() {
+  showCreateStageProject.value = true;
+}
 
 onMounted(async () => {
   const id = route.params.id;
   if (id) {
-    projectId.value = Number(id);
     try {
-      const projectData = await $fetch<Project>(
-        `/api/Projects/${projectId.value}`
-      );
-      project.value = projectData;
-      loadingProject.value = false;
-    } catch (err: any) {
-      errorProject.value = err;
-      loadingProject.value = false;
+      const projectData = await $fetch<Project>(`/api/Projects/${Number(id)}`);
+      console.log("get project data", projectData);
+
+      projectStages.value = projectData.projectStages || [];
+    } catch (err) {
       console.error(
-        "Erreur lors de la récupération des détails du projet :",
+        "Erreur lors de la récupération des détails du projet:",
         err
       );
+      projectStages.value = [];
     }
-
-    //   try {
-    //     const stagesData = await $fetch<ProjectStage[]>(
-    //       `/api/Projects/project-stagePost/${projectId.value}`
-    //     );
-    //     projectStages.value = stagesData;
-    //     loadingStages.value = false;
-    //   } catch (err: any) {
-    //     errorStages.value = err;
-    //     loadingStages.value = false;
-    //     console.error(
-    //       "Erreur lors de la récupération des étapes du projet :",
-    //       err
-    //     );
-    //   }
-  } else {
-    loadingProject.value = false;
-    loadingStages.value = false;
   }
 });
+
+const stageAdded = async (newStage: ProjectStage) => {
+  if (projectId.value) {
+    try {
+      const stagesData = await $fetch<ProjectStage[]>(
+        `/api/Projects/${projectId.value}`
+      );
+      projectStages.value = stagesData;
+    } catch (err) {
+      console.error("Erreur lors de la récupération des étapes :", err);
+    }
+  }
+};
 
 // interface Etape {
 //   titre: string;

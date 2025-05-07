@@ -1,6 +1,5 @@
 <template>
   <div
-    v-if="true"
     class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 z-50 flex items-center justify-center"
   >
     <div
@@ -62,18 +61,15 @@
             name="status"
             class="shadow border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
-            <option value="A_VENIR">À venir</option>
-            <option value="En_COURS">En cours</option>
-            <option value="TERMINE">Terminé</option>
-            <option value="EN_ATTENTE">En attente</option>
+            <option
+              v-for="(status, key) in statusOptions"
+              :key="key"
+              :value="key"
+            >
+              {{ status }}
+            </option>
           </select>
         </div>
-        <input
-          type="hidden"
-          id="projectId"
-          name="projectId"
-          :value="projectId"
-        />
         <div class="flex justify-end">
           <button
             type="button"
@@ -95,27 +91,49 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 
-const props = defineProps({
-  true: Boolean,
-  projectId: {
-    type: Number,
-    required: true,
-  },
-});
+const route = useRoute();
+const projectId = computed(() => Number(route.params.id) ?? null);
 
-const emit = defineEmits(["close-modal", "stage-added"]);
+const emit = defineEmits(["close", "stageAdded"]);
 
 const formData = ref({
-  id: "",
   title: "",
   description: null,
   status: "A_VENIR",
 });
 
+const statusOptions = {
+  A_VENIR: "À venir",
+  EN_COURS: "En cours",
+  TERMINE: "Terminé",
+  EN_ATTENTE: "En attente",
+};
+
 const handleSubmit = async () => {
-  emit("close");
+  console.log("projectId:", projectId.value);
+  try {
+    const newStage = await $fetch("/api/Projects/projectStage", {
+      method: "POST",
+      body: {
+        projectId: Number(projectId.value),
+        title: formData.value.title,
+        description: formData.value.description || undefined,
+        status: formData.value.status,
+      },
+    });
+
+    emit("stageAdded", newStage);
+    emit("close");
+
+    // Reset form
+    formData.value.title = "";
+    formData.value.description = null;
+    formData.value.status = "A_VENIR";
+  } catch (error) {
+    console.error("Erreur lors de la création de l'étape :", error);
+  }
 };
 </script>
 

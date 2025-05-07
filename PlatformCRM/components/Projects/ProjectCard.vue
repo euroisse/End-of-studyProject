@@ -52,7 +52,7 @@ import { useRouter } from "vue-router";
 interface Project {
   id: number;
   title: string;
-  status: "En_COURS" | "A_VENIR" | "TERMINE" | "EN_ATTENTE";
+  status: "EN_COURS" | "A_VENIR" | "TERMINE" | "EN_ATTENTE";
   customerId: number;
   customer?: {
     name: string;
@@ -74,7 +74,7 @@ interface Project {
 const props = defineProps<{
   project: Project;
   getStatusClass: (
-    status: "En_COURS" | "A_VENIR" | "TERMINE" | "EN_ATTENTE"
+    status: "EN_COURS" | "A_VENIR" | "TERMINE" | "EN_ATTENTE"
   ) => string;
 }>();
 
