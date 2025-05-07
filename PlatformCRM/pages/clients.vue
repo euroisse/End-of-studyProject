@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50 flex">
+  <div v-if="isEmploye" class="min-h-screen bg-gray-50 flex">
     <ClientsClientSideBar
       :searchQuery="searchQuery"
       :selectedClientStatuses="selectedClientStatuses"
@@ -12,7 +12,7 @@
     />
 
     <main class="flex-1 flex flex-col">
-      <header class="bg-white border-b border-gray-200 p-4">
+      <!-- <header class="bg-white border-b border-gray-200 p-4">
         <div class="flex justify-between items-center">
           <h2 class="text-xl font-semibold text-gray-900">Liste des clients</h2>
           <button
@@ -23,7 +23,7 @@
             Nouveau client
           </button>
         </div>
-      </header>
+      </header> -->
 
       <div class="flex-1 overflow-y-auto p-6">
         <div class="grid gap-4">
@@ -54,6 +54,7 @@ import { ref, computed } from "vue";
 import { useStorage } from "@vueuse/core";
 definePageMeta({ layout: "admin" });
 // State
+const { isEmploye } = useIsRole();
 const searchQuery = useStorage("searchQuery", "");
 const showClientModal = ref(false);
 const isEditing = ref(false);
@@ -152,11 +153,11 @@ const toggleProjectRange = (range: string) => {
   }
 };
 
-const openNewClientModal = () => {
-  currentClient.value = undefined;
-  isEditing.value = false;
-  showClientModal.value = true;
-};
+// const openNewClientModal = () => {
+//   currentClient.value = undefined;
+//   isEditing.value = false;
+//   showClientModal.value = true;
+// };
 
 const editClient = (client: Client) => {
   currentClient.value = { ...client };

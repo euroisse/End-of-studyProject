@@ -33,7 +33,10 @@
 
     <div class="flex justify-between items-center text-xs text-gray-600">
       <span>Mise à jour: {{ formattedLastUpdate }}</span>
-      <button class="text-indigo-600 hover:text-indigo-800 cursor-pointer">
+      <button
+        @click="goToProjectDetails(project.id)"
+        class="text-indigo-600 hover:text-indigo-800 cursor-pointer"
+      >
         <i class="ri-arrow-right-s-line"></i>
       </button>
     </div>
@@ -44,6 +47,7 @@
 import { defineProps, computed } from "vue";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { useRouter } from "vue-router";
 
 interface Project {
   id: number;
@@ -75,9 +79,15 @@ const props = defineProps<{
 }>();
 
 const { project, getStatusClass } = props;
+const router = useRouter();
 
 const formattedLastUpdate = computed(() => {
-  return format(new Date(project.updatedAt), "dd MMMM yyyy", { locale: fr });
+  if (!project.updatedAt) return "Non défini";
+
+  const date = new Date(project.updatedAt);
+  if (isNaN(date.getTime())) return "Date invalide";
+
+  return format(date, "dd MMMM yyyy", { locale: fr });
 });
 
 const calculateProgress = computed(() => {
@@ -89,4 +99,9 @@ const calculateProgress = computed(() => {
   ).length;
   return Math.round((completedStages / project.projectStages.length) * 100);
 });
+
+const goToProjectDetails = (id: number) => {
+  console.log("Navigating to project ID:", id);
+  router.push(`/projects/${id}`);
+};
 </script>
