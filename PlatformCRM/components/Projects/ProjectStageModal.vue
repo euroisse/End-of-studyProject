@@ -78,7 +78,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, defineEmits, watch } from "vue";
+import { ref, watch } from "vue";
 import type { ProjectStage } from "~/generated/prisma";
 
 const props = defineProps<{
@@ -109,19 +109,26 @@ watch(
         status: newStage.status,
       };
     }
-  }
+  },
+  { immediate: true }
 );
 
 const saveProjectStage = async () => {
-  if (!props.projectStage?.id) return;
-  console.log("projectstage id est undefined", props.projectStage);
-  try {
-    await $fetch(`/api/projectStage/${props.projectStage.id}`, {
-      method: "PUT",
-      body: form.value,
-    });
+  if (!props.projectStage?.id) {
+    console.error("projectstage id est undefined");
+    return;
+  }
 
-    emit("save");
+  try {
+    const updatedStage = await $fetch(
+      `/api/projectStage/${props.projectStage.id}`,
+      {
+        method: "PUT",
+        body: form.value,
+      }
+    );
+
+    emit("save", updatedStage);
     emit("close");
     console.log("Étape mise à jour avec succès");
   } catch (error: any) {

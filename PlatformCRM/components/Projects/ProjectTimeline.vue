@@ -58,7 +58,7 @@
             </div>
 
             <p class="text-sm text-gray-500 mt-2">
-              Date de livraison estimée: {{ step.updatedAt }}
+              Date de livraison estimée: {{ formatDate(step.updatedAt) }}
             </p>
           </div>
         </div>
@@ -75,11 +75,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, defineProps, defineEmits } from "vue";
 import type { ProjectStage, ProjectStageStatus } from "~/generated/prisma";
 import ProjectStageModal from "./ProjectStageModal.vue";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 const props = defineProps<{ steps: ProjectStage[] }>();
+const emit = defineEmits(["refreshStages"]);
 
 const showModal = ref(false);
 const selectedProjectStage = ref<ProjectStage | null>(null);
@@ -106,6 +109,18 @@ const getIconClass = (status: ProjectStageStatus) => {
   );
 };
 
+const formatDate = (date?: Date): string => {
+  if (date) {
+    try {
+      return format(new Date(date), "dd/MM/yyyy", { locale: fr });
+    } catch (error) {
+      console.error("Erreur de formatage de date:", error);
+      return "";
+    }
+  }
+  return "";
+};
+
 const editProjectStage = (stage: ProjectStage) => {
   selectedProjectStage.value = { ...stage };
   showModal.value = true;
@@ -116,11 +131,13 @@ const closeModal = () => {
   showModal.value = false;
 };
 
-const handleSaveProjectStage = (updatedStage: ProjectStage) => {
-  const index = props.steps?.findIndex((step) => step.id === updatedStage.id);
-  console.log(index);
-
-  closeModal();
+const handleSaveProjectStage = async (updatedStage: ProjectStage) => {
+  try {
+    emit("refreshStages");
+    closeModal();
+  } catch (error) {
+    console.error("Erreur lors de la mise à jour de l'étape:", error);
+  }
 };
 
 const deleteProjectStage = async (id: number) => {
@@ -129,12 +146,10 @@ const deleteProjectStage = async (id: number) => {
       const response = await $fetch(`/api/projectStage/${id}`, {
         method: "DELETE",
       });
+
       if (response) {
-        const index = props.steps?.findIndex((step) => step.id === id);
-        if (index !== undefined && props.steps && Array.isArray(props.steps)) {
-          props.steps.splice(index, 1);
-          console.log("Étape de projet supprimée avec succès");
-        }
+        emit("refreshStages");
+        console.log("Étape de projet supprimée avec succès");
       } else {
         console.error("La suppression de l'étape a échoué.");
       }

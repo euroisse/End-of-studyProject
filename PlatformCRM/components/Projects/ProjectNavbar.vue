@@ -41,6 +41,7 @@
           :value="formatDate(project.startDate)"
           readonly
         />
+        <i class="ri-sort-line ml-1"></i>
         <label
           for="date_fin"
           class="block text-sm font-medium text-gray-700 mb-1"

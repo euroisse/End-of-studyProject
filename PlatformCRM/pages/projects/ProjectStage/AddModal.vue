@@ -81,8 +81,9 @@
           <button
             type="submit"
             class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            :disabled="isSubmitting"
           >
-            Enregistrer
+            {{ isSubmitting ? "Enregistrement..." : "Enregistrer" }}
           </button>
         </div>
       </form>
@@ -90,8 +91,9 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from "vue";
+import type { ProjectStage } from "~/generated/prisma";
 
 const route = useRoute();
 const projectId = computed(() => Number(route.params.id) ?? null);
@@ -104,6 +106,8 @@ const formData = ref({
   status: "A_VENIR",
 });
 
+const isSubmitting = ref(false);
+
 const statusOptions = {
   A_VENIR: "À venir",
   EN_COURS: "En cours",
@@ -112,12 +116,18 @@ const statusOptions = {
 };
 
 const handleSubmit = async () => {
-  console.log("projectId:", projectId.value);
+  if (!projectId.value) {
+    console.error("ID du projet manquant");
+    return;
+  }
+
+  isSubmitting.value = true;
+
   try {
     const newStage = await $fetch("/api/Projects/projectStage", {
       method: "POST",
       body: {
-        projectId: Number(projectId.value),
+        projectId: projectId.value,
         title: formData.value.title,
         description: formData.value.description || undefined,
         status: formData.value.status,
@@ -133,6 +143,8 @@ const handleSubmit = async () => {
     formData.value.status = "A_VENIR";
   } catch (error) {
     console.error("Erreur lors de la création de l'étape :", error);
+  } finally {
+    isSubmitting.value = false;
   }
 };
 </script>
