@@ -1,6 +1,9 @@
+import { Prisma } from '~/generated/prisma';
 import prisma from '~/server/database';
 
-export default defineEventHandler(async (event)=>{
+type ProjectWithProjectStages = Prisma.ProjectGetPayload<{include: {projectStages: true}}>
+
+export default defineEventHandler(async (event): Promise<ProjectWithProjectStages>=>{
     const projectId = parseInt(event.context.params?.id as string||'' );
 if (!projectId) {
     throw createError({
@@ -12,17 +15,18 @@ try{
     const project = await prisma.project.findUnique({
         where: { id: projectId },
         include:{
+          customer:true,
             projectStages:{}
         }
-    })
+    }) as ProjectWithProjectStages
     if (!project) {
-        throw createError({
-          statusCode: 404,
-          statusMessage: `Projet avec l'ID ${projectId} non trouvé.`,
-        });
-      }
+      throw createError({
+        statusCode: 404,
+        statusMessage: `Projet avec l'ID ${projectId} non trouvé.`,
+      });
+    }
   
-      return project;
+    return project;
 }
 catch (error: any) {
     console.error('Erreur lors de la récupération du projet :', error);
