@@ -3,7 +3,7 @@
     class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 z-50 flex items-center justify-center"
   >
     <div
-      class="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-8 w-full max-w-md"
+      class="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-8 w-full max-w-lg"
     >
       <div class="p-6">
         <div class="flex justify-between items-center mb-6">
@@ -31,7 +31,7 @@
             type="text"
             id="title"
             name="title"
-            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 dark:text-gray-300 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500"
             required
           />
         </div>
@@ -45,7 +45,7 @@
             v-model="formData.description"
             id="description"
             name="description"
-            rows="4"
+            rows="6"
             class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           ></textarea>
         </div>
@@ -59,7 +59,7 @@
             v-model="formData.status"
             id="status"
             name="status"
-            class="shadow border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            class="shadow border rounded w-full py-3 px-4 text-gray-700 dark:text-gray-300 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             <option
               v-for="(status, key) in statusOptions"

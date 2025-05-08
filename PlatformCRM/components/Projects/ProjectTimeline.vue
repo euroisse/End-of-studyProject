@@ -7,7 +7,7 @@
       ></div>
       <div class="space-y-8">
         <div
-          v-for="(step, index) in steps"
+          v-for="(step, index) in projectStore.selectedProject?.projectStages"
           :key="step.id"
           class="relative flex"
         >
@@ -18,6 +18,10 @@
                 ? 'bg-green-500'
                 : step.status === 'EN_COURS'
                 ? 'bg-indigo-500'
+                : step.status === 'A_VENIR'
+                ? 'bg-gray-200'
+                : step.status === 'EN_ATTENTE'
+                ? 'bg-yellow-300'
                 : 'bg-gray-200'
             } text-white font-medium text-[14px] font-Roboto`"
           >
@@ -36,6 +40,10 @@
                     ? 'bg-green-100 text-green-600'
                     : step.status === 'EN_COURS'
                     ? 'bg-indigo-100 text-indigo-600'
+                    : step.status === 'A_VENIR'
+                    ? 'bg-gray-100 text-gray-600'
+                    : step.status === 'EN_ATTENTE'
+                    ? 'bg-yellow-100 text-yellow-600'
                     : 'bg-gray-100 text-gray-600'
                 }`"
               >
@@ -80,10 +88,10 @@ import type { ProjectStage, ProjectStageStatus } from "~/generated/prisma";
 import ProjectStageModal from "./ProjectStageModal.vue";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { useProjectStore } from "~/stores/projectStore";
 
-const props = defineProps<{ steps: ProjectStage[] }>();
 const emit = defineEmits(["refreshStages"]);
-
+const projectStore = useProjectStore();
 const showModal = ref(false);
 const selectedProjectStage = ref<ProjectStage | null>(null);
 
@@ -122,7 +130,7 @@ const formatDate = (date?: Date): string => {
 };
 
 const editProjectStage = (stage: ProjectStage) => {
-  selectedProjectStage.value = { ...stage };
+  projectStore.setSelectedProjectStage(stage);
   showModal.value = true;
 };
 
@@ -133,7 +141,7 @@ const closeModal = () => {
 
 const handleSaveProjectStage = async (updatedStage: ProjectStage) => {
   try {
-    emit("refreshStages");
+    await projectStore.updateProjectStage(updatedStage.id!, updatedStage);
     closeModal();
   } catch (error) {
     console.error("Erreur lors de la mise à jour de l'étape:", error);
@@ -143,16 +151,7 @@ const handleSaveProjectStage = async (updatedStage: ProjectStage) => {
 const deleteProjectStage = async (id: number) => {
   if (window.confirm("Êtes-vous sûr de vouloir supprimer cette étape ?")) {
     try {
-      const response = await $fetch(`/api/projectStage/${id}`, {
-        method: "DELETE",
-      });
-
-      if (response) {
-        emit("refreshStages");
-        console.log("Étape de projet supprimée avec succès");
-      } else {
-        console.error("La suppression de l'étape a échoué.");
-      }
+      await projectStore.deleteProjectStage(id);
     } catch (error: any) {
       console.error(
         `Erreur lors de la suppression de l'étape: ${error.message}`
@@ -161,3 +160,23 @@ const deleteProjectStage = async (id: number) => {
   }
 };
 </script>
+
+<style scoped>
+.bg-a-venir {
+  background-color: #e5e7eb; /* Gris clair */
+  color: #4b5563; /* Gris moyen */
+}
+
+.text-a-venir {
+  color: #4b5563; /* Gris moyen */
+}
+
+.bg-en-attente {
+  background-color: #fef08a; /* Jaune clair */
+  color: #a16207; /* Jaune foncé */
+}
+
+.text-en-attente {
+  color: #a16207; /* Jaune foncé */
+}
+</style>

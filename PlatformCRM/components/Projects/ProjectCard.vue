@@ -49,27 +49,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useRouter } from "vue-router";
 
-interface Project {
-  id: number;
-  title: string;
-  status: "EN_COURS" | "A_VENIR" | "TERMINE" | "EN_ATTENTE";
-  customerId: number;
-  customer?: {
-    name: string;
-  };
-  projectStages: {
-    id: number;
-    name: string;
-    status: string;
-  }[];
-  users: {
-    employee: {
-      id: number;
-      name: string;
-    };
-  }[];
-  updatedAt: Date;
-}
+import type { Project } from "~/types";
 
 const props = defineProps<{
   project: Project;

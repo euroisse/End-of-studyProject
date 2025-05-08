@@ -1,6 +1,5 @@
 <template>
   <div
-    v-if="true"
     class="fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center z-50"
   >
     <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
@@ -35,6 +34,7 @@
           <textarea
             v-model="form.description"
             id="description"
+            rows="10"
             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           ></textarea>
         </div>
@@ -80,12 +80,9 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import type { ProjectStage } from "~/generated/prisma";
-
-const props = defineProps<{
-  projectStage?: ProjectStage | null;
-}>();
+const projectStore = useProjectStore();
 const emit = defineEmits(["close", "save"]);
-
+const editingStage = computed(() => projectStore.selectedProjectStage);
 const form = ref<Partial<ProjectStage>>({
   title: "",
   description: "",
@@ -98,37 +95,28 @@ const statusOptions = {
   EN_ATTENTE: "En attente",
 };
 
-watch(
-  () => props.projectStage,
-  (newStage) => {
-    if (newStage) {
-      form.value = {
-        id: newStage.id,
-        title: newStage.title,
-        description: newStage.description,
-        status: newStage.status,
-      };
-    }
-  },
-  { immediate: true }
-);
+watch(editingStage, (newStage) => {
+  if (newStage) {
+    form.value = {
+      id: newStage.id,
+      title: newStage.title,
+      description: newStage.description,
+      status: newStage.status,
+    };
+  } else {
+    form.value = { title: "", description: "", status: "A_VENIR" };
+  }
+}),
+  { immediate: true };
 
 const saveProjectStage = async () => {
-  if (!props.projectStage?.id) {
+  if (!editingStage.value?.id) {
     console.error("projectstage id est undefined");
     return;
   }
 
   try {
-    const updatedStage = await $fetch(
-      `/api/projectStage/${props.projectStage.id}`,
-      {
-        method: "PUT",
-        body: form.value,
-      }
-    );
-
-    emit("save", updatedStage);
+    await projectStore.updateProjectStage(editingStage.value.id, form.value);
     emit("close");
     console.log("Étape mise à jour avec succès");
   } catch (error: any) {

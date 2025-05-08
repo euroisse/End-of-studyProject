@@ -1,5 +1,3 @@
-// Voici le code corrigé pour la page de détail du projet (paste-4.txt)
-
 <template>
   <main class="pt-10">
     <ProjectNavbar :project="project" v-if="project" />
@@ -50,62 +48,51 @@
 <script setup lang="ts">
 import ProjectNavbar from "~/components/Projects/ProjectNavbar.vue";
 import ProjectTimeline from "~/components/Projects/ProjectTimeline.vue";
-import type { ProjectStage, Project } from "~/generated/prisma";
-import type { ProjectWithProjectStages } from "~/types";
+import type { ProjectStage } from "~/generated/prisma";
+
 import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import AddModal from "./ProjectStage/AddModal.vue";
 
+import AddModal from "./ProjectStage/AddModal.vue";
+import { useProjectStore } from "~/stores/projectStore";
 definePageMeta({ layout: "admin" });
 const showCreateStageProject = ref(false);
+const projectStore = useProjectStore();
 
 const route = useRoute();
 const projectId = computed(() => Number(route.params.id) ?? null);
-const project = ref<ProjectWithProjectStages | null>(null);
-const projectStages = ref<ProjectStage[]>([]);
+const project = computed(() => projectStore.selectedProject);
+const projectStages = computed(
+  () => projectStore.selectedProject?.projectStages || []
+);
 
 function openModal() {
   showCreateStageProject.value = true;
 }
 
 // Fonction pour charger les données du projet
-const loadProjectData = async () => {
+onMounted(async () => {
   if (!projectId.value) return;
 
   try {
-    const projectData = await $fetch<ProjectWithProjectStages>(
-      `/api/Projects/${projectId.value}`
-    );
-    console.log("get project data", projectData);
-
-    project.value = projectData;
-    projectStages.value = projectData.projectStages || [];
+    await projectStore.fetchProject(projectId.value);
   } catch (err) {
     console.error("Erreur lors de la récupération des détails du projet:", err);
-    project.value = null;
-    projectStages.value = [];
   }
-};
-
-onMounted(() => {
-  loadProjectData();
 });
-
 const stageAdded = async (newStage: ProjectStage) => {
-  await loadProjectData();
+  showCreateStageProject.value = false;
 };
 
-const formatDate = (date?: Date): string => {
-  if (date) {
-    try {
-      return format(date, "yyyy-MM-dd", { locale: fr });
-    } catch (error) {
-      console.error("Erreur de formatage de date:", error);
-      return "";
-    }
-  }
-  return "";
-};
+// const formatDate = (date?: Date): string => {
+//   if (date) {
+//     try {
+//       return format(date, "yyyy-MM-dd", { locale: fr });
+//     } catch (error) {
+//       console.error("Erreur de formatage de date:", error);
+//       return "";
+//     }
+//   }
+//   return "";
+// };
 </script>
