@@ -46,6 +46,27 @@ export interface Invoice {
       
 };}
 
+export interface Project {
+  id: number;
+  title: string;
+  status: "EN_COURS" | "A_VENIR" | "TERMINE" | "EN_ATTENTE";
+  customerId: number;
+  customer?: {
+    name: string;
+  };
+  projectStages: {
+    id: number;
+    name: string;
+    status: string;
+  }[];
+  users: {
+    employee: {
+      id: number;
+      name: string;
+    };
+  }[];
+  updatedAt: Date;
+}
 
 export type ProjectWithProjectStages = Prisma.ProjectGetPayload<{
   include: { customer: true ; projectStages: true };
