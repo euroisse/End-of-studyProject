@@ -33,6 +33,7 @@ export default defineEventHandler(async (event) => {
             startDate: startDate ? new Date(startDate as string) : undefined,
             endDate: endDate ? new Date(endDate as string) : undefined,
         },
+        include:{customer: true, projectStages: true}
         });
 
 //retourner le projet mis a jour
