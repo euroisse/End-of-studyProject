@@ -25,34 +25,18 @@
         </button>
       </div>
     </div>
-    <div class="flex flex-col gap-4 w-full sm:w-auto mb-6">
-      <div>
-        <label
-          for="date-limite"
-          class="block text-sm font-medium text-gray-700 mb-1"
-        >
-          Date debut
-        </label>
-        <input
-          id="date_debut"
-          :value="formatDate(project.startDate)"
-          type="date"
-          class="w-full px-4 py-2 border rounded-button focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-        />
+    <div class="flex flex-col gap-2 w-full sm:w-auto mb-6">
+      <div
+        class="text-sm font-medium text-gray-700 mb-2 items-center"
+        v-if="project.customer"
+      >
+        <p>Date de debut: {{ formatDateDisplay(project.startDate) }}</p>
       </div>
-      <div>
-        <label
-          for="date-limite"
-          class="block text-sm font-medium text-gray-700 mb-1"
-        >
-          Date fin
-        </label>
-        <input
-          id="date_fin"
-          :value="formatDate(project.endDate)"
-          type="date"
-          class="w-full px-4 py-2 border rounded-button focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-        />
+      <div
+        class="text-sm font-medium text-gray-700 mb-2 items-center"
+        v-if="project.customer"
+      >
+        <p>Date de fin: {{ formatDateDisplay(project.endDate) }}</p>
       </div>
     </div>
 
@@ -67,8 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from "vue";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useRouter } from "vue-router";
 
@@ -79,19 +62,25 @@ const showEditModal = ref(false);
 const emit = defineEmits(["project-updated"]);
 const projectStore = useProjectStore();
 const project = computed(() => projectStore.selectedProject);
-const formatDate = (date?: Date | null): string => {
-  if (date && date instanceof Date && !isNaN(date.getTime())) {
-    try {
-      return format(date, "yyyy-MM-dd", { locale: fr });
-    } catch (error) {
-      console.error("Erreur de formatage de date:", error);
-      return "";
-    }
-  }
-  return "";
-};
 
+const formatDateDisplay = (dateString?: string | Date | null): string => {
+  if (!dateString) return "Non défini";
+
+  try {
+    const date =
+      typeof dateString === "string" ? parseISO(dateString) : dateString;
+
+    if (date instanceof Date && !isNaN(date.getTime())) {
+      return format(date, "dd MMMM yyyy", { locale: fr });
+    }
+    return "Date invalide";
+  } catch (error) {
+    console.error("Erreur lors du formatage de la date:", error);
+    return "Date invalide";
+  }
+};
 function openEditModal() {
+  projectStore.setSelectedProjectToEdit(project.value);
   showEditModal.value = true;
 }
 const onProjectUpdated = async () => {
