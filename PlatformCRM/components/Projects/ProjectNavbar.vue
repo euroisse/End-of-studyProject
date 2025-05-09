@@ -38,26 +38,81 @@
       >
         <p>Date de fin: {{ formatDateDisplay(project.endDate) }}</p>
       </div>
+      <div
+        class="flex gap-2 w-full px-3 pt-3 border-b shadow-sm bg-white border-gray-200"
+      >
+        <div class="flex items-center justify-between">
+          <!-- <div class="grid grid-cols-1 sm:hidden">
+            <select
+              v-model="activeTabMobile"
+              class="col-start-1 row-start-1 w-full appearance-none rounded-md py-2 pl-3 pr-8 text-base outline outline-1 -outline-offset-1 focus:outline focus:outline-2 focus:-outline-offset-2 bg-white text-gray-900 outline-gray-300 focus:outline-blue-600"
+            >
+              <option value="apercu">Aperçu</option>
+              <option value="taches">Tâches</option>
+            </select>
+          </div> -->
+          <div class="hidden sm:block">
+            <nav class="-mb-px flex space-x-8">
+              <button
+                @click="() => setActiveTab('apercu')"
+                :class="[
+                  'whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium focus:outline-none',
+                  activeTab === 'apercu'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+                ]"
+              >
+                Aperçu
+              </button>
+              <button
+                @click="() => setActiveTab('taches')"
+                :class="[
+                  'whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium focus:outline-none',
+                  activeTab === 'taches'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+                ]"
+              >
+                Tâches
+              </button>
+            </nav>
+          </div>
+        </div>
+      </div>
     </div>
 
+    <div v-if="activeTab === 'apercu'">
+      <ProjectsProjectTimeline
+        class="mb-8 bg-white w-full rounded-sm flex-1 p-8"
+        v-if="projectStages && projectStages.length > 0"
+      />
+    </div>
+
+    <div v-if="activeTab === 'taches'">
+      <ProjectsProjecTasks />
+    </div>
     <ProjectEditModal
       :showModal="showEditModal"
       @close="showEditModal = false"
       @project-updated="onProjectUpdated"
+      :projectToEdit="project"
     />
   </div>
-
-  <div v-else>Chargement de l'en-tête du projet...</div>
 </template>
 
 <script setup lang="ts">
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useRouter } from "vue-router";
+import { ref, computed } from "vue";
 
 import ProjectEditModal from "~/components/ProjectModal/ProjectEditModal.vue";
-
+const projectStages = computed(
+  () => projectStore.selectedProject?.projectStages || []
+);
 const showEditModal = ref(false);
+console.log(showEditModal.value);
+const activeTab = ref("apercu");
 
 const emit = defineEmits(["project-updated"]);
 const projectStore = useProjectStore();
@@ -79,10 +134,12 @@ const formatDateDisplay = (dateString?: string | Date | null): string => {
     return "Date invalide";
   }
 };
+
 function openEditModal() {
   projectStore.setSelectedProjectToEdit(project.value);
   showEditModal.value = true;
 }
+
 const onProjectUpdated = async () => {
   showEditModal.value = false;
 };
@@ -93,8 +150,10 @@ const goBackToProjects = () => {
   router.push({ name: "projects" });
   console.log("Retour à la page des projets");
 };
+
+const setActiveTab = (tabName: string) => {
+  activeTab.value = tabName;
+};
 </script>
 
-<style scoped>
-/* Ajoutez des styles supplémentaires si nécessaire */
-</style>
+<style scoped></style>

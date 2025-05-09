@@ -1,11 +1,6 @@
 <template>
   <main class="pt-10">
     <ProjectNavbar :project="project" v-if="project" />
-    <ProjectTimeline
-      :steps="projectStages"
-      class="mb-8 bg-white w-full rounded-sm flex-1 p-8"
-      v-if="projectStages && projectStages.length > 0"
-    />
     <div
       v-else
       class="text-center py-8 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
@@ -26,17 +21,7 @@
         </NuxtLink>
       </div>
     </div>
-    <div>
-      <div class="mt-8">
-        <button
-          @click="openModal"
-          class="w-full flex items-center justify-center py-6 px-4 text-sm font-medium text-gray-500 dark:text-gray-400 rounded-md border border-dashed border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
-        >
-          <i class="ri-add-line mr-1"></i>
-          Ajouter une étape
-        </button>
-      </div>
-    </div>
+    <div></div>
     <AddModal
       v-if="showCreateStageProject"
       @close="showCreateStageProject = false"
@@ -47,7 +32,6 @@
 
 <script setup lang="ts">
 import ProjectNavbar from "~/components/Projects/ProjectNavbar.vue";
-import ProjectTimeline from "~/components/Projects/ProjectTimeline.vue";
 import type { ProjectStage } from "~/generated/prisma";
 
 import { ref, onMounted, computed } from "vue";
@@ -62,13 +46,6 @@ const projectStore = useProjectStore();
 const route = useRoute();
 const projectId = computed(() => Number(route.params.id) ?? null);
 const project = computed(() => projectStore.selectedProject);
-const projectStages = computed(
-  () => projectStore.selectedProject?.projectStages || []
-);
-
-function openModal() {
-  showCreateStageProject.value = true;
-}
 
 // Fonction pour charger les données du projet
 onMounted(async () => {
