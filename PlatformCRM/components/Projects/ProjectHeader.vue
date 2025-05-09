@@ -15,7 +15,13 @@
       </button>
     </div>
   </div>
-
+  <!-- <ProjectFilter
+      v-model:searchQuery="searchQuery"
+      :clients="clients"
+      @filterByProgress="handleProgressFilter"
+      @filterByClient="handleClientFilter"
+      @filterByDate="handleDateFilter"
+    /> -->
   <div
     v-if="showCreateProject"
     class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto"
@@ -166,7 +172,20 @@ interface Client {
 }
 
 const clients = ref<Client[]>([]);
-
+const filters = reactive({
+  progress: {
+    notStarted: false,
+    inProgress: false,
+    completed: false,
+    active: false,
+  },
+  clientId: "",
+  date: {
+    startDate: "",
+    endDate: "",
+    active: false,
+  },
+});
 const projet = reactive({
   title: "",
   customerId: "",
