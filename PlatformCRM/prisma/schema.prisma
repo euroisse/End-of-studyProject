@@ -28,12 +28,12 @@ model User {
   department     String?
   profilePicture String?
   projects       EmployeeOnProjects[]
-
+  tasks          Tasks[]              @relation("AssignedTasks")
   // Client related fields
   adresse        String?
   company        String?
   industry       String?
-  clientProjects Project[] @relation("CustomerProjects")
+  clientProjects Project[]            @relation("CustomerProjects")
 
   // Role management
   UserRole UserRole[]
@@ -70,6 +70,7 @@ model Project {
   description   String?
   users         EmployeeOnProjects[]
   projectStages ProjectStage[]
+  tasks         Tasks[]              @relation("ProjectTasks")
   startDate     DateTime             @default(now()) @map("start_date")
   endDate       DateTime?            @map("end_date")
 }
@@ -101,12 +102,29 @@ enum ProjectStageStatus {
   EN_ATTENTE
 }
 
-// model Tasks {
-//   id          Int      @id @default(autoincrement())
-//   employee    User     @relation(fields: [employeeId], references: [id])
-//   employeeId  Int
-//   title       String
-//   description String
-//   deadline    String
-//   status      String
-// }
+model Tasks {
+  id          Int          @id @default(autoincrement())
+  employee    User         @relation("AssignedTasks", fields: [employeeId], references: [id])
+  project     Project      @relation("ProjectTasks", fields: [projectId], references: [id])
+  projectId   Int
+  employeeId  Int
+  title       String
+  description String
+  effort      Int?
+  priority    TaskPriority @default(BASSE)
+  status      TaskStatus   @default(A_FAIRE)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+enum TaskStatus {
+  A_FAIRE
+  EN_COURS
+  TERMINE
+}
+
+enum TaskPriority {
+  BASSE
+  MOYENNE
+  HAUTE
+}
