@@ -1,82 +1,77 @@
 <template>
   <div v-if="project">
-    <div class="flex justify-between items-center mb-4">
-      <div>
-        <div class="flex justify-center items-center">
-          <button
-            @click="goBackToProjects"
-            class="mr-3 text-gray-500 text-xl hover:text-gray-800 focus:outline-none"
-          >
-            <i class="ri-arrow-left-s-line"></i>
-          </button>
-          <h1 class="text-2xl font-bold pb-2">{{ project.title }}</h1>
+    <div v-show="activeTab === 'apercu'">
+      <div class="flex justify-between items-center mb-4">
+        <div>
+          <div class="flex justify-center items-center">
+            <button
+              @click="goBackToProjects"
+              class="mr-3 text-gray-500 text-xl hover:text-gray-800 focus:outline-none"
+            >
+              <i class="ri-arrow-left-s-line"></i>
+            </button>
+            <h1 class="text-2xl font-bold pb-2">{{ project.title }}</h1>
+          </div>
+          <div class="text-gray-600 items-center" v-if="project.customer">
+            <p>Client: {{ project.customer.name }}</p>
+          </div>
         </div>
-        <div class="text-gray-600 items-center" v-if="project.customer">
-          <p>Client: {{ project.customer.name }}</p>
+        <div>
+          <button
+            class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 flex items-center !rounded-button whitespace-nowrap"
+            @click="openEditModal"
+          >
+            <i class="ri-pencil-line mr-2"></i>
+            Modifier le projet
+          </button>
         </div>
       </div>
-      <div>
-        <button
-          class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 flex items-center !rounded-button whitespace-nowrap"
-          @click="openEditModal"
+      <div class="flex flex-col gap-2 w-full sm:w-auto mb-6">
+        <div
+          class="text-sm font-medium text-gray-700 mb-2"
+          v-if="project.customer"
         >
-          <i class="ri-pencil-line mr-2"></i>
-          Modifier le projet
-        </button>
+          <p>Date de debut: {{ formatDateDisplay(project.startDate) }}</p>
+        </div>
+        <div
+          class="text-sm font-medium text-gray-700 mb-2"
+          v-if="project.customer"
+        >
+          <p>Date de fin: {{ formatDateDisplay(project.endDate) }}</p>
+        </div>
       </div>
     </div>
-    <div class="flex flex-col gap-2 w-full sm:w-auto mb-6">
-      <div
-        class="text-sm font-medium text-gray-700 mb-2 items-center"
-        v-if="project.customer"
-      >
-        <p>Date de debut: {{ formatDateDisplay(project.startDate) }}</p>
-      </div>
-      <div
-        class="text-sm font-medium text-gray-700 mb-2 items-center"
-        v-if="project.customer"
-      >
-        <p>Date de fin: {{ formatDateDisplay(project.endDate) }}</p>
-      </div>
-      <div
-        class="flex gap-2 w-full px-3 pt-3 border-b shadow-sm bg-white border-gray-200"
-      >
-        <div class="flex items-center justify-between">
-          <!-- <div class="grid grid-cols-1 sm:hidden">
-            <select
-              v-model="activeTabMobile"
-              class="col-start-1 row-start-1 w-full appearance-none rounded-md py-2 pl-3 pr-8 text-base outline outline-1 -outline-offset-1 focus:outline focus:outline-2 focus:-outline-offset-2 bg-white text-gray-900 outline-gray-300 focus:outline-blue-600"
+
+    <!-- NAVIGATION TABS (toujours visible) -->
+    <div
+      class="flex gap-2 w-full px-3 pt-3 border-b shadow-sm bg-white border-gray-200"
+    >
+      <div class="flex items-center justify-between w-full">
+        <div class="hidden sm:block">
+          <nav class="-mb-px flex space-x-8">
+            <button
+              @click="() => setActiveTab('apercu')"
+              :class="[
+                'whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium focus:outline-none',
+                activeTab === 'apercu'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+              ]"
             >
-              <option value="apercu">Aperçu</option>
-              <option value="taches">Tâches</option>
-            </select>
-          </div> -->
-          <div class="hidden sm:block">
-            <nav class="-mb-px flex space-x-8">
-              <button
-                @click="() => setActiveTab('apercu')"
-                :class="[
-                  'whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium focus:outline-none',
-                  activeTab === 'apercu'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
-                ]"
-              >
-                Aperçu
-              </button>
-              <button
-                @click="() => setActiveTab('taches')"
-                :class="[
-                  'whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium focus:outline-none',
-                  activeTab === 'taches'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
-                ]"
-              >
-                Tâches
-              </button>
-            </nav>
-          </div>
+              Aperçu
+            </button>
+            <button
+              @click="() => setActiveTab('taches')"
+              :class="[
+                'whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium focus:outline-none',
+                activeTab === 'taches'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+              ]"
+            >
+              Tâches
+            </button>
+          </nav>
         </div>
       </div>
     </div>
@@ -89,8 +84,9 @@
     </div>
 
     <div v-if="activeTab === 'taches'">
-      <ProjectsProjecTasks />
+      <ProjecTasks />
     </div>
+
     <ProjectEditModal
       :showModal="showEditModal"
       @close="showEditModal = false"
@@ -107,6 +103,7 @@ import { useRouter } from "vue-router";
 import { ref, computed } from "vue";
 
 import ProjectEditModal from "~/components/ProjectModal/ProjectEditModal.vue";
+import ProjecTasks from "./ProjecTasks.vue";
 const projectStages = computed(
   () => projectStore.selectedProject?.projectStages || []
 );

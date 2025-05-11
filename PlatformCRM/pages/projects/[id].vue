@@ -60,16 +60,4 @@ onMounted(async () => {
 const stageAdded = async (newStage: ProjectStage) => {
   showCreateStageProject.value = false;
 };
-
-// const formatDate = (date?: Date): string => {
-//   if (date) {
-//     try {
-//       return format(date, "yyyy-MM-dd", { locale: fr });
-//     } catch (error) {
-//       console.error("Erreur de formatage de date:", error);
-//       return "";
-//     }
-//   }
-//   return "";
-// };
 </script>

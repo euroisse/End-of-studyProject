@@ -63,11 +63,39 @@ export interface Project {
     employee: {
       id: number;
       name: string;
+      email: string
     };
   }[];
   updatedAt: Date;
 }
 
 export type ProjectWithProjectStages = Prisma.ProjectGetPayload<{
-  include: { customer: true ; projectStages: true };
+  include: { customer: true ; projectStages: true; };
 }>;
+
+export type Task = {
+   id: number;
+  title: string;
+  description?: string | null;
+  projectId: number;
+  employeeId?: number | null;
+  priority: 'BASSE' | 'MOYENNE' | 'HAUTE';
+  status: 'A_FAIRE' | 'EN_COURS' | 'TERMINE';
+  effort?: number | null;
+  employee?: { id: number; name: string } | null; 
+  project?: { id: number; name: string } | null; }
+
+  export interface Employee {
+  id: number
+  name: string
+  email: string
+}
+export interface State {
+  tasks: Task[];
+  selectedTaskIds: number[];
+  selectedProjectId: number | null; 
+  assignedEmployeeId: number | null;
+  taskStatuses: { label: string; value: Task['status'] }[];
+  taskPriorities: { label: string; value: Task['priority'] }[];
+ 
+}

@@ -18,12 +18,12 @@ export const useProjectStore = defineStore('projects', {
       this.projectToEdit = project;
     },
 
-    // async fetchProjects() {
-    //   const response = await $fetch<Project[]>('/api/Projects/projects',{
-    //     method: 'POST',
-    //   });
-    //   this.projects = response;
-    // },
+    async fetchProjects() {
+      const response = await $fetch<Project[]>('/api/Projects/projects',{
+        method: 'POST',
+      });
+      this.projects = response;
+    },
 
     async fetchProject(id: number) {
       const response = await $fetch<ProjectWithProjectStages>(`/api/Projects/${id}`);
