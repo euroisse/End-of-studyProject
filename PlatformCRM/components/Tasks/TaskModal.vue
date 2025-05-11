@@ -127,7 +127,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { useEmployeeStore } from "~/stores/employee";
+import { useEmployeeStore } from "~/stores/employeeStore";
 import { useRoute } from "vue-router";
 
 import type { Employee, Task } from "~/types";
