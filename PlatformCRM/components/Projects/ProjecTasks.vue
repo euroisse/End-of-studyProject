@@ -123,55 +123,69 @@
 
     <div
       v-if="tasks.length > 0"
-      class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+      class="mt-8 grid w-full grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6 my-8"
     >
       <div
         v-for="task in tasks"
         :key="task.id"
-        class="bg-white rounded-md shadow-md p-4"
+        class="bg-white w-full rounded-xl shadow-md p-4 flex justify-between items-start"
       >
-        <h4 class="text-lg font-semibold text-gray-800 mb-2">
-          {{ task.title }}
-        </h4>
-        <p class="text-sm text-gray-600 mb-2">{{ task.description }}</p>
-        <div class="flex items-center text-sm mb-1">
-          <span class="mr-2"
-            >Priorité :
-            <strong
-              :class="{
-                'text-red-500': task.priority === 'HAUTE',
-                'text-yellow-500': task.priority === 'MOYENNE',
-                'text-green-500': task.priority === 'BASSE',
-              }"
-              >{{ task.priority }}</strong
-            ></span
-          >
-          <span v-if="task.effort !== null" class="mr-2"
-            >Effort : <strong>{{ task.effort }}</strong></span
-          >
-          <span v-if="task.employee"
-            >Assigné à : <strong>{{ task.employee.name }}</strong></span
-          >
+        <div>
+          <h4 class="text-lg font-semibold text-gray-800 mb-2">
+            {{ task.title }}
+          </h4>
+          <p class="text-sm text-gray-600 mb-2">{{ task.description }}</p>
+          <div class="flex items-center text-sm mb-2">
+            <span class="mr-4">
+              Priorité :
+              <strong
+                :class="{
+                  'text-red-500': task.priority === 'HAUTE',
+                  'text-yellow-500': task.priority === 'MOYENNE',
+                  'text-green-500': task.priority === 'BASSE',
+                }"
+                >{{ task.priority }}</strong
+              >
+            </span>
+            <span v-if="task.effort !== null" class="mr-4">
+              Effort : <strong>{{ task.effort }}</strong></span
+            >
+            <span v-if="task.employee">
+              Assigné à : <strong> 👤 {{ task.employee.name }}</strong></span
+            >
+          </div>
+          <div class="text-xs text-gray-500">
+            ID du Projet : {{ task.projectId }}
+          </div>
+          <div class="mt-2">
+            <span
+              class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold rounded-full"
+              :class="[
+                task.status === 'A_FAIRE' ? 'bg-gray-200 text-gray-700' : '',
+                task.status === 'EN_COURS'
+                  ? 'bg-yellow-200 text-yellow-700'
+                  : '',
+                task.status === 'TERMINE' ? 'bg-green-200 text-green-700' : '',
+              ]"
+            >
+              {{ task.status }}
+            </span>
+          </div>
         </div>
-        <div class="text-xs text-gray-500">
-          ID du Projet : {{ task.projectId }}
-        </div>
-        <div class="mt-2">
-          <span
-            class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold rounded-full"
-            :class="[
-              task.status === 'A_FAIRE' ? 'bg-gray-200 text-gray-700' : '',
-              task.status === 'EN_COURS' ? 'bg-yellow-200 text-yellow-700' : '',
-              task.status === 'TERMINE' ? 'bg-green-200 text-green-700' : '',
-            ]"
-          >
-            {{ task.status }}
-          </span>
-        </div>
+        <button
+          class="text-gray-400 hover:text-blue-600 focus:outline-none"
+          @click="
+            taskStore.setTaskToEditId(task.id);
+            isEditModalOpen = true;
+          "
+        >
+          <i class="ri-pencil-line"></i>
+        </button>
       </div>
     </div>
   </div>
   <TaskModal :is-open="isModalOpen" @close="isModalOpen = false" />
+  <TasksTaskEdit :is-open="isEditModalOpen" @close="isEditModalOpen = false" />
 </template>
 
 <script setup lang="ts">
@@ -184,8 +198,10 @@ import TaskModal from "../Tasks/TaskModal.vue";
 const taskStore = useTaskStore();
 const { tasks } = storeToRefs(taskStore);
 const isModalOpen = ref(false);
-onMounted(() => {
+const isEditModalOpen = ref(false);
+onMounted((taskId: number) => {
   taskStore.fetchTasks();
+  taskStore.setTaskToEditId(taskId);
 });
 
 const filteredTasks = (status: Task["status"]) => {

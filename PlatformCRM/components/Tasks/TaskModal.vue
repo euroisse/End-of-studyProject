@@ -83,8 +83,12 @@
             class="w-full border rounded-xl p-2 focus:outline-none bg-white text-gray-900 border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 text-sm"
           >
             <option disabled value="">-- Choisir un employé --</option>
-            <option v-for="emp in employees" :key="emp.id" :value="emp.id">
-              {{ emp.name }}
+            <option
+              v-for="emp in employees"
+              :key="emp.value"
+              :value="emp.value"
+            >
+              {{ emp.label }}
             </option>
           </select>
         </div>
@@ -98,6 +102,7 @@
         </div>
         <div class="mb-4">
           <input
+            hidden
             type="number"
             v-model.number="projectId"
             placeholder="ID du projet (optionnel)"
@@ -130,7 +135,7 @@ import { ref, onMounted } from "vue";
 import { useEmployeeStore } from "~/stores/employeeStore";
 import { useRoute } from "vue-router";
 
-import type { Employee, Task } from "~/types";
+import type { SelectOptions, Task } from "~/types";
 
 const emit = defineEmits(["close"]);
 const route = useRoute();
@@ -150,7 +155,7 @@ const effort = ref<number | null>(null);
 const projectId = ref<number | null>(null);
 const employeeId = ref<number | null>(null);
 
-const employees = ref<Employee[]>([]);
+const employees = ref<SelectOptions[]>([]);
 const newTask = ref({
   title: "",
   description: "",
@@ -169,18 +174,18 @@ onMounted(async () => {
 
 async function submitTask() {
   const taskData = {
-    title: newTask.value.title,
-    description: newTask.value.description,
-    priority: newTask.value.priority,
-    status: newTask.value.status,
-    effort: newTask.value.effort ?? undefined,
-    projectId: newTask.value.projectId,
-    employeeId: newTask.value.employeeId,
+    title: title.value,
+    description: description.value,
+    priority: priority.value,
+    status: status.value,
+    effort: effort.value ?? undefined,
+    projectId: projectId.value as number,
+    employeeId: employeeId.value as number,
   };
 
   console.log("Task data:", taskData);
 
-  await taskStore.createTask(taskData.value);
+  await taskStore.createTask(taskData);
 
   title.value = "";
   description.value = "";
