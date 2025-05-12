@@ -90,6 +90,11 @@ export type Task = {
   name: string
   email: string
 }
+
+export interface SelectOptions {
+  value: string | number
+  label: string
+}
 export interface State {
   tasks: Task[];
   selectedTaskIds: number[];
@@ -97,5 +102,8 @@ export interface State {
   assignedEmployeeId: number | null;
   taskStatuses: { label: string; value: Task['status'] }[];
   taskPriorities: { label: string; value: Task['priority'] }[];
- 
+  taskToEditId: number | null;
+  taskBeingEdited: Task | null | undefined;
 }
+
+export interface TaskUpdatePayload extends Omit<Partial<Task>, 'id' | 'employee' | 'project'> {}
