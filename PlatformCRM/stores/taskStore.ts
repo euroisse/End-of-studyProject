@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia';
-import type { Task, State } from '~/types/';
+import type { Task, State, TaskUpdatePayload } from '~/types/';
 
 export const useTaskStore = defineStore('task', {
   state: (): State => ({
     tasks: [],
     selectedTaskIds: [],
-    selectedProjectId: null, 
+    selectedProjectId: null,
     assignedEmployeeId: null,
     taskStatuses: [
       { label: 'To Do', value: 'A_FAIRE' },
@@ -17,14 +17,13 @@ export const useTaskStore = defineStore('task', {
       { label: 'Medium', value: 'MOYENNE' },
       { label: 'High', value: 'HAUTE' },
     ],
-    
-   
+    taskToEditId: null,
+    taskBeingEdited: null,
   }),
   actions: {
     async fetchTasks() {
-        const response = await $fetch<Task[]>('/api/Tasks/tasks');
-        this.tasks = response;
-      
+      const response = await $fetch<Task[]>('/api/Tasks/tasks');
+      this.tasks = response;
     },
     setTasks(newTasks: Task[]) {
       this.tasks = newTasks;
@@ -42,17 +41,32 @@ export const useTaskStore = defineStore('task', {
     setAssignedEmployee(employeeId: number | null) {
       this.assignedEmployeeId = employeeId;
     },
-    
-    async createTask(taskData: Omit<Task, 'id' | 'employee' | 'project'> & { projectId?: number; employeeId?: number }) {
-      
-      
-        const response = await $fetch<Task>('/api/Tasks/tasks', {
-          method: 'POST',
-          body: taskData,
-        });
-         this.tasks.push(response)
-     
+    setTaskToEditId(taskId: number | null) {
+      this.taskToEditId = taskId;
+      this.taskBeingEdited = this.tasks.find(task => task.id === taskId) || null;
     },
+    async createTask(taskData: Omit<Task, 'id' | 'employee' | 'project'> & { projectId?: number; employeeId?: number }) {
+      const response = await $fetch<Task>('/api/Tasks/tasks', {
+        method: 'POST',
+        body: taskData,
+      });
+      this.tasks.push(response);
+    },
+    async updateTask(taskId: number, payload: TaskUpdatePayload): Promise<Task | null> {
+      try {
+        const response = await $fetch<Task>(`/api/Tasks/${taskId}`, {
+          method: 'PATCH',
+          body: payload
+        });
+        const index = this.tasks.findIndex(task => task.id === taskId);
+        if (index !== -1) {
+          this.tasks[index] = { ...this.tasks[index], ...response };
+        }
+        return response;
+      } catch (error) {
+        console.error("Erreur lors de la mise à jour de la tâche", error);
+        return null;
+      }
+    }
   },
-
 });
