@@ -11,7 +11,7 @@
           Annuler
         </button>
         <button
-          @click="deleteTask"
+          @click="deleteTasks"
           class="bg-red-500 text-white px-4 py-2 rounded-xl hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
         >
           Supprimer
@@ -22,19 +22,21 @@
 </template>
 <script setup lang="ts">
 const taskStore = useTaskStore();
-defineProps({
+const props = defineProps({
   isOpen: {
     type: Boolean,
     required: true,
   },
+  taskIdToDelete: {
+    type: Number,
+    default: null,
+  },
 });
 const emit = defineEmits(["close"]);
-const taskToDeleteId = ref<number | null>(null);
 
-const deleteTask = async () => {
-  taskToDeleteId.value = null;
-  if (taskToDeleteId.value) {
-    await taskStore.deleteTask(taskToDeleteId.value);
+const deleteTasks = async () => {
+  if (props.taskIdToDelete !== null) {
+    await taskStore.deleteTask(props.taskIdToDelete);
     emit("close");
   }
 };
