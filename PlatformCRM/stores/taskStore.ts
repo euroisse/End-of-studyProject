@@ -72,7 +72,7 @@ export const useTaskStore = defineStore('task', {
     },
      async deleteTask(taskId: number): Promise<void> {
       try {
-      await $fetch(`/api/Tasks/tasks/${taskId}`, {
+      await $fetch(`/api/Tasks/${taskId}`, {
           method: 'DELETE',
         });
         this.tasks = this.tasks.filter(task => task.id !== taskId);
