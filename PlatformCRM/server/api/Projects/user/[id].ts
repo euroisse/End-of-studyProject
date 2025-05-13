@@ -2,7 +2,7 @@ import prisma from '~/server/database';
 
 export default defineEventHandler(async (event) => {
   // Récupérer l'ID de l'utilisateur connecté
-  const userId = parseInt(event.context.params?.id as string||'' );
+  const userId = parseInt(event.context.params?.id as string || '');
   if (!userId) {
     throw createError({
       statusCode: 401,
@@ -50,10 +50,14 @@ export default defineEventHandler(async (event) => {
         },
       });
     } else {
-      // Si l'utilisateur est un client, récupérer uniquement ses projets
+      // Si l'utilisateur est un employé, récupérer uniquement ses projets
       projects = await prisma.project.findMany({
         where: {
-          customerId: userId,
+          users: {
+            some: {
+              employeeId: userId,
+            },
+          },
         },
         include: {
           customer: true,
@@ -78,6 +82,3 @@ export default defineEventHandler(async (event) => {
     });
   }
 });
-
-
-

@@ -1,6 +1,6 @@
 <template>
   <main class="pt-10">
-    <ProjectNavbar :project="project" v-if="project" />
+    <ProjectNavbar v-if="project" />
     <div
       v-else
       class="text-center py-8 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
@@ -21,9 +21,17 @@
         </NuxtLink>
       </div>
     </div>
-    <div></div>
+    <div class="mt-8">
+      <button
+        @click="showCreateStageProject = true"
+        class="w-full flex items-center justify-center py-6 px-4 text-sm font-medium text-gray-500 dark:text-gray-400 rounded-md border border-dashed border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
+      >
+        <i class="ri-add-line mr-1"></i>
+        Ajouter une étape
+      </button>
+    </div>
     <AddModal
-      v-if="showCreateStageProject"
+      :is-open="showCreateStageProject"
       @close="showCreateStageProject = false"
       @stageAdded="stageAdded"
     />
@@ -58,6 +66,6 @@ onMounted(async () => {
   }
 });
 const stageAdded = async (newStage: ProjectStage) => {
-  showCreateStageProject.value = false;
+  showCreateStageProject.value = true;
 };
 </script>

@@ -70,34 +70,7 @@
 <script lang="ts" setup>
 import { ref, watch } from "vue";
 import { format } from "date-fns";
-
-interface User {
-  id: number;
-  name: string;
-  avatar?: string;
-}
-
-interface Project {
-  id: number;
-  name: string;
-}
-
-// Ajustement des types pour correspondre à votre modèle Prisma
-interface Task {
-  id: number;
-  title: string;
-  description: string;
-  project: Project;
-  projectId: number;
-  employee: User;
-  employeeId: number;
-  status: "A_FAIRE" | "EN_COURS" | "TERMINE";
-  priority: "BASSE" | "MOYENNE" | "HAUTE";
-  effort?: number;
-  createdAt: string;
-  updatedAt: string;
-  dueDate?: string;
-}
+import type { Task } from "~/types";
 
 const props = defineProps<{
   task: Task;

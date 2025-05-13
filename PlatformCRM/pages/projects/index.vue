@@ -18,7 +18,6 @@
       <ProjectsProjectCard
         v-for="project in filteredProjects"
         :key="project.id"
-        :project="project"
         :getStatusClass="getStatusClass"
       />
     </div>
@@ -34,46 +33,27 @@
 
 <script lang="ts" setup>
 import { ref, computed, onMounted } from "vue";
+import { useProjectStore } from "~/stores/projectStore";
 
 definePageMeta({
   layout: "admin",
 });
 
-type ProjectStatus = "EN_COURS" | "A_VENIR" | "TERMINE" | "EN_ATTENTE";
+const projectStore = useProjectStore();
+const projects = computed(() => projectStore.projects);
 
-interface Project {
-  id: number;
-  title: string;
-  status: ProjectStatus;
-  customerId: number;
-  customer?: {
-    name: string;
-  };
-  projectStages: {
-    id: number;
-    name: string;
-    status: string;
-    order: number;
-  }[];
-  users: {
-    employee: {
-      id: number;
-      name: string;
-    };
-  }[];
-  updatedAt: Date;
-}
+type ProjectStatus = "EN_COURS" | "A_VENIR" | "TERMINE" | "EN_ATTENTE";
 
 const { isAdmin } = useIsRole();
 const searchQuery = ref("");
 const showStatusFilter = ref(false);
 const showDateFilter = ref(false);
-const projects = ref<Project[]>([]);
 const loading = ref(true);
 const error = ref<any>(null);
 
 onMounted(async () => {
   const userString = localStorage.getItem("user");
+  console.log("User from localStorage:", userString);
   if (!userString) {
     error.value = {
       message: "Utilisateur non connecté. Veuillez vous connecter.",
@@ -87,11 +67,12 @@ onMounted(async () => {
     const userId = user.id;
     const userRole = user.role;
 
-    const data = await $fetch<Project[]>(
-      userRole === "ADMIN" ? "/api/Projects" : `/api/Projects/user/${userId}`
-    );
-
-    projects.value = data;
+    loading.value = true;
+    if (userRole === "ADMIN") {
+      await projectStore.fetchProjects();
+    } else if (userRole === "EMPLOYEE") {
+      await projectStore.fetchUserProjects(userId);
+    }
     loading.value = false;
   } catch (err: any) {
     error.value = err;

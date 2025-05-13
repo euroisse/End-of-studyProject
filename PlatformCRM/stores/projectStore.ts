@@ -43,7 +43,11 @@ export const useProjectStore = defineStore('projects', {
         }
       }
     },
-   
+    
+    async fetchUserProjects(userId: number) { 
+      const response = await $fetch<Project[]>(`/api/Projects/user/${userId}`);
+      this.projects = response;
+    },
     async deleteProjectStage(stageId: number) {
       await $fetch(`/api/projectStage/${stageId}`, {
         method: 'DELETE',

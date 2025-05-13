@@ -1,7 +1,6 @@
 import type { Prisma, User } from "~/generated/prisma";
 
 
-// types/index.ts
 export interface Conversation {
     id: number;
     name: string;

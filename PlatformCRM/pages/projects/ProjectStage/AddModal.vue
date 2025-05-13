@@ -1,5 +1,6 @@
 <template>
   <div
+    v-if="isOpen"
     class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 z-50 flex items-center justify-center"
   >
     <div
@@ -94,7 +95,12 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import type { ProjectStage } from "~/generated/prisma";
-
+defineProps({
+  isOpen: {
+    type: Boolean,
+    required: true,
+  },
+});
 const route = useRoute();
 const projectId = computed(() => Number(route.params.id) ?? null);
 
