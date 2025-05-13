@@ -19,6 +19,7 @@ export const useTaskStore = defineStore('task', {
     ],
     taskToEditId: null,
     taskBeingEdited: null,
+    
   }),
   actions: {
     async fetchTasks() {
@@ -45,6 +46,7 @@ export const useTaskStore = defineStore('task', {
       this.taskToEditId = taskId;
       this.taskBeingEdited = this.tasks.find(task => task.id === taskId) || null;
     },
+ 
     async createTask(taskData: Omit<Task, 'id' | 'employee' | 'project'> & { projectId?: number; employeeId?: number }) {
       const response = await $fetch<Task>('/api/Tasks/tasks', {
         method: 'POST',
@@ -67,6 +69,17 @@ export const useTaskStore = defineStore('task', {
         console.error("Erreur lors de la mise à jour de la tâche", error);
         return null;
       }
-    }
+    },
+     async deleteTask(taskId: number): Promise<void> {
+      try {
+      await $fetch(`/api/Tasks/tasks/${taskId}`, {
+          method: 'DELETE',
+        });
+        this.tasks = this.tasks.filter(task => task.id !== taskId);
+       
+      } catch (error) {
+        console.error("Erreur lors de la suppression de la tâche", error);
+      }
+    },
   },
 });
