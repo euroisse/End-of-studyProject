@@ -80,7 +80,7 @@ export type Task = {
   projectId: number;
   employeeId?: number | null;
   priority: 'BASSE' | 'MOYENNE' | 'HAUTE';
-  status: 'A_FAIRE' | 'EN_COURS' | 'TERMINE';
+  status: 'A_FAIRE' | 'EN_COURS' | 'TERMINE'| 'ANNULE'| 'EN_ATTENTE';
   effort?: number | null;
   employee?: { id: number; name: string } | null; 
   project?: { id: number; name: string } | null; }
@@ -104,6 +104,8 @@ export interface State {
   taskPriorities: { label: string; value: Task['priority'] }[];
   taskToEditId: number | null;
   taskBeingEdited: Task | null | undefined;
+  
 }
 
 export interface TaskUpdatePayload extends Omit<Partial<Task>, 'id' | 'employee' | 'project'> {}
+export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'WAITING' | 'DONE' | 'CANCELLED'
