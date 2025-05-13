@@ -197,6 +197,7 @@
   <TasksDeleteTasks
     :is-open="isDeleteConfirmationOpen"
     @close="isDeleteConfirmationOpen = false"
+    :task-id-to-delete="taskToDeleteId"
   />
 </template>
 
@@ -212,7 +213,7 @@ const { tasks } = storeToRefs(taskStore);
 const isModalOpen = ref(false);
 const isEditModalOpen = ref(false);
 const isDeleteConfirmationOpen = ref(false);
-const taskToDeleteId = ref<number | null>(null);
+const taskToDeleteId = ref();
 onMounted((taskId: number) => {
   taskStore.fetchTasks();
   taskStore.setTaskToEditId(taskId);
