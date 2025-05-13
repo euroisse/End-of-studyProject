@@ -156,15 +156,7 @@ const projectId = ref<number | null>(null);
 const employeeId = ref<number | null>(null);
 
 const employees = ref<SelectOptions[]>([]);
-const newTask = ref({
-  title: "",
-  description: "",
-  status: "A_FAIRE",
-  priority: "MOYENNE",
-  projectId: null,
-  effort: null,
-  employeeId: null,
-});
+
 onMounted(async () => {
   await employeeStore.fetchEmployees();
   employees.value = employeeStore.employees;

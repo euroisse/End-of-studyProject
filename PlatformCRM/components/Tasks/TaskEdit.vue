@@ -175,6 +175,6 @@ async function updateTask() {
 
 function closeModal() {
   emit("close");
-  taskStore.setTaskToEditId(null); // Réinitialiser l'ID lors de la fermeture
+  taskStore.setTaskToEditId(null);
 }
 </script>

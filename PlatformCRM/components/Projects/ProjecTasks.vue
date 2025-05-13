@@ -172,20 +172,32 @@
             </span>
           </div>
         </div>
-        <button
-          class="text-gray-400 hover:text-blue-600 focus:outline-none"
-          @click="
-            taskStore.setTaskToEditId(task.id);
-            isEditModalOpen = true;
-          "
-        >
-          <i class="ri-pencil-line"></i>
-        </button>
+        <div class="flex flex-col items-end">
+          <button
+            class="text-gray-400 hover:text-blue-600 focus:outline-none"
+            @click="
+              taskStore.setTaskToEditId(task.id);
+              isEditModalOpen = true;
+            "
+          >
+            <i class="ri-pencil-line"></i>
+          </button>
+          <button
+            class="text-gray-400 hover:text-red-600 focus:outline-none"
+            @click="prepareDeleteTask(task.id)"
+          >
+            <i class="ri-delete-bin-line"></i>
+          </button>
+        </div>
       </div>
     </div>
   </div>
   <TaskModal :is-open="isModalOpen" @close="isModalOpen = false" />
   <TasksTaskEdit :is-open="isEditModalOpen" @close="isEditModalOpen = false" />
+  <TasksDeleteTasks
+    :is-open="isDeleteConfirmationOpen"
+    @close="isDeleteConfirmationOpen = false"
+  />
 </template>
 
 <script setup lang="ts">
@@ -199,6 +211,8 @@ const taskStore = useTaskStore();
 const { tasks } = storeToRefs(taskStore);
 const isModalOpen = ref(false);
 const isEditModalOpen = ref(false);
+const isDeleteConfirmationOpen = ref(false);
+const taskToDeleteId = ref<number | null>(null);
 onMounted((taskId: number) => {
   taskStore.fetchTasks();
   taskStore.setTaskToEditId(taskId);
@@ -206,6 +220,10 @@ onMounted((taskId: number) => {
 
 const filteredTasks = (status: Task["status"]) => {
   return tasks.value.filter((task) => task.status === status);
+};
+const prepareDeleteTask = (taskId: number) => {
+  taskToDeleteId.value = taskId;
+  isDeleteConfirmationOpen.value = true;
 };
 </script>
 
