@@ -45,10 +45,12 @@ export interface Invoice {
       
 };}
 
+export type ProjectStatus = "EN_COURS" | "A_VENIR" | "TERMINE" | "EN_ATTENTE";
+
 export interface Project {
   id: number;
   title: string;
-  status: "EN_COURS" | "A_VENIR" | "TERMINE" | "EN_ATTENTE";
+  status: ProjectStatus;
   customerId: number;
   customer?: {
     name: string;
@@ -57,12 +59,13 @@ export interface Project {
     id: number;
     name: string;
     status: string;
+    order: number;
   }[];
   users: {
     employee: {
       id: number;
       name: string;
-      email: string
+      email: string;
     };
   }[];
   updatedAt: Date;
