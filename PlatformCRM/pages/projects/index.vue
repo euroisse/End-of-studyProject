@@ -18,6 +18,7 @@
       <ProjectsProjectCard
         v-for="project in filteredProjects"
         :key="project.id"
+        :project="project"
         :getStatusClass="getStatusClass"
       />
     </div>
@@ -33,27 +34,21 @@
 
 <script lang="ts" setup>
 import { ref, computed, onMounted } from "vue";
-import { useProjectStore } from "~/stores/projectStore";
-
+import type { Project, ProjectStatus } from "~/types";
 definePageMeta({
   layout: "admin",
 });
-
-const projectStore = useProjectStore();
-const projects = computed(() => projectStore.projects);
-
-type ProjectStatus = "EN_COURS" | "A_VENIR" | "TERMINE" | "EN_ATTENTE";
 
 const { isAdmin } = useIsRole();
 const searchQuery = ref("");
 const showStatusFilter = ref(false);
 const showDateFilter = ref(false);
+const projects = ref<Project[]>([]);
 const loading = ref(true);
 const error = ref<any>(null);
 
 onMounted(async () => {
   const userString = localStorage.getItem("user");
-  console.log("User from localStorage:", userString);
   if (!userString) {
     error.value = {
       message: "Utilisateur non connecté. Veuillez vous connecter.",
@@ -67,12 +62,11 @@ onMounted(async () => {
     const userId = user.id;
     const userRole = user.role;
 
-    loading.value = true;
-    if (userRole === "ADMIN") {
-      await projectStore.fetchProjects();
-    } else if (userRole === "EMPLOYEE") {
-      await projectStore.fetchUserProjects(userId);
-    }
+    const data = await $fetch<Project[]>(
+      userRole === "ADMIN" ? "/api/Projects" : `/api/Projects/user/${userId}`
+    );
+
+    projects.value = data;
     loading.value = false;
   } catch (err: any) {
     error.value = err;
