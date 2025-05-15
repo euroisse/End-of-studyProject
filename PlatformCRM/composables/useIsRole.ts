@@ -20,7 +20,7 @@ export const useIsRole = () => {
   });
 
   const isEmploye = computed(() => {
-    return user.value?.roles?.includes('employe') ?? false;
+    return user.value?.roles?.includes('employee') ?? false;
   });
 
   const isClient = computed(() => {
@@ -34,11 +34,15 @@ export const useIsRole = () => {
   const userName = computed(() => {
     return user.value?.name ?? null;
   });
-
+const loggedInEmployeeId = computed(() => {
+    return user.value?.employeeId ?? null;
+  });
+  console.log(loggedInEmployeeId.value);
   return {
     isEmploye,
     isClient,
     isAdmin,
     userName,
+    loggedInEmployeeId,
   };
 };
