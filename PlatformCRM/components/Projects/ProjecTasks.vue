@@ -5,11 +5,15 @@
         <div>
           <div class="flex items-center space-x-2 text-sm">
             <span class="text-gray-500 pb-2">Projets /</span>
-            <h2 class="text-2xl font-bold text-gray-800">Gestion des Tâches</h2>
+            <h2 v-if="isAdmin" class="text-2xl font-bold text-gray-800">
+              Gestion des Tâches
+            </h2>
+            <h2 class="text-2xl font-bold text-gray-800">Mes Tâches</h2>
           </div>
         </div>
         <div>
           <button
+            v-if="isAdmin"
             @click="isModalOpen = true"
             class="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
           >
@@ -148,7 +152,7 @@
               >
             </span>
             <span v-if="task.effort !== null" class="mr-4">
-              Effort : <strong>{{ task.effort }}</strong></span
+              Effort : <strong>{{ task.effort }} h</strong></span
             >
             <span v-if="task.employee">
               Assigné à : <strong> 👤 {{ task.employee.name }}</strong></span
@@ -170,9 +174,19 @@
             >
               {{ task.status }}
             </span>
+            <select
+              v-if="!isAdmin && task.employee?.id === loggedInEmployeeId"
+              v-model="task.status"
+              @change="updateTaskStatus(task.id, task.status)"
+              class="ml-4 text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            >
+              <option value="A_FAIRE">À Faire</option>
+              <option value="EN_COURS">En Cours</option>
+              <option value="TERMINE">Terminé</option>
+            </select>
           </div>
         </div>
-        <div class="flex flex-col items-end">
+        <div v-if="isAdmin" class="flex flex-col items-end">
           <button
             class="text-gray-400 hover:text-blue-600 focus:outline-none"
             @click="
@@ -207,6 +221,7 @@ import { storeToRefs } from "pinia";
 import { onMounted } from "vue";
 import type { Task } from "~/types";
 import TaskModal from "../Tasks/TaskModal.vue";
+const { isAdmin, loggedInEmployeeId } = useIsRole();
 
 const taskStore = useTaskStore();
 const { tasks } = storeToRefs(taskStore);
@@ -217,6 +232,10 @@ const taskToDeleteId = ref();
 onMounted((taskId: number) => {
   taskStore.fetchTasks();
   taskStore.setTaskToEditId(taskId);
+  console.log(
+    "ProjecTasks.vue: ID de l'employé connecté:",
+    loggedInEmployeeId.value
+  );
 });
 
 const filteredTasks = (status: Task["status"]) => {
@@ -225,6 +244,16 @@ const filteredTasks = (status: Task["status"]) => {
 const prepareDeleteTask = (taskId: number) => {
   taskToDeleteId.value = taskId;
   isDeleteConfirmationOpen.value = true;
+};
+const updateTaskStatus = async (taskId: number, newStatus: Task["status"]) => {
+  try {
+    await taskStore.updateTaskStatus(taskId, newStatus);
+  } catch (error) {
+    console.error(
+      "Erreur lors de la mise à jour du statut de la tâche:",
+      error
+    );
+  }
 };
 </script>
 

@@ -53,7 +53,7 @@
 
             <div class="flex justify-between items-center">
               <p class="text-gray-500">{{ step.description }}</p>
-              <div class="flex space-x-2">
+              <div v-if="isAdmin" class="flex space-x-2">
                 <i
                   class="ri-pencil-line text-gray-600 cursor-pointer hover:text-indigo-600"
                   @click="editProjectStage(step)"
@@ -89,7 +89,7 @@ import ProjectStageModal from "./ProjectStageModal.vue";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useProjectStore } from "~/stores/projectStore";
-
+const { isAdmin } = useIsRole();
 const emit = defineEmits(["refreshStages"]);
 const projectStore = useProjectStore();
 const showModal = ref(false);

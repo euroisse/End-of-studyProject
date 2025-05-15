@@ -18,6 +18,7 @@
         </div>
         <div>
           <button
+            v-if="isAdmin"
             class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 flex items-center !rounded-button whitespace-nowrap"
             @click="openEditModal"
           >
@@ -104,6 +105,7 @@ import { ref, computed } from "vue";
 
 import ProjectEditModal from "~/components/ProjectModal/ProjectEditModal.vue";
 import ProjecTasks from "./ProjecTasks.vue";
+const { isAdmin } = useIsRole();
 const projectStages = computed(
   () => projectStore.selectedProject?.projectStages || []
 );
