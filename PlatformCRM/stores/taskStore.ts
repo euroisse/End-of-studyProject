@@ -81,5 +81,24 @@ export const useTaskStore = defineStore('task', {
         console.error("Erreur lors de la suppression de la tâche", error);
       }
     },
-  },
+
+     async updateTaskStatus(taskId: number, newStatus: Task['status']) {
+      try {
+        const response = await $fetch<Task>(`/api/tasks/${taskId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ status: newStatus }),
+        });
+        const taskIndex = this.tasks.findIndex(task => task.id === taskId);
+        if (taskIndex !== -1) {
+          this.tasks[taskIndex].status = newStatus;
+        }
+        return response
+      } catch (error: any) {
+        console.error('Erreur lors de la mise à jour du statut de la tâche:', error.message);
+        throw error; 
+      }
+    },}
 });
