@@ -1,18 +1,15 @@
 <template>
   <div class="p-8 overflow-x-hidden container">
     <div class="flex justify-between items-center mb-8">
-      <h1 v-if="isEmploye" class="text-2xl font-bold text-gray-800">
-        Gestion des devis
+      <h1 class="text-2xl font-bold text-gray-800">
+        {{ isAdmin ? "Gestion des devis" : "Mes devis" }}
       </h1>
-      <h1 v-else class="text-2xl font-bold text-gray-800">Mes devis</h1>
-      <div class="flex items-center space-x-4">
+      <div v-if="isAdmin">
         <button
-          v-if="isEmploye"
           @click="showCreateQuote = true"
-          class="bg-indigo-500 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-md transition-all whitespace-nowrap cursor-pointer !rounded-button"
+          class="bg-indigo-500 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-md"
         >
-          <i class="ri-add-line mr-2"></i>
-          Créer un devis
+          <i class="ri-add-line mr-2"></i> Créer un devis
         </button>
       </div>
     </div>
@@ -27,14 +24,15 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { ref } from "vue";
 import PreviewQuoteModal from "~/components/quotes/PreviewQuoteModal.vue";
+import QuotesQuoteList from "~/components/quotes/QuoteList.vue";
 
-definePageMeta({
-  layout: "admin",
-});
-const { isEmploye } = useIsRole();
+definePageMeta({ layout: "admin" });
+
+const { isAdmin } = useIsRole();
+
 const showCreateQuote = ref(false);
 const showPreview = ref(false);
 const selectedQuote = ref(null);
@@ -44,5 +42,3 @@ const previewQuote = (quote: any) => {
   showPreview.value = true;
 };
 </script>
-
-<style scoped></style>
