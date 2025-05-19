@@ -34,6 +34,7 @@ model User {
   company        String?
   industry       String?
   clientProjects Project[]            @relation("CustomerProjects")
+  clientQuote    Quote[]
 
   // Role management
   UserRole UserRole[]
@@ -69,6 +70,7 @@ model Project {
   title         String
   description   String?
   users         EmployeeOnProjects[]
+  projectQuote  Quote[]
   projectStages ProjectStage[]
   tasks         Tasks[]              @relation("ProjectTasks")
   startDate     DateTime             @default(now()) @map("start_date")
@@ -90,6 +92,7 @@ model ProjectStage {
   projectId   Int
   title       String
   description String?
+  stages      cout_stage[]
   status      ProjectStageStatus @default(A_VENIR)
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
@@ -128,4 +131,32 @@ enum TaskPriority {
   BASSE
   MOYENNE
   HAUTE
+}
+
+model Quote {
+  id         Int          @id @default(autoincrement())
+  number     String       @unique
+  status     quoteStatus  @default(ACCEPTE)
+  customer   User         @relation(fields: [customerId], references: [id])
+  customerId Int
+  project    Project      @relation(fields: [projectId], references: [id])
+  projectId  Int
+  stages     cout_stage[]
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+}
+
+model cout_stage {
+  quoteId        Int
+  projectStageId Int
+  quote          Quote        @relation(fields: [quoteId], references: [id])
+  projectStage   ProjectStage @relation(fields: [projectStageId], references: [id])
+  prix           Float
+
+  @@id([quoteId, projectStageId])
+}
+
+enum quoteStatus {
+  ACCEPTE
+  REFUSE
 }
