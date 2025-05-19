@@ -80,6 +80,21 @@
       @save="handleSaveProjectStage"
     />
   </div>
+  <div class="mt-8">
+    <button
+      v-if="isAdmin"
+      @click="showCreateStageProject = true"
+      class="w-full flex items-center justify-center py-6 px-4 text-sm font-medium text-gray-500 dark:text-gray-400 rounded-md border border-dashed border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
+    >
+      <i class="ri-add-line mr-1"></i>
+      Ajouter une étape
+    </button>
+  </div>
+  <AddModal
+    :is-open="showCreateStageProject"
+    @close="showCreateStageProject = false"
+    @stageAdded="stageAdded"
+  />
 </template>
 
 <script setup lang="ts">
@@ -89,12 +104,13 @@ import ProjectStageModal from "./ProjectStageModal.vue";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useProjectStore } from "~/stores/projectStore";
+import AddModal from "~/pages/projects/ProjectStage/AddModal.vue";
 const { isAdmin } = useIsRole();
 const emit = defineEmits(["refreshStages"]);
 const projectStore = useProjectStore();
 const showModal = ref(false);
 const selectedProjectStage = ref<ProjectStage | null>(null);
-
+const showCreateStageProject = ref(false);
 const getStatusText = (status: ProjectStageStatus) => {
   return (
     {
@@ -159,24 +175,27 @@ const deleteProjectStage = async (id: number) => {
     }
   }
 };
+const stageAdded = async (newStage: ProjectStage) => {
+  showCreateStageProject.value = true;
+};
 </script>
 
 <style scoped>
 .bg-a-venir {
-  background-color: #e5e7eb; /* Gris clair */
-  color: #4b5563; /* Gris moyen */
+  background-color: #e5e7eb;
+  color: #4b5563;
 }
 
 .text-a-venir {
-  color: #4b5563; /* Gris moyen */
+  color: #4b5563;
 }
 
 .bg-en-attente {
-  background-color: #fef08a; /* Jaune clair */
-  color: #a16207; /* Jaune foncé */
+  background-color: #fef08a;
+  color: #a16207;
 }
 
 .text-en-attente {
-  color: #a16207; /* Jaune foncé */
+  color: #a16207;
 }
 </style>

@@ -23,7 +23,7 @@ export const useTaskStore = defineStore('task', {
   }),
   actions: {
     async fetchTasks() {
-      const response = await $fetch<Task[]>('/api/Tasks/tasks');
+      const response = await $fetch<Task[]>('/api/Tasks/tasks?_expand=project');
       this.tasks = response;
     },
     setTasks(newTasks: Task[]) {
@@ -63,6 +63,7 @@ export const useTaskStore = defineStore('task', {
         const index = this.tasks.findIndex(task => task.id === taskId);
         if (index !== -1) {
           this.tasks[index] = { ...this.tasks[index], ...response };
+          
         }
         return response;
       } catch (error) {
@@ -84,11 +85,8 @@ export const useTaskStore = defineStore('task', {
 
      async updateTaskStatus(taskId: number, newStatus: Task['status']) {
       try {
-        const response = await $fetch<Task>(`/api/tasks/${taskId}`, {
+        const response = await $fetch<Task>(`/api/Tasks/status/${taskId}`, {
           method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
           body: JSON.stringify({ status: newStatus }),
         });
         const taskIndex = this.tasks.findIndex(task => task.id === taskId);

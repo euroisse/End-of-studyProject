@@ -151,7 +151,6 @@ const employeMenu: MenuItem[] = [
       { label: "Devis", to: "/devis" },
     ],
   },
-  { label: "Tâches", to: "/taches", icon: "ri-task-line" },
   {
     label: "Messages",
     to: "/messages",
@@ -188,14 +187,17 @@ const clientMenu: MenuItem[] = [
 ];
 
 const adminMenu: MenuItem[] = [
-  {
-    label: "Tableau de bord",
-    to: "/dashboard",
-    icon: "ri-dashboard-line",
-  },
   { label: "Projets", to: "/projects", icon: "ri-projector-2-line" },
   { label: "Clients", to: "/clients", icon: "ri-user-3-line" },
   { label: "Déconnexion", icon: "ri-logout-box-line" },
+  {
+    label: "Factures & Devis",
+    icon: "ri-file-line",
+    children: [
+      { label: "Factures", to: "/factures" },
+      { label: "Devis", to: "/devis" },
+    ],
+  },
 ];
 
 const currentMenuItems = computed<MenuItem[]>(() => {

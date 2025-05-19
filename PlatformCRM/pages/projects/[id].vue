@@ -21,35 +21,17 @@
         </NuxtLink>
       </div>
     </div>
-    <div class="mt-8">
-      <button
-        v-if="isAdmin"
-        @click="showCreateStageProject = true"
-        class="w-full flex items-center justify-center py-6 px-4 text-sm font-medium text-gray-500 dark:text-gray-400 rounded-md border border-dashed border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
-      >
-        <i class="ri-add-line mr-1"></i>
-        Ajouter une étape
-      </button>
-    </div>
-    <AddModal
-      :is-open="showCreateStageProject"
-      @close="showCreateStageProject = false"
-      @stageAdded="stageAdded"
-    />
   </main>
 </template>
 
 <script setup lang="ts">
 import ProjectNavbar from "~/components/Projects/ProjectNavbar.vue";
-import type { ProjectStage } from "~/generated/prisma";
-const { isAdmin } = useIsRole();
 import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 
-import AddModal from "./ProjectStage/AddModal.vue";
 import { useProjectStore } from "~/stores/projectStore";
 definePageMeta({ layout: "admin" });
-const showCreateStageProject = ref(false);
+
 const projectStore = useProjectStore();
 
 const route = useRoute();
@@ -66,7 +48,4 @@ onMounted(async () => {
     console.error("Erreur lors de la récupération des détails du projet:", err);
   }
 });
-const stageAdded = async (newStage: ProjectStage) => {
-  showCreateStageProject.value = true;
-};
 </script>

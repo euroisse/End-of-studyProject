@@ -8,7 +8,9 @@
             <h2 v-if="isAdmin" class="text-2xl font-bold text-gray-800">
               Gestion des Tâches
             </h2>
-            <h2 class="text-2xl font-bold text-gray-800">Mes Tâches</h2>
+            <h2 v-if="isEmploye" class="text-2xl font-bold text-gray-800">
+              Mes Tâches
+            </h2>
           </div>
         </div>
         <div>
@@ -126,93 +128,113 @@
     </div>
 
     <div
-      v-if="tasks.length > 0"
-      class="mt-8 grid w-full grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6 my-8"
-    >
-      <div
-        v-for="task in tasks"
-        :key="task.id"
-        class="bg-white w-full rounded-xl shadow-md p-4 flex justify-between items-start"
-      >
-        <div>
-          <h4 class="text-lg font-semibold text-gray-800 mb-2">
-            {{ task.title }}
-          </h4>
-          <p class="text-sm text-gray-600 mb-2">{{ task.description }}</p>
-          <div class="flex items-center text-sm mb-2">
-            <span class="mr-4">
-              Priorité :
-              <strong
-                :class="{
-                  'text-red-500': task.priority === 'HAUTE',
-                  'text-yellow-500': task.priority === 'MOYENNE',
-                  'text-green-500': task.priority === 'BASSE',
-                }"
-                >{{ task.priority }}</strong
+      class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 my-8"
+    ></div>
+
+    <div v-if="tasksByProject.length > 0" class="mt-8 space-y-6">
+      <div v-for="projectGroup in tasksByProject" :key="projectGroup.projectId">
+        <h2 v-if="isEmploye" class="text-xl font-semibold text-gray-800 mb-4">
+          {{
+            projectGroup.projectName || `Projet ID: ${projectGroup.projectId}`
+          }}
+        </h2>
+        <div
+          class="grid w-full grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6"
+        >
+          <div
+            v-for="task in projectGroup.tasks"
+            :key="task.id"
+            class="bg-white w-full rounded-xl shadow-md p-4 flex justify-between items-start"
+          >
+            <div>
+              <h4 class="text-lg font-semibold text-gray-800 mb-2">
+                {{ task.title }}
+              </h4>
+              <p class="text-sm text-gray-600 mb-2">{{ task.description }}</p>
+              <div class="flex items-center text-sm mb-2">
+                <span class="mr-4">
+                  Priorité :
+                  <strong
+                    :class="{
+                      'text-red-500': task.priority === 'HAUTE',
+                      'text-yellow-500': task.priority === 'MOYENNE',
+                      'text-green-500': task.priority === 'BASSE',
+                    }"
+                    >{{ task.priority }}</strong
+                  >
+                </span>
+                <span v-if="task.effort !== null" class="mr-4">
+                  Effort : <strong>{{ task.effort }} h</strong></span
+                >
+                <span v-if="task.employee">
+                  Assigné à :
+                  <strong> 👤 {{ task.employee.name }}</strong></span
+                >
+              </div>
+              <div class="text-xs text-gray-500">
+                ID du Projet : {{ task.projectId }}
+              </div>
+              <div class="mt-2">
+                <span
+                  class="inline-flex items-center justify-center px-3 py-2 text-xs font-bold rounded-full"
+                  :class="[
+                    task.status === 'A_FAIRE'
+                      ? 'bg-gray-200 text-gray-700'
+                      : '',
+                    task.status === 'EN_COURS'
+                      ? 'bg-yellow-200 text-yellow-700'
+                      : '',
+                    task.status === 'TERMINE'
+                      ? 'bg-green-200 text-green-700'
+                      : '',
+                  ]"
+                >
+                  {{ task.status }}
+                </span>
+                <select
+                  v-if="isEmploye"
+                  v-model="task.status"
+                  @change="updateTaskStatus(task.id, task.status)"
+                  class="ml-4 text-sm rounded-md border-gray-300 bg-white px-3 py-2 shadow-md focus:border-indigo-500 focus:ring-indigo-500"
+                >
+                  <option value="A_FAIRE">À Faire</option>
+                  <option value="EN_COURS">En Cours</option>
+                  <option value="TERMINE">Terminé</option>
+                </select>
+              </div>
+            </div>
+            <div v-if="isAdmin" class="flex flex-col items-end">
+              <button
+                class="text-gray-400 hover:text-blue-600 focus:outline-none"
+                @click="
+                  taskStore.setTaskToEditId(task.id);
+                  isEditModalOpen = true;
+                "
               >
-            </span>
-            <span v-if="task.effort !== null" class="mr-4">
-              Effort : <strong>{{ task.effort }} h</strong></span
-            >
-            <span v-if="task.employee">
-              Assigné à : <strong> 👤 {{ task.employee.name }}</strong></span
-            >
+                <i class="ri-pencil-line"></i>
+              </button>
+              <button
+                class="text-gray-400 hover:text-red-600 focus:outline-none"
+                @click="prepareDeleteTask(task.id)"
+              >
+                <i class="ri-delete-bin-line"></i>
+              </button>
+            </div>
           </div>
-          <div class="text-xs text-gray-500">
-            ID du Projet : {{ task.projectId }}
-          </div>
-          <div class="mt-2">
-            <span
-              class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold rounded-full"
-              :class="[
-                task.status === 'A_FAIRE' ? 'bg-gray-200 text-gray-700' : '',
-                task.status === 'EN_COURS'
-                  ? 'bg-yellow-200 text-yellow-700'
-                  : '',
-                task.status === 'TERMINE' ? 'bg-green-200 text-green-700' : '',
-              ]"
-            >
-              {{ task.status }}
-            </span>
-            <select
-              v-if="!isAdmin && task.employee?.id === loggedInEmployeeId"
-              v-model="task.status"
-              @change="updateTaskStatus(task.id, task.status)"
-              class="ml-4 text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            >
-              <option value="A_FAIRE">À Faire</option>
-              <option value="EN_COURS">En Cours</option>
-              <option value="TERMINE">Terminé</option>
-            </select>
-          </div>
-        </div>
-        <div v-if="isAdmin" class="flex flex-col items-end">
-          <button
-            class="text-gray-400 hover:text-blue-600 focus:outline-none"
-            @click="
-              taskStore.setTaskToEditId(task.id);
-              isEditModalOpen = true;
-            "
-          >
-            <i class="ri-pencil-line"></i>
-          </button>
-          <button
-            class="text-gray-400 hover:text-red-600 focus:outline-none"
-            @click="prepareDeleteTask(task.id)"
-          >
-            <i class="ri-delete-bin-line"></i>
-          </button>
         </div>
       </div>
     </div>
+    <TaskModal :is-open="isModalOpen" @close="isModalOpen = false" />
+    <TasksTaskEdit
+      :is-open="isEditModalOpen"
+      @close="isEditModalOpen = false"
+    />
+    <TasksDeleteTasks
+      :is-open="isDeleteConfirmationOpen"
+      @close="isDeleteConfirmationOpen = false"
+      :task-id-to-delete="taskToDeleteId"
+    />
   </div>
-  <TaskModal :is-open="isModalOpen" @close="isModalOpen = false" />
-  <TasksTaskEdit :is-open="isEditModalOpen" @close="isEditModalOpen = false" />
-  <TasksDeleteTasks
-    :is-open="isDeleteConfirmationOpen"
-    @close="isDeleteConfirmationOpen = false"
-    :task-id-to-delete="taskToDeleteId"
-  />
 </template>
 
 <script setup lang="ts">
@@ -221,7 +243,7 @@ import { storeToRefs } from "pinia";
 import { onMounted } from "vue";
 import type { Task } from "~/types";
 import TaskModal from "../Tasks/TaskModal.vue";
-const { isAdmin, loggedInEmployeeId } = useIsRole();
+const { isAdmin, isEmploye } = useIsRole();
 
 const taskStore = useTaskStore();
 const { tasks } = storeToRefs(taskStore);
@@ -232,12 +254,30 @@ const taskToDeleteId = ref();
 onMounted((taskId: number) => {
   taskStore.fetchTasks();
   taskStore.setTaskToEditId(taskId);
-  console.log(
-    "ProjecTasks.vue: ID de l'employé connecté:",
-    loggedInEmployeeId.value
-  );
 });
+const getProjectName = (projectId: number): string | undefined => {
+  //  faire une recherche dans une liste de projets.
+  const task = tasks.value.find(
+    (t) => t.projectId === projectId && t.project?.title
+  );
+  return task?.project?.title;
+};
+const tasksByProject = computed(() => {
+  const groupedTasks: { [projectId: number]: Task[] } = {};
+  tasks.value.forEach((task) => {
+    if (!groupedTasks[task.projectId]) {
+      groupedTasks[task.projectId] = [];
+    }
+    groupedTasks[task.projectId].push(task);
+  });
 
+  // Convertir l'objet en tableau pour pouvoir itérer dans la template
+  return Object.entries(groupedTasks).map(([projectId, projectTasks]) => ({
+    projectId: parseInt(projectId),
+    projectName: getProjectName(parseInt(projectId)),
+    tasks: projectTasks,
+  }));
+});
 const filteredTasks = (status: Task["status"]) => {
   return tasks.value.filter((task) => task.status === status);
 };

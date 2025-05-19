@@ -85,7 +85,7 @@ export type Task = {
   status: 'A_FAIRE' | 'EN_COURS' | 'TERMINE'| 'ANNULE'| 'EN_ATTENTE';
   effort?: number | null;
   employee?: { id: number; name: string } | null; 
-  project?: { id: number; name: string } | null; }
+  project?: { id: number; name: string; title:string } | null; }
 
   export interface Employee {
   id: number
