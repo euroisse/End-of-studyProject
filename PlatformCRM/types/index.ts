@@ -111,3 +111,8 @@ export interface State {
 
 export interface TaskUpdatePayload extends Omit<Partial<Task>, 'id' | 'employee' | 'project'> {}
 export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'WAITING' | 'DONE' | 'CANCELLED'
+
+export interface QuoteStageInput {
+  projectStageId: number;
+  prix: number;
+}
