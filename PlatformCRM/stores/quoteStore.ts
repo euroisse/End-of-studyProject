@@ -1,0 +1,95 @@
+import { defineStore } from 'pinia';
+
+import { ref } from 'vue';
+
+import type { quote } from '~/types';
+
+export const useDevisStore = defineStore('devis', () => {
+  const quote: Ref<quote | null> = ref(null);
+  const quoteDetails: Ref<quote | null> = ref(null);
+  const loading: Ref<boolean> = ref(false);
+  const error: Ref<any> = ref(null);
+
+  function setLoading(isLoading: boolean) {
+    loading.value = isLoading;
+  }
+
+  function setError(err: any) {
+    error.value = err;
+  }
+
+  function clearError() {
+    error.value = null;
+  }
+
+  async function createQuote(devisData: any): Promise<quote> {
+    setLoading(true);
+    clearError();
+    try {
+      const newQuote = await $fetch<quote>('/api/quote', { method: 'POST', body: devisData });
+      quote.value = newQuote;
+      return newQuote;
+    } catch (err: any) {
+      setError(err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function fetchQuoteDetails(quoteId: number): Promise<quote | null> {
+    setLoading(true);
+    quoteDetails.value = null;
+    clearError();
+    try {
+      const details = await $fetch<quote>(`/api/quotes/${quoteId}`);
+      quoteDetails.value = details;
+      return details;
+    } catch (err: any) {
+      setError(err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function updatequote(quoteId: number, updateData: any): Promise<quote> {
+    setLoading(true);
+    clearError();
+    try {
+      const updatedQuote = await $fetch<quote>(`/api/quotes/${quoteId}`, { method: 'PUT', body: updateData });
+      quoteDetails.value = updatedQuote; 
+      return updatedQuote;
+    } catch (err: any) {
+      setError(err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function deleteQuote(quoteId: number): Promise<void> {
+    setLoading(true);
+    clearError();
+    try {
+      await $fetch<void>(`/api/quotes/${quoteId}`, { method: 'DELETE' });
+ 
+    } catch (err: any) {
+      setError(err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return {
+    quote,
+    quoteDetails,
+    loading,
+    error,
+    createQuote,
+    fetchQuoteDetails,
+    updatequote,
+    deleteQuote,
+  };
+});
