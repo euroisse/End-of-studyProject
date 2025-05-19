@@ -188,6 +188,8 @@ const clientMenu: MenuItem[] = [
 
 const adminMenu: MenuItem[] = [
   { label: "Projets", to: "/projects", icon: "ri-projector-2-line" },
+
+  { label: "Clients", to: "/clients", icon: "ri-user-3-line" },
   {
     label: "Factures & Devis",
     icon: "ri-file-line",
@@ -196,7 +198,6 @@ const adminMenu: MenuItem[] = [
       { label: "Devis", to: "/devis" },
     ],
   },
-  { label: "Clients", to: "/clients", icon: "ri-user-3-line" },
   { label: "Déconnexion", icon: "ri-logout-box-line" },
 ];
 
