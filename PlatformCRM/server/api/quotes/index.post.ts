@@ -67,6 +67,7 @@ export default defineEventHandler(async (event) => {
         stages: {
           create: stagesToCreate,
         },
+        totalPrice: 0,
       },
       include: {
         customer: { select: { id: true, name: true, company: true } },

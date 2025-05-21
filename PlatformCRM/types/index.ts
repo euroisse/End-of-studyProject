@@ -137,10 +137,8 @@ export interface QuoteStageInput {
      name: string;
      email: string;
    };
-   project: {
-     id: number;
-     title: string;
-   };
+    projectName: string;
+  totalPrice: number;
    createdAt: string;
    updatedAt: string;
  }

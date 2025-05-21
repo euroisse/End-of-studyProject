@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
       return {
         id: quote.id,
         number: quote.number,
-        projectName: quote.project.title || null, 
+        projectName: quote.project.title || 'null', 
         totalPrice: totalPrice,
         status: quote.status,
         createdAt: quote.createdAt,

@@ -67,7 +67,7 @@
                   {{ quoteItem.number }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {{ quoteItem.project?.title || "N/A" }}
+                  {{ quoteItem.projectName || "N/A" }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <span
