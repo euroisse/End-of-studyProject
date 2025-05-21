@@ -114,7 +114,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useQuoteStore } from "~/stores/quoteStore";
-// Importe le type 'quote' que tu as défini
 import type { quote } from "~/types";
 
 const searchQuery = ref("");
@@ -122,13 +121,11 @@ const quoteStore = useQuoteStore();
 
 const filteredQuotes = computed(() => {
   const searchLower = searchQuery.value.toLowerCase();
-  return quoteStore.quotesList.filter((quoteItem: quote) => {
-    // Accès sécurisé à quoteItem.project?.title
-    const projectTitle = quoteItem.project?.title?.toLowerCase() || "";
+  return quoteStore.quotesList.filter((quote: any) => {
     return (
-      (quoteItem.number &&
-        quoteItem.number.toLowerCase().includes(searchLower)) ||
-      projectTitle.includes(searchLower)
+      (quote.number && quote.number.toLowerCase().includes(searchLower)) ||
+      (quote.projectName &&
+        quote.projectName.toLowerCase().includes(searchLower))
     );
   });
 });

@@ -109,7 +109,5 @@ export default defineEventHandler(async (event) => {
       statusCode: 500,
       statusMessage: `Une erreur est survenue lors de l'opération sur le devis ${devisId}.`,
     });
-  } finally {
-    await prisma.$disconnect();
   }
 });

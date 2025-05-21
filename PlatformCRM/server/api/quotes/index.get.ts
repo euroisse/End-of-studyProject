@@ -1,4 +1,4 @@
-// server/api/devis/index.get.ts
+
 
 import prisma from "~/server/database";
 
@@ -37,7 +37,5 @@ export default defineEventHandler(async (event) => {
       statusCode: 500,
       statusMessage: 'Impossible de récupérer les devis.',
     });
-  } finally {
-    await prisma.$disconnect();
   }
 });

@@ -51,7 +51,7 @@ const previewQuote = (quote: any) => {
 // Fonction pour gérer la fermeture du modal
 const handleQuoteModalClose = async () => {
   showCreateQuote.value = false;
-  // Après la fermeture du modal, on demande à QuoteList de rafraîchir sa liste
+
   if (
     quoteListRef.value &&
     typeof quoteListRef.value.refreshQuotes === "function"

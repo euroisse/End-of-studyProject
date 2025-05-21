@@ -20,11 +20,11 @@ export const useQuoteStore = defineStore('devis', () => {
     error.value = null;
   }
 
-  async function createQuote(devisData: any): Promise<quote> {
+  async function createQuote(payload: any): Promise<quote> {
     setLoading(true);
     clearError();
     try {
-      const newQuote = await $fetch<quote>('/api/quotes', { method: 'POST', body: devisData }); 
+      const newQuote = await $fetch<quote>('/api/quotes', { method: 'POST', body: payload }); 
       quote.value = newQuote;
       return newQuote;
     } catch (err: any) {

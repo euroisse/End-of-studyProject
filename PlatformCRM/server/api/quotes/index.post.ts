@@ -63,7 +63,7 @@ export default defineEventHandler(async (event) => {
         number: newQuoteNumber,
         customer: { connect: { id: customerId } },
         project: { connect: { id: projectId } },
-        status: '  EN_ATTENTE', 
+        status: 'EN_ATTENTE', 
         stages: {
           create: stagesToCreate,
         },
@@ -89,7 +89,7 @@ export default defineEventHandler(async (event) => {
         calculatedTotalPrice = createdQuoteWithStages.stages.reduce((sum, stage) => sum + stage.prix, 0);
     }
 
-    setResponseStatus(event, 201); 
+   
     return { ...newQuote, totalPrice: calculatedTotalPrice };
 
   } catch (error: any) {
