@@ -15,7 +15,21 @@
         </div>
       </div>
       <div class="container mx-auto">
-        <div class="overflow-x-auto overflow-y-auto">
+        <div v-if="quoteStore.loading" class="text-center py-8">
+          <div
+            class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-t-indigo-500 border-gray-200"
+          ></div>
+          <p class="mt-2 text-gray-600">Chargement des devis...</p>
+        </div>
+
+        <div
+          v-else-if="quoteStore.quotesList.length === 0"
+          class="text-center py-8"
+        >
+          <p class="text-gray-500">Aucun devis disponible</p>
+        </div>
+
+        <div v-else class="overflow-x-auto overflow-y-auto">
           <table class="w-full min-w-[700px]">
             <thead>
               <tr class="bg-gray-50">
@@ -29,7 +43,11 @@
                 >
                   Projet
                 </th>
-
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Statut
+                </th>
                 <th
                   class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
@@ -39,36 +57,45 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
               <tr
-                v-for="quote in filteredQuotes"
-                :key="quote.id"
+                v-for="quoteItem in filteredQuotes"
+                :key="quoteItem.id"
                 class="hover:bg-gray-50"
               >
                 <td
                   class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
                 >
-                  {{ quote.number }}
+                  {{ quoteItem.number }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {{ quote.project }}
+                  {{ quoteItem.project?.title || "N/A" }}
                 </td>
-
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <span
+                    :class="[
+                      'inline-block px-2 py-1 text-xs rounded-full font-medium',
+                      statusClass(quoteItem.status),
+                    ]"
+                  >
+                    {{ quoteItem.status }}
+                  </span>
+                </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <div class="flex space-x-2">
                     <button
-                      @click="previewQuote(quote)"
+                      @click="previewQuote(quoteItem)"
                       class="text-green-600 hover:text-green-900 cursor-pointer"
                     >
                       <i class="ri-eye-line"></i>
                     </button>
                     <button
-                      @click="editQuote(quote)"
+                      @click="editQuote(quoteItem)"
                       class="text-indigo-600 hover:text-indigo-900 cursor-pointer"
                     >
                       <i class="ri-edit-line"></i>
                     </button>
 
                     <button
-                      @click="deleteQuote(quote)"
+                      @click="deleteQuote(quoteItem)"
                       class="text-red-600 hover:text-red-900 cursor-pointer"
                     >
                       <i class="ri-delete-bin-line"></i>
@@ -85,53 +112,73 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
+import { useQuoteStore } from "~/stores/quoteStore";
+// Importe le type 'quote' que tu as défini
+import type { quote } from "~/types";
 
 const searchQuery = ref("");
-const filterStatus = ref("all");
-
-const quotes = ref([
-  {
-    id: 1,
-    number: "DEV-2025-001",
-    project: "Projet E-commerce",
-    description: "Développement d'une plateforme e-commerce complète",
-  },
-  {
-    id: 2,
-    number: "DEV-2025-002",
-    project: "Projet Marketing Digital",
-
-    description: "Campagne marketing digital sur 3 mois",
-  },
-  {
-    id: 3,
-    number: "DEV-2025-003",
-    project: "Projet Refonte Site Web",
-
-    description: "Refonte complète du site web corporate",
-  },
-]);
+const quoteStore = useQuoteStore();
 
 const filteredQuotes = computed(() => {
-  return quotes.value.filter((quote) => {
-    const searchLower = searchQuery.value.toLowerCase();
+  const searchLower = searchQuery.value.toLowerCase();
+  return quoteStore.quotesList.filter((quoteItem: quote) => {
+    // Accès sécurisé à quoteItem.project?.title
+    const projectTitle = quoteItem.project?.title?.toLowerCase() || "";
     return (
-      quote.number.toLowerCase().includes(searchLower) ||
-      quote.project.toLowerCase().includes(searchLower)
+      (quoteItem.number &&
+        quoteItem.number.toLowerCase().includes(searchLower)) ||
+      projectTitle.includes(searchLower)
     );
   });
 });
 
 const emit = defineEmits(["preview"]);
-const previewQuote = (quote: any) => {
-  emit("preview", quote);
+
+const previewQuote = (quoteItem: quote) => {
+  emit("preview", quoteItem);
 };
 
-const deleteQuote = (quote: any) => {
-  // Implementation for deleting quote
+const editQuote = (quoteItem: quote) => {
+  console.log("Éditer le devis :", quoteItem);
 };
-const editQuote = (quote: any) => {};
+
+const deleteQuote = async (quoteItem: quote) => {
+  if (
+    window.confirm(
+      `Êtes-vous sûr de vouloir supprimer le devis ${quoteItem.number} ?`
+    )
+  ) {
+    try {
+      await quoteStore.deleteQuote(quoteItem.id);
+    } catch (error) {
+      console.error("Erreur lors de la suppression du devis :", error);
+      alert("Une erreur est survenue lors de la suppression du devis.");
+    }
+  }
+};
+
+const statusClass = (status: string) => {
+  switch (status) {
+    case "ACCEPTE":
+      return "bg-green-100 text-green-700";
+    case "REFUSE":
+      return "bg-red-100 text-red-700";
+    case "EN_ATTENTE":
+      return "bg-yellow-100 text-yellow-700";
+    default:
+      return "bg-gray-100 text-gray-700";
+  }
+};
+
+const refreshQuotes = async () => {
+  await quoteStore.fetchQuotesList();
+};
+defineExpose({
+  refreshQuotes,
+});
+
+onMounted(() => {
+  quoteStore.fetchQuotesList();
+});
 </script>
-
-<style scoped></style>

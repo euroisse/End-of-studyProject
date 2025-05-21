@@ -21,6 +21,7 @@ export const useProjectStore = defineStore('projects', {
     async fetchProjects() {
       const response = await $fetch<Project[]>('/api/Projects/projects',{
         method: 'POST',
+        
       });
       this.projects = response;
     },

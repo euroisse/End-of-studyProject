@@ -116,3 +116,34 @@ export interface QuoteStageInput {
   projectStageId: number;
   prix: number;
 }
+ export interface quote {
+   id: number;
+   number: string;
+   status: stageStatus;
+   customerId: number;
+   projectId: number;
+   stages: {
+     quoteId: number;
+     projectStageId: number;
+     prix: number;
+     projectStage: {
+       id: number;
+       title: string;
+       description: string | null;
+     };
+   }[];
+   customer: {
+     id: number;
+     name: string;
+     email: string;
+   };
+   project: {
+     id: number;
+     title: string;
+   };
+   createdAt: string;
+   updatedAt: string;
+ }
+ export type stageStatus = 
+'ACCEPTE'|'REFUSE'|'EN_ATTENTE'
+ 

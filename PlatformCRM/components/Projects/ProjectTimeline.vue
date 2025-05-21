@@ -178,6 +178,41 @@ const deleteProjectStage = async (id: number) => {
 const stageAdded = async (newStage: ProjectStage) => {
   showCreateStageProject.value = true;
 };
+
+onMounted(() => {
+  console.log("ProjectsProjectTimeline mounted.");
+  console.log(
+    "projectStore.selectedProject in Timeline:",
+    projectStore.selectedProject
+  );
+  console.log(
+    "projectStages in Timeline:",
+    projectStore.selectedProject?.projectStages
+  );
+  console.log(
+    "projectStages length in Timeline:",
+    projectStore.selectedProject?.projectStages?.length
+  );
+});
+
+watch(
+  () => projectStore.selectedProject,
+  (newProject) => {
+    console.log(
+      "projectStore.selectedProject changed in Timeline:",
+      newProject
+    );
+    console.log(
+      "projectStages after change in Timeline:",
+      newProject?.projectStages
+    );
+    console.log(
+      "projectStages length after change in Timeline:",
+      newProject?.projectStages?.length
+    );
+  },
+  { deep: true }
+);
 </script>
 
 <style scoped>

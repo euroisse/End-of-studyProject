@@ -17,7 +17,6 @@
         </div>
 
         <form @submit.prevent="createQuote" class="space-y-4">
-          <!-- Sélection du projet -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2"
               >Projet</label
@@ -32,12 +31,11 @@
                 :key="project.id"
                 :value="project.id"
               >
-                {{ project.name }}
+                {{ project.title }}
               </option>
             </select>
           </div>
 
-          <!-- Étapes -->
           <div>
             <label class="block mb-2 font-semibold text-gray-700"
               >Étapes du projet</label
@@ -78,7 +76,6 @@
             </div>
           </div>
 
-          <!-- Date de livraison -->
           <div>
             <label class="block mb-2 font-semibold text-gray-700"
               >Date estimée de livraison</label
@@ -90,7 +87,6 @@
             />
           </div>
 
-          <!-- Actions -->
           <div class="flex justify-end space-x-4">
             <button
               type="button"
@@ -113,36 +109,48 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import { useQuoteStore } from "~/stores/quoteStore";
 
 const emit = defineEmits(["close"]);
+const devisStore = useQuoteStore();
 
 const dateLivraison = ref("");
 const selectedProjectId = ref("");
 const etapes = ref([{ nom: "", prix: 0 }]);
-
-const projects = ref([
-  { id: 1, name: "Projet E-commerce" },
-  { id: 2, name: "Projet Marketing Digital" },
-  { id: 3, name: "Projet Refonte Site Web" },
-]);
-
+const projects = ref<Project[]>([]);
 const addEtape = () => etapes.value.push({ nom: "", prix: 0 });
 const removeEtape = (index: number) => etapes.value.splice(index, 1);
 
-const createQuote = () => {
+const createQuote = async () => {
+  if (!selectedProjectId.value) {
+    alert("Veuillez sélectionner un projet.");
+    return;
+  }
+
   const payload = {
-    projetId: selectedProjectId.value,
+    projectId: Number(selectedProjectId.value),
     dateLivraison: dateLivraison.value,
-    etapes: etapes.value,
+    stages: etapes.value.map((etape) => ({
+      nom: etape.nom,
+      prix: etape.prix,
+    })),
   };
   console.log("Créer le devis avec :", payload);
-  emit("close");
-  // TODO: Utiliser $fetch('/api/devis', { method: 'POST', body: payload })
+  try {
+    await devisStore.createQuote(payload);
+    emit("close");
+  } catch (error) {
+    console.error("Erreur lors de la création du devis :", error);
+  }
 };
 
 const saveAsDraft = () => {
-  // Similaire à createQuote, mais avec un flag "draft"
   emit("close");
 };
+
+onMounted(async () => {
+  const data = await $fetch<Project[]>("/api/Projects/projects");
+  projects.value = data;
+});
 </script>

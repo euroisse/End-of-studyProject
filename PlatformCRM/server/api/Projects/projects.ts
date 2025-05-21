@@ -3,42 +3,41 @@ import type { Project } from '~/generated/prisma';
 
 
 export default defineEventHandler(async (event) => {
-    //verifie la methode
-  if (event.node.req.method === 'POST') {
     try {
-      const body = await readBody(event);
-      const { customerId, title, description, startDate, endDate } = body;
+        if (event.node.req.method === 'POST') {
+            const { customerId, title, description, startDate, endDate } = await readBody(event);
 
-      if (!customerId || !title) {
-        throw createError({
-          statusCode: 400,
-          statusMessage: 'L\'ID du client et le titre sont obligatoires.',
-        });
-      }
+            if (!customerId || !title) {
+                return createError({
+                    statusCode: 400,
+                    statusMessage: 'L\'ID du client et le titre sont obligatoires.',
+                });
+            }
 
-      const newProject: Project = await prisma.project.create({
-        data: {
-          customerId: parseInt(customerId as string),
-          title: title as string,
-          description: description as string | undefined,
-          startDate: startDate ? new Date(startDate as string) : undefined,
-          endDate: endDate ? new Date(endDate as string) : undefined,
-        },
-      });
-
-      return newProject;
+            const newProject: Project = await prisma.project.create({
+                data: {
+                    customerId: parseInt(customerId as string),
+                    title: title as string,
+                    description: description as string | undefined,
+                    startDate: startDate ? new Date(startDate as string) : undefined,
+                    endDate: endDate ? new Date(endDate as string) : undefined,
+                },
+            });
+            return newProject;
+        } else if (event.node.req.method === 'GET') {
+            const projects: Project[] = await prisma.project.findMany();
+            return projects;
+        } else {
+             return createError({
+                statusCode: 405,
+                statusMessage: 'Méthode non autorisée',
+            });
+        }
     } catch (error: any) {
-      console.error('Error creating project:', error);
-      return createError({
-        statusCode: error.statusCode || 500,
-        statusMessage: error.message || 'Failed to create project',
-      });
+        console.error('Erreur :', error);
+        return createError({
+            statusCode: error.statusCode || 500,
+            statusMessage: error.message || 'Erreur interne du serveur',
+        });
     }
-  } else {
-    
-    throw createError({
-      statusCode: 405,
-      statusMessage: 'Method Not Allowed',
-    });
-  }
 });

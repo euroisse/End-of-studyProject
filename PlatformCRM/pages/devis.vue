@@ -14,8 +14,9 @@
       </div>
     </div>
 
-    <QuotesQuoteList @preview="previewQuote" />
-    <QuotesQuoteModal v-if="showCreateQuote" @close="showCreateQuote = false" />
+    <QuotesQuoteList ref="quoteListRef" @preview="previewQuote" />
+
+    <quoteModal v-if="showCreateQuote" @close="handleQuoteModalClose" />
     <PreviewQuoteModal
       v-if="showPreview"
       :quote="selectedQuote"
@@ -28,6 +29,8 @@
 import { ref } from "vue";
 import PreviewQuoteModal from "~/components/quotes/PreviewQuoteModal.vue";
 import QuotesQuoteList from "~/components/quotes/QuoteList.vue";
+import QuoteModal from "~/components/quotes/QuoteModal.vue";
+import { useIsRole } from "~/composables/useIsRole";
 
 definePageMeta({ layout: "admin" });
 
@@ -37,8 +40,27 @@ const showCreateQuote = ref(false);
 const showPreview = ref(false);
 const selectedQuote = ref(null);
 
+// Ajoute une référence au composant QuotesQuoteList
+const quoteListRef = ref<InstanceType<typeof QuotesQuoteList> | null>(null);
+
 const previewQuote = (quote: any) => {
   selectedQuote.value = quote;
   showPreview.value = true;
+};
+
+// Fonction pour gérer la fermeture du modal
+const handleQuoteModalClose = async () => {
+  showCreateQuote.value = false;
+  // Après la fermeture du modal, on demande à QuoteList de rafraîchir sa liste
+  if (
+    quoteListRef.value &&
+    typeof quoteListRef.value.refreshQuotes === "function"
+  ) {
+    await quoteListRef.value.refreshQuotes();
+  } else {
+    console.warn(
+      "La méthode refreshQuotes n'est pas disponible sur quoteListRef."
+    );
+  }
 };
 </script>

@@ -1,15 +1,13 @@
 import { defineStore } from 'pinia';
-
 import { ref } from 'vue';
-
 import type { quote } from '~/types';
 
-export const useDevisStore = defineStore('devis', () => {
+export const useQuoteStore = defineStore('devis', () => {
   const quote: Ref<quote | null> = ref(null);
   const quoteDetails: Ref<quote | null> = ref(null);
   const loading: Ref<boolean> = ref(false);
   const error: Ref<any> = ref(null);
-
+  const quotesList: Ref<quote[]> = ref([]);
   function setLoading(isLoading: boolean) {
     loading.value = isLoading;
   }
@@ -26,7 +24,7 @@ export const useDevisStore = defineStore('devis', () => {
     setLoading(true);
     clearError();
     try {
-      const newQuote = await $fetch<quote>('/api/quote', { method: 'POST', body: devisData });
+      const newQuote = await $fetch<quote>('/api/quotes', { method: 'POST', body: devisData }); 
       quote.value = newQuote;
       return newQuote;
     } catch (err: any) {
@@ -52,13 +50,24 @@ export const useDevisStore = defineStore('devis', () => {
       setLoading(false);
     }
   }
-
+async function fetchQuotesList(): Promise<void> {
+    setLoading(true);
+    clearError();
+    try {
+      const quotes = await $fetch<quote[]>('/api/quotes');
+      quotesList.value = quotes;
+    } catch (err: any) {
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  }
   async function updatequote(quoteId: number, updateData: any): Promise<quote> {
     setLoading(true);
     clearError();
     try {
       const updatedQuote = await $fetch<quote>(`/api/quotes/${quoteId}`, { method: 'PUT', body: updateData });
-      quoteDetails.value = updatedQuote; 
+      quoteDetails.value = updatedQuote;
       return updatedQuote;
     } catch (err: any) {
       setError(err);
@@ -73,7 +82,7 @@ export const useDevisStore = defineStore('devis', () => {
     clearError();
     try {
       await $fetch<void>(`/api/quotes/${quoteId}`, { method: 'DELETE' });
- 
+
     } catch (err: any) {
       setError(err);
       throw err;
@@ -87,9 +96,11 @@ export const useDevisStore = defineStore('devis', () => {
     quoteDetails,
     loading,
     error,
+    quotesList,
     createQuote,
     fetchQuoteDetails,
     updatequote,
     deleteQuote,
+    fetchQuotesList
   };
 });
