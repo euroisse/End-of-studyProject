@@ -40,7 +40,9 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusCode: 404, statusMessage: `Devis avec l'ID ${devisId} non trouvé.` });
       }
 
-
+await prisma.cout_stage.deleteMany({
+  where: { quoteId: devisId }
+});
 await prisma.quote.delete({
   where: { id: devisId }
 });
