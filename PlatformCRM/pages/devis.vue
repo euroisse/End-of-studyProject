@@ -18,8 +18,8 @@
 
     <quoteModal v-if="showCreateQuote" @close="handleQuoteModalClose" />
     <PreviewQuoteModal
-      v-if="showPreview"
-      :quote="selectedQuote"
+      v-if="showPreview && selectedQuote"
+      :quoteId="selectedQuote.id"
       @close="showPreview = false"
     />
   </div>
@@ -31,20 +31,20 @@ import PreviewQuoteModal from "~/components/quotes/PreviewQuoteModal.vue";
 import QuotesQuoteList from "~/components/quotes/QuoteList.vue";
 import QuoteModal from "~/components/quotes/QuoteModal.vue";
 import { useIsRole } from "~/composables/useIsRole";
-
+import type { quote } from "~/types";
 definePageMeta({ layout: "admin" });
 
 const { isAdmin } = useIsRole();
 
 const showCreateQuote = ref(false);
 const showPreview = ref(false);
-const selectedQuote = ref(null);
+const selectedQuote = ref<quote | null>(null);
 
 // Ajoute une référence au composant QuotesQuoteList
 const quoteListRef = ref<InstanceType<typeof QuotesQuoteList> | null>(null);
 
-const previewQuote = (quote: any) => {
-  selectedQuote.value = quote;
+const previewQuote = (item: quote) => {
+  selectedQuote.value = item;
   showPreview.value = true;
 };
 

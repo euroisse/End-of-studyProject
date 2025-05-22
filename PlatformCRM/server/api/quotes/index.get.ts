@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
       }
     });
 
-    // Calculer le prix total pour chaque devis
+
     const quotesWithTotalPrice = quotes.map(quote => {
       const totalPrice = quote.stages.reduce((sum, stage) => sum + stage.prix, 0);
       return {

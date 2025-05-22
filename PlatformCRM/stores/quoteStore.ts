@@ -54,8 +54,11 @@ async function fetchQuotesList(): Promise<void> {
     setLoading(true);
     clearError();
     try {
-      const quotes = await $fetch<quote[]>('/api/quotes');
-      quotesList.value = quotes;
+      const quotes = await $fetch<any[]>('/api/quotes');
+       quotesList.value = quotes.map(q => ({
+      ...q,
+      id: Number(q.id) 
+    }));
     } catch (err: any) {
       setError(err);
     } finally {

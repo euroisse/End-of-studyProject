@@ -122,6 +122,9 @@ export interface QuoteStageInput {
    status: stageStatus;
    customerId: number;
    projectId: number;
+   project:{
+    title:string;
+   }
    stages: {
      quoteId: number;
      projectStageId: number;
@@ -136,12 +139,20 @@ export interface QuoteStageInput {
      id: number;
      name: string;
      email: string;
+     company:string;
    };
     projectName: string;
   totalPrice: number;
+  dateLivraison?:string
    createdAt: string;
    updatedAt: string;
  }
  export type stageStatus = 
 'ACCEPTE'|'REFUSE'|'EN_ATTENTE'
- 
+
+ export interface ProjectStageRaw {
+  id: number;
+  title: string;
+  description?: string;
+  
+}
