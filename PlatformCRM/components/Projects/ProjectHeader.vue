@@ -172,20 +172,7 @@ interface Client {
 }
 
 const clients = ref<Client[]>([]);
-const filters = reactive({
-  progress: {
-    notStarted: false,
-    inProgress: false,
-    completed: false,
-    active: false,
-  },
-  clientId: "",
-  date: {
-    startDate: "",
-    endDate: "",
-    active: false,
-  },
-});
+
 const projet = reactive({
   title: "",
   customerId: "",

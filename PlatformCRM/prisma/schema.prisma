@@ -150,7 +150,7 @@ model Quote {
 model cout_stage {
   quoteId        Int
   projectStageId Int
-  quote          Quote        @relation(fields: [quoteId], references: [id])
+  quote          Quote        @relation(fields: [quoteId], references: [id], onDelete: Cascade)
   projectStage   ProjectStage @relation(fields: [projectStageId], references: [id])
   prix           Float
 

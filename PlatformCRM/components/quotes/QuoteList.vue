@@ -95,7 +95,7 @@
                     </button>
 
                     <button
-                      @click="deleteQuote(quoteItem)"
+                      @click="openDeleteModal(quoteItem)"
                       class="text-red-600 hover:text-red-900 cursor-pointer"
                     >
                       <i class="ri-delete-bin-line"></i>
@@ -109,13 +109,26 @@
       </div>
     </div>
   </div>
+  <DeleteConfirmModal
+    v-if="showEditModal"
+    :quoteItem="quoteToDelete"
+    @close="cancelDelete"
+    @success="handleQuoteFormSuccess"
+  />
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useQuoteStore } from "~/stores/quoteStore";
 import type { quote } from "~/types";
+import DeleteConfirmModal from "./DeleteConfirmModal.vue";
+const openDeleteModal = (quoteItem: quote) => {
+  quoteToDelete.value = quoteItem;
+  showEditModal.value = true;
+};
 
+const quoteToDelete = ref<quote | null>(null);
+const showEditModal = ref(false);
 const searchQuery = ref("");
 const quoteStore = useQuoteStore();
 
@@ -132,27 +145,20 @@ const filteredQuotes = computed(() => {
 
 const emit = defineEmits(["preview"]);
 
+const cancelDelete = () => {
+  showEditModal.value = false;
+  quoteToDelete.value = null;
+};
+
+const handleQuoteFormSuccess = () => {
+  quoteStore.fetchQuotesList();
+};
 const previewQuote = (quoteItem: quote) => {
   emit("preview", quoteItem);
 };
 
 const editQuote = (quoteItem: quote) => {
   console.log("Éditer le devis :", quoteItem);
-};
-
-const deleteQuote = async (quoteItem: quote) => {
-  if (
-    window.confirm(
-      `Êtes-vous sûr de vouloir supprimer le devis ${quoteItem.number} ?`
-    )
-  ) {
-    try {
-      await quoteStore.deleteQuote(quoteItem.id);
-    } catch (error) {
-      console.error("Erreur lors de la suppression du devis :", error);
-      alert("Une erreur est survenue lors de la suppression du devis.");
-    }
-  }
 };
 
 const statusClass = (status: string) => {

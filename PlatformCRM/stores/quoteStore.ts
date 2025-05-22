@@ -1,7 +1,7 @@
 // stores/useQuoteStore.ts
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import type { quote, CreateUpdateQuotePayload } from '~/types';
+import type { quote, CreateUpdateQuotePayload, QuoteStageInput } from '~/types';
 
 export const useQuoteStore = defineStore('devis', () => {
   const quote: Ref<quote | null> = ref(null);

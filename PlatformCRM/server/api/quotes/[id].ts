@@ -40,7 +40,11 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusCode: 404, statusMessage: `Devis avec l'ID ${devisId} non trouvé.` });
       }
 
-      await prisma.quote.delete({ where: { id: devisId } });
+
+await prisma.quote.delete({
+  where: { id: devisId }
+});
+
 
       return { message: `Devis avec l'ID ${devisId} supprimé avec succès.` };
     }

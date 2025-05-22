@@ -155,7 +155,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
 import { useQuoteStore } from "#imports";
-import type { ProjectStage } from "~/generated/prisma";
 import type { ProjectStageRaw, CreateUpdateQuotePayload } from "~/types";
 
 const props = defineProps<{
