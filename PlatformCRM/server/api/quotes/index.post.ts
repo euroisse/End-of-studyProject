@@ -2,11 +2,17 @@
 
 import prisma from "~/server/database";
 
+interface BodyReauestInterface {
+  projectId: number,
+  stagesWithPrices: Array<{
+    projectStageId: number,
+    prix: number
+  }>
+}
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event);
-  const {  projectId } = body;
-
+  const body: BodyReauestInterface = await readBody(event);
+  const {  projectId, stagesWithPrices } = body;
   if ( !projectId) {
     throw createError({
       statusCode: 400,
@@ -51,11 +57,16 @@ export default defineEventHandler(async (event) => {
     const newQuoteNumber = `DEV-${String(nextNumber).padStart(3, '0')}`;
 
     // 3. Récupérer les étapes du projet et calculer le prix total
-    const stagesToCreate = project.projectStages.map(pStage => ({
-      projectStage: { connect: { id: pStage.id } },
-      prix: 0, 
-    }));
+    const stagesToCreate = project.projectStages.map(pStage => {
+      const stage =  stagesWithPrices.find((item) => item.projectStageId == pStage.id);
+      return {
+        projectStage: { connect: { id: pStage.id } },
+        prix: stage?.prix || 0, 
+      }
+    }
+  );
 
+  const totalPrice = stagesWithPrices.reduce((acc, current) => acc + current.prix, 0);
 
     // 4. Enregistrer le devis en base avec l'état par défaut "EN_ATTENTE"
     const newQuote = await prisma.quote.create({
@@ -67,7 +78,7 @@ export default defineEventHandler(async (event) => {
         stages: {
           create: stagesToCreate,
         },
-        totalPrice: 0,
+        totalPrice:  totalPrice || 0,
       },
       include: {
         customer: { select: { id: true, name: true, company: true } },

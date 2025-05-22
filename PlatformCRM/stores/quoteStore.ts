@@ -1,6 +1,7 @@
+// stores/useQuoteStore.ts
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import type { quote } from '~/types';
+import type { quote, CreateUpdateQuotePayload } from '~/types';
 
 export const useQuoteStore = defineStore('devis', () => {
   const quote: Ref<quote | null> = ref(null);
@@ -8,6 +9,8 @@ export const useQuoteStore = defineStore('devis', () => {
   const loading: Ref<boolean> = ref(false);
   const error: Ref<any> = ref(null);
   const quotesList: Ref<quote[]> = ref([]);
+  const currentStagesPrices: Ref<Record<number, number>> = ref({});
+
   function setLoading(isLoading: boolean) {
     loading.value = isLoading;
   }
@@ -20,11 +23,11 @@ export const useQuoteStore = defineStore('devis', () => {
     error.value = null;
   }
 
-  async function createQuote(payload: any): Promise<quote> {
+  async function createQuote(payload: CreateUpdateQuotePayload): Promise<quote> {
     setLoading(true);
     clearError();
     try {
-      const newQuote = await $fetch<quote>('/api/quotes', { method: 'POST', body: payload }); 
+      const newQuote = await $fetch<quote>('/api/quotes', { method: 'POST', body: payload });
       quote.value = newQuote;
       return newQuote;
     } catch (err: any) {
@@ -42,6 +45,13 @@ export const useQuoteStore = defineStore('devis', () => {
     try {
       const details = await $fetch<quote>(`/api/quotes/${quoteId}`);
       quoteDetails.value = details;
+
+      const prices: Record<number, number> = {};
+      details.stages.forEach(stage => {
+        prices[stage.projectStageId] = stage.prix;
+      });
+      currentStagesPrices.value = prices;
+
       return details;
     } catch (err: any) {
       setError(err);
@@ -50,27 +60,35 @@ export const useQuoteStore = defineStore('devis', () => {
       setLoading(false);
     }
   }
-async function fetchQuotesList(): Promise<void> {
+
+  async function fetchQuotesList(): Promise<void> {
     setLoading(true);
     clearError();
     try {
       const quotes = await $fetch<any[]>('/api/quotes');
-       quotesList.value = quotes.map(q => ({
-      ...q,
-      id: Number(q.id) 
-    }));
+      quotesList.value = quotes.map(q => ({
+        ...q,
+        id: Number(q.id)
+      }));
     } catch (err: any) {
       setError(err);
     } finally {
       setLoading(false);
     }
   }
-  async function updatequote(quoteId: number, updateData: any): Promise<quote> {
+
+  async function updatequote(quoteId: number, payload: CreateUpdateQuotePayload): Promise<quote> {
     setLoading(true);
     clearError();
     try {
-      const updatedQuote = await $fetch<quote>(`/api/quotes/${quoteId}`, { method: 'PUT', body: updateData });
+      const updatedQuote = await $fetch<quote>(`/api/quotes/${quoteId}`, { method: 'PUT', body: payload });
       quoteDetails.value = updatedQuote;
+      const prices: Record<number, number> = {};
+      updatedQuote.stages.forEach(stage => {
+        prices[stage.projectStageId] = stage.prix;
+      });
+      currentStagesPrices.value = prices;
+
       return updatedQuote;
     } catch (err: any) {
       setError(err);
@@ -100,6 +118,7 @@ async function fetchQuotesList(): Promise<void> {
     loading,
     error,
     quotesList,
+    currentStagesPrices, 
     createQuote,
     fetchQuoteDetails,
     updatequote,

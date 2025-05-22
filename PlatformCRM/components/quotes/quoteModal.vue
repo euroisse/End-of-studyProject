@@ -156,7 +156,8 @@
 import { ref, onMounted, watch, computed } from "vue";
 import { useQuoteStore } from "#imports";
 import type { ProjectStage } from "~/generated/prisma";
-import type { ProjectStageRaw } from "~/types";
+import type { ProjectStageRaw, CreateUpdateQuotePayload } from "~/types";
+
 const props = defineProps<{
   quoteId?: number | null;
 }>();
@@ -167,7 +168,6 @@ const devisStore = useQuoteStore();
 const projectStore = useProjectStore();
 const selectedProjectId = ref<number | null>(null);
 const dateLivraison = ref<string>("");
-const selectedProjectStage = ref<ProjectStage | null>(null);
 const stagePrices = ref<Record<number, number>>({});
 const quoteStatus = ref<string>("EN_ATTENTE");
 const projectStagesForQuote = ref<ProjectStageRaw[]>([]);
@@ -200,7 +200,10 @@ async function fetchProjectStages() {
           projectStore.selectedProject.projectStages;
 
         projectStagesForQuote.value.forEach((stage) => {
-          if (stagePrices.value[stage.id] === undefined) {
+          if (devisStore.currentStagesPrices[stage.id] !== undefined) {
+            stagePrices.value[stage.id] =
+              devisStore.currentStagesPrices[stage.id];
+          } else if (stagePrices.value[stage.id] === undefined) {
             stagePrices.value[stage.id] = 0;
           }
         });
@@ -213,7 +216,6 @@ async function fetchProjectStages() {
         "Erreur lors de la récupération des étapes du projet :",
         error
       );
-
       projectStagesForQuote.value = [];
     }
   } else {
@@ -238,11 +240,11 @@ const formatPrice = (price: number): string => {
   });
 };
 
-// Gère la soumission du formulaire (création ou modification)
 const handleSubmit = async () => {
   if (!selectedProjectId.value) {
     return;
   }
+
   if (
     Object.values(stagePrices.value).some(
       (p) => p === null || p === undefined || p < 0
@@ -258,26 +260,25 @@ const handleSubmit = async () => {
 
   try {
     if (isEditing.value && props.quoteId) {
-      // Logique de modification
-      const payload = {
+      const payload: CreateUpdateQuotePayload = {
         projectId: selectedProjectId.value,
         stagesWithPrices: stagesWithPrices,
         status: quoteStatus.value,
         dateLivraison: dateLivraison.value || null,
       };
       await devisStore.updatequote(props.quoteId, payload);
-      alert("Devis mis à jour avec succès!");
+      alert("Devis mis à jour avec succès !");
     } else {
-      // Logique de création
-      const payload = {
+      const payload: CreateUpdateQuotePayload = {
         projectId: selectedProjectId.value,
         stagesWithPrices: stagesWithPrices,
         dateLivraison: dateLivraison.value || undefined,
       };
       await devisStore.createQuote(payload);
-      alert("Devis créé avec succès!");
+      alert("Devis créé et envoyé avec succès !");
     }
 
+    emit("success");
     emit("close");
   } catch (error: any) {
     console.error("Erreur lors de l'opération sur le devis :", error);
@@ -293,23 +294,20 @@ const saveAsDraft = async () => {
     projectStageId: stage.id,
     prix: stagePrices.value[stage.id] || 0,
   }));
-  const payload = {
+  const payload: CreateUpdateQuotePayload = {
     projectId: selectedProjectId.value,
     stagesWithPrices: stagesWithPrices,
     dateLivraison: dateLivraison.value || undefined,
+    status: "BROUILLON",
   };
 
   try {
     if (isEditing.value && props.quoteId) {
-      await devisStore.updatequote(props.quoteId, {
-        ...payload,
-        status: "BROUILLON",
-      });
-      alert("Devis enregistré comme brouillon avec succès!");
+      await devisStore.updatequote(props.quoteId, payload);
+      alert("Devis enregistré comme brouillon avec succès !");
     } else {
-      const newQuote = await devisStore.createQuote(payload);
-      await devisStore.updatequote(newQuote.id, { status: "BROUILLON" });
-      alert("Devis créé et enregistré comme brouillon avec succès!");
+      await devisStore.createQuote(payload);
+      alert("Devis créé et enregistré comme brouillon avec succès !");
     }
     emit("success");
     emit("close");
@@ -327,7 +325,36 @@ watch(selectedProjectId, (newVal) => {
   }
 });
 
+watch(
+  () => devisStore.quoteDetails,
+  (newDetails) => {
+    if (isEditing.value && newDetails) {
+      selectedProjectId.value = newDetails.projectId;
+      dateLivraison.value = newDetails.dateLivraison || "";
+      quoteStatus.value = newDetails.status;
+
+      const prices: Record<number, number> = {};
+      newDetails.stages.forEach((stage) => {
+        prices[stage.projectStageId] = stage.prix;
+      });
+      stagePrices.value = prices;
+
+      fetchProjectStages();
+    } else if (!isEditing.value) {
+      selectedProjectId.value = null;
+      dateLivraison.value = "";
+      stagePrices.value = {};
+      quoteStatus.value = "EN_ATTENTE";
+      projectStagesForQuote.value = [];
+    }
+  },
+  { immediate: true }
+);
+
 onMounted(async () => {
   await fetchProjects();
+  if (isEditing.value && props.quoteId) {
+    await devisStore.fetchQuoteDetails(props.quoteId);
+  }
 });
 </script>

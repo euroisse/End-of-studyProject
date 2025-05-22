@@ -116,6 +116,7 @@ export interface QuoteStageInput {
   projectStageId: number;
   prix: number;
 }
+
  export interface quote {
    id: number;
    number: string;
@@ -128,7 +129,7 @@ export interface QuoteStageInput {
    stages: {
      quoteId: number;
      projectStageId: number;
-     prix: number;
+    prix:number;
      projectStage: {
        id: number;
        title: string;
@@ -155,4 +156,10 @@ export interface QuoteStageInput {
   title: string;
   description?: string;
   
+}
+export interface CreateUpdateQuotePayload {
+  projectId: number;
+  stagesWithPrices: QuoteStageInput[]; 
+  dateLivraison?: string | null;
+  status?: string;
 }

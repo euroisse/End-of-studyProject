@@ -16,17 +16,19 @@
         </div>
 
         <div>
-          <h1 class="text-2xl font-bold text-gray-800">
-            Devis #{{ quoteDetails.number }}
-          </h1>
-          <span
-            :class="[
-              'inline-block mt-2 px-3 py-1 text-sm rounded-full font-medium',
-              statusClass(quoteDetails.status),
-            ]"
-          >
-            {{ quoteDetails.status }}
-          </span>
+          <div class="flex justify-between">
+            <h1 class="text-2xl font-bold text-gray-800">
+              Devis #{{ quoteDetails.number }}
+            </h1>
+            <span
+              :class="[
+                'inline-block mt-2 px-3 py-1 text-sm rounded-full font-medium',
+                statusClass(quoteDetails.status),
+              ]"
+            >
+              {{ quoteDetails.status }}
+            </span>
+          </div>
 
           <p class="text-gray-600 font-bold">
             Client: {{ quoteDetails.customer?.name || "N/A" }}
