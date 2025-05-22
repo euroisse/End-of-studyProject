@@ -134,17 +134,18 @@ enum TaskPriority {
 }
 
 model Quote {
-  id         Int          @id @default(autoincrement())
-  number     String       @unique
-  status     quoteStatus  @default(EN_ATTENTE)
-  customer   User         @relation(fields: [customerId], references: [id])
-  customerId Int
-  project    Project      @relation(fields: [projectId], references: [id])
-  projectId  Int
-  totalPrice Float
-  stages     cout_stage[]
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
+  id            Int          @id @default(autoincrement())
+  number        String       @unique
+  status        quoteStatus  @default(EN_ATTENTE)
+  customer      User         @relation(fields: [customerId], references: [id])
+  customerId    Int
+  project       Project      @relation(fields: [projectId], references: [id])
+  projectId     Int
+  totalPrice    Float
+  newTotalPrice Float?
+  stages        cout_stage[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 }
 
 model cout_stage {

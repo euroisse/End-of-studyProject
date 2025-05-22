@@ -14,7 +14,6 @@
             <i class="ri-close-line"></i>
           </button>
         </div>
-
         <div>
           <div class="flex justify-between">
             <h1 class="text-2xl font-bold text-gray-800">
@@ -44,8 +43,22 @@
                 : "N/A"
             }}
           </p>
-          <p class="text-lg font-bold text-gray-800 mt-4">
-            Prix Total: {{ quoteDetails.totalPrice || 0 }} CFA
+          <p
+            class="text-lg font-bold mt-4"
+            :class="
+              quoteDetails.newTotalPrice ? 'text-red-600' : 'text-gray-800'
+            "
+          >
+            Prix Total:
+            {{
+              formatPrice(
+                quoteDetails.newTotalPrice !== null &&
+                  quoteDetails.newTotalPrice !== undefined
+                  ? quoteDetails.newTotalPrice
+                  : quoteDetails.totalPrice
+              )
+            }}
+            CFA
           </p>
         </div>
 
@@ -66,7 +79,7 @@
                     {{ stage.projectStage.title }}
                   </h3>
                   <span class="text-blue-600 font-semibold">
-                    {{ stage.prix }} CFA {{ console.log("Stage:", stage) }}
+                    {{ stage.prix }} CFA
                   </span>
                 </div>
                 <p class="text-gray-600 text-sm">
@@ -100,6 +113,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useQuoteStore } from "#imports";
 import type { quote } from "~/types";
+
 const props = defineProps<{
   quoteId: number | null;
 }>();
@@ -114,7 +128,6 @@ watch(
   async (newId) => {
     if (newId) {
       await fetchQuoteData(newId);
-      console.log("Quote Details:", quoteDetails.value);
     } else {
       quoteDetails.value = null;
     }
@@ -144,6 +157,13 @@ const formatDate = (dateStr: string) => {
     console.error("Erreur de formatage de date:", e);
     return "Date invalide";
   }
+};
+
+const formatPrice = (price: number): string => {
+  return price.toLocaleString("fr-FR", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  });
 };
 
 const statusClass = (status: string) => {

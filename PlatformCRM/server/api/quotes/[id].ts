@@ -40,12 +40,12 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusCode: 404, statusMessage: `Devis avec l'ID ${devisId} non trouvé.` });
       }
 
-await prisma.cout_stage.deleteMany({
-  where: { quoteId: devisId }
-});
-await prisma.quote.delete({
-  where: { id: devisId }
-});
+      await prisma.cout_stage.deleteMany({
+        where: { quoteId: devisId }
+      });
+      await prisma.quote.delete({
+        where: { id: devisId }
+      });
 
 
       return { message: `Devis avec l'ID ${devisId} supprimé avec succès.` };
@@ -65,6 +65,7 @@ await prisma.quote.delete({
 
       let updateData: {
         status?: quoteStatus;
+        newTotalPrice?: number; 
         stages?: {
           deleteMany: {};
           create: { projectStage: { connect: { id: number } }; prix: number }[];
@@ -81,6 +82,10 @@ await prisma.quote.delete({
       }
 
       if (stages) {
+        // Calculate newTotalPrice from the updated stages
+        const calculatedNewTotalPrice = stages.reduce((sum, stage) => sum + stage.prix, 0);
+        updateData.newTotalPrice = calculatedNewTotalPrice; // Assign the calculated total
+
         updateData.stages = {
           deleteMany: {},
           create: stages.map((stage) => ({
@@ -108,7 +113,7 @@ await prisma.quote.delete({
     }
 
     // Méthode non autorisée
-    throw createError({ statusCode: 405, statusMessage: `Méthode  non autorisée.` });
+    throw createError({ statusCode: 405, statusMessage: `Méthode non autorisée.` });
   } catch (error) {
     console.error(`Erreur sur la route devis/${devisId} :`, error);
     throw createError({

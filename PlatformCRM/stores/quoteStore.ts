@@ -118,7 +118,7 @@ export const useQuoteStore = defineStore('devis', () => {
     loading,
     error,
     quotesList,
-    currentStagesPrices, 
+    currentStagesPrices,
     createQuote,
     fetchQuoteDetails,
     updatequote,

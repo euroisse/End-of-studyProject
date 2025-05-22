@@ -74,7 +74,11 @@
 
             <div class="mt-6 p-4 bg-indigo-50 rounded-lg text-right">
               <h3 class="text-xl font-bold text-indigo-800">
-                Prix total estimé: {{ formatPrice(calculateTotal()) }} CFA
+                Prix total initial: {{ formatPrice(originalTotalPrice) }} CFA
+              </h3>
+              <h3 class="text-xl font-bold text-indigo-800 mt-2">
+                Nouveau prix total estimé:
+                {{ formatPrice(calculateTotal()) }} CFA
               </h3>
             </div>
           </div>
@@ -144,6 +148,7 @@ const stagePrices = ref<Record<number, number>>({});
 const quoteStatus = ref<string>("");
 const projectStagesForQuote = ref<ProjectStageRaw[]>([]);
 const projectTitle = ref<string>("");
+const originalTotalPrice = ref<number>(0); // New ref for original total price
 
 const quoteStatusDisplayName = computed(() => {
   switch (quoteStatus.value) {
@@ -162,7 +167,7 @@ const quoteStatusDisplayName = computed(() => {
   }
 });
 
-// Calcule le prix total des étapes
+// Calcule le prix total des étapes (this will be the newTotalPrice)
 const calculateTotal = (): number => {
   return Object.values(stagePrices.value).reduce(
     (sum, price) => sum + (price || 0),
@@ -222,6 +227,7 @@ onMounted(async () => {
       dateLivraison.value = details.dateLivraison || "";
       quoteStatus.value = details.status;
       projectTitle.value = details.project?.title || "N/A";
+      originalTotalPrice.value = details.totalPrice;
 
       // Remplit les étapes et les prix avec les données existantes du devis
       projectStagesForQuote.value = details.stages.map((s) => ({
