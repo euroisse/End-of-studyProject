@@ -4,9 +4,17 @@
     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
   >
     <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm mx-auto">
-      <h3 class="text-lg font-bold mb-4 text-gray-800">
-        Confirmer la suppression
-      </h3>
+      <div class="flex justify-between mb-4">
+        <h3 class="text-lg font-bold text-gray-800">
+          Confirmer la suppression
+        </h3>
+        <button
+          @click="$emit('close')"
+          class="text-gray-400 hover:text-gray-600"
+        >
+          <i class="ri-close-line text-xl"></i>
+        </button>
+      </div>
       <p class="text-gray-700 mb-6">
         Êtes-vous sûr de vouloir supprimer le devis
         <span class="font-semibold">{{ quoteToDelete?.number }}</span> ? Cette

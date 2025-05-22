@@ -88,7 +88,7 @@
                       <i class="ri-eye-line"></i>
                     </button>
                     <button
-                      @click="editQuote(quoteItem)"
+                      @click="openEditPricesModal(quoteItem)"
                       class="text-indigo-600 hover:text-indigo-900 cursor-pointer"
                     >
                       <i class="ri-edit-line"></i>
@@ -115,6 +115,15 @@
     @close="cancelDelete"
     @success="handleQuoteFormSuccess"
   />
+  <EditQuotePriceModal
+    v-if="showEditPricesModal && quoteToEditPrices"
+    :quoteId="quoteToEditPrices.id"
+    @close="
+      showEditPricesModal = false;
+      quoteToEditPrices = null;
+    "
+    @success="handleQuoteFormSuccess"
+  />
 </template>
 
 <script setup lang="ts">
@@ -122,11 +131,13 @@ import { ref, computed, onMounted } from "vue";
 import { useQuoteStore } from "~/stores/quoteStore";
 import type { quote } from "~/types";
 import DeleteConfirmModal from "./DeleteConfirmModal.vue";
+import EditQuotePriceModal from "./EditQuotePriceModal.vue";
 const openDeleteModal = (quoteItem: quote) => {
   quoteToDelete.value = quoteItem;
   showEditModal.value = true;
 };
-
+const showEditPricesModal = ref(false);
+const quoteToEditPrices = ref<quote | null>(null);
 const quoteToDelete = ref<quote | null>(null);
 const showEditModal = ref(false);
 const searchQuery = ref("");
@@ -152,13 +163,16 @@ const cancelDelete = () => {
 
 const handleQuoteFormSuccess = () => {
   quoteStore.fetchQuotesList();
+  showEditPricesModal.value = false;
+  quoteToEditPrices.value = null;
 };
 const previewQuote = (quoteItem: quote) => {
   emit("preview", quoteItem);
 };
 
-const editQuote = (quoteItem: quote) => {
-  console.log("Éditer le devis :", quoteItem);
+const openEditPricesModal = (quoteItem: quote) => {
+  quoteToEditPrices.value = quoteItem;
+  showEditPricesModal.value = true;
 };
 
 const statusClass = (status: string) => {

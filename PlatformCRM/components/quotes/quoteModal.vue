@@ -1,14 +1,14 @@
 <template>
   <div
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto"
   >
     <div
-      class="max-w-4xl mx-auto p-6 bg-white rounded-2xl shadow-md space-y-6 overflow-y-auto max-h-[90vh]"
+      class="max-w-5xl w-[500px] mx-auto p-6 bg-white rounded-2xl shadow-md space-y-6 max-h-[90vh]"
     >
       <div class="p-6">
         <div class="flex justify-between items-center mb-6">
           <h2 class="text-xl font-bold text-gray-800">
-            {{ isEditing ? "Modifier le devis" : "Créer un nouveau devis" }}
+            Créer un nouveau devis
           </h2>
           <button
             @click="$emit('close')"
@@ -26,7 +26,6 @@
             <select
               v-model="selectedProjectId"
               @change="fetchProjectStages"
-              :disabled="isEditing"
               class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-500 bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
             >
               <option disabled value="">Sélectionner un projet</option>
@@ -38,9 +37,6 @@
                 {{ project.title }}
               </option>
             </select>
-            <p v-if="isEditing" class="text-xs text-gray-500 mt-1">
-              Le projet ne peut pas être modifié après la création du devis.
-            </p>
           </div>
 
           <div v-if="selectedProjectId">
@@ -80,7 +76,6 @@
                     type="number"
                     v-model.number="stagePrices[stage.id]"
                     min="0"
-                    step="0.01"
                     class="w-32 p-2 border rounded-md text-right focus:ring-indigo-500 focus:border-indigo-500"
                     placeholder="Prix"
                   />
@@ -107,7 +102,7 @@
             />
           </div>
 
-          <div v-if="isEditing">
+          <div>
             <label class="block text-sm font-medium text-gray-700 mb-2"
               >Statut du devis</label
             >
