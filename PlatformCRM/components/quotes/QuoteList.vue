@@ -1,7 +1,7 @@
 <template>
   <div class="bg-white rounded-lg shadow-md">
-    <div class="p-6">
-      <div class="flex items-center justify-between container mb-4">
+    <div class="p-10">
+      <div class="flex items-center justify-between mb-4">
         <div class="relative">
           <input
             type="text"
@@ -14,7 +14,7 @@
           ></i>
         </div>
       </div>
-      <div class="container mx-auto">
+      <div class="mx-auto">
         <div v-if="quoteStore.loading" class="text-center py-8">
           <div
             class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-t-indigo-500 border-gray-200"
@@ -80,7 +80,7 @@
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <div class="flex space-x-2">
+                  <div class="flex space-x-6">
                     <button
                       @click="previewQuote(quoteItem)"
                       class="text-green-600 hover:text-green-900 cursor-pointer"
