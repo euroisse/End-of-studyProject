@@ -98,6 +98,7 @@
                       <i class="ri-eye-line"></i>
                     </button>
                     <button
+                      v-if="isAdmin"
                       @click="openEditPricesModal(quoteItem)"
                       class="text-indigo-600 hover:text-indigo-900 cursor-pointer"
                     >
@@ -105,6 +106,7 @@
                     </button>
 
                     <button
+                      v-if="isAdmin"
                       @click="openDeleteModal(quoteItem)"
                       class="text-red-600 hover:text-red-900 cursor-pointer"
                     >
@@ -146,6 +148,7 @@ const openDeleteModal = (quoteItem: quote) => {
   quoteToDelete.value = quoteItem;
   showEditModal.value = true;
 };
+const { isAdmin } = useIsRole();
 const quotes = ref<quote[]>([]);
 const showEditPricesModal = ref(false);
 const quoteToEditPrices = ref<quote | null>(null);
