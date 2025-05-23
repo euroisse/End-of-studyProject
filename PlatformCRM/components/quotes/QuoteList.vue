@@ -46,6 +46,11 @@
                 <th
                   class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
+                  Prix
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
                   Statut
                 </th>
                 <th
@@ -68,6 +73,11 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {{ quoteItem.projectName || "N/A" }}
+                </td>
+                <td
+                  class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-500"
+                >
+                  {{ getDisplayPrice(quoteItem) }} FCFA
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <span
@@ -161,8 +171,8 @@ const cancelDelete = () => {
   quoteToDelete.value = null;
 };
 
-const handleQuoteFormSuccess = () => {
-  quoteStore.fetchQuotesList();
+const handleQuoteFormSuccess = async () => {
+  await quoteStore.fetchQuotesList();
   showEditPricesModal.value = false;
   quoteToEditPrices.value = null;
 };
@@ -187,6 +197,24 @@ const statusClass = (status: string) => {
       return "bg-gray-100 text-gray-700";
   }
 };
+const getDisplayPrice = (quoteItem: quote): number => {
+  //  Vérifie si un 'newTotalPrice' existe et n'est pas vide
+  if (
+    quoteItem.newTotalPrice !== undefined &&
+    quoteItem.newTotalPrice !== null
+  ) {
+    // Si oui, c'est le nouveau prix et nous l'affichons
+    return quoteItem.newTotalPrice;
+  } else if (
+    quoteItem.totalPrice !== undefined &&
+    quoteItem.totalPrice !== null
+  ) {
+    // Sinon, si 'totalPrice' existe et n'est pas vide, nous l'affichons
+    return quoteItem.totalPrice;
+  }
+  // Si aucun des deux n'existe, nous retournons 0 par défaut
+  return 0;
+};
 
 const refreshQuotes = async () => {
   await quoteStore.fetchQuotesList();
@@ -197,5 +225,12 @@ defineExpose({
 
 onMounted(() => {
   quoteStore.fetchQuotesList();
+  const updatequote = quoteStore.quotesList.find(
+    (q) => q.id === quoteToEditPrices.value?.id
+  );
+  if (updatequote) {
+    updatequote.newTotalPrice;
+    updatequote.totalPrice;
+  }
 });
 </script>

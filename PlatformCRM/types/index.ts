@@ -144,7 +144,7 @@ export interface QuoteStageInput {
    };
     projectName: string;
   totalPrice: number;
-  newTotalPrice?: number | null;
+  newTotalPrice?: number;
   dateLivraison?:string
    createdAt: string;
    updatedAt: string;
