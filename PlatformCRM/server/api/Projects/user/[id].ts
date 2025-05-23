@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
     }
 
     try {
-       
+        
         const user = await prisma.user.findUnique({
             where: { id: userId },
             include: {
@@ -26,15 +26,15 @@ export default defineEventHandler(async (event) => {
         });
 
         if (!user) {
-          throw createError({
-            statusCode: 404,
-            statusMessage: 'Utilisateur non trouvé.',
-          });
+            throw createError({
+                statusCode: 404,
+                statusMessage: 'Utilisateur non trouvé.',
+            });
         }
       
         // Vérifier le rôle de l'utilisateur
         const isAdmin = user.UserRole.some((userRole) => userRole.role.name === 'admin');
-
+        const isClient = user.UserRole.some((userRole) => userRole.role.name === 'customer'); 
 
         let projects: Project[];
 
@@ -43,7 +43,6 @@ export default defineEventHandler(async (event) => {
             projects = await prisma.project.findMany({
                 include: {
                     customer: true,
-                    
                     users: {
                         include: {
                             employee: true,
@@ -51,19 +50,37 @@ export default defineEventHandler(async (event) => {
                     },
                     projectStages: true,
                     tasks: { 
-                      include: {
-                        employee: true
-                      }
+                        include: {
+                            employee: true
+                        }
                     }
                 },
             });
-        } else {
+        } else if (isClient) {
+            // Si l'utilisateur est un client, récupérer uniquement les projets liés à son ID client
+            projects = await prisma.project.findMany({
+                where: {
+                    customerId: userId, 
+                },
+                include: {
+                    customer: true,
+                    projectStages: true,
+                    users: { 
+                        include: {
+                            employee: true,
+                        },
+                    },
+                   
+                },
+            });
+        }
+        else {
             // Si l'utilisateur est un employé, récupérer uniquement les projets liés à ses tâches
             projects = await prisma.project.findMany({
                 where: {
                     tasks: {
                         some: {
-                            employeeId: userId, // seulement les projets où l'employé a au moins une tâche
+                            employeeId: userId, 
                         },
                     },
                 },
@@ -71,8 +88,8 @@ export default defineEventHandler(async (event) => {
                     customer: true,
                     projectStages: true,
                     tasks: {
-                        where: { employeeId: userId }, // on ne renvoie que ses tâches à lui
-                        include: {         
+                        where: { employeeId: userId }, 
+                        include: {          
                             employee: true,
                         },
                     },

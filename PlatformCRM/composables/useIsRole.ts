@@ -24,7 +24,7 @@ export const useIsRole = () => {
   });
 
   const isClient = computed(() => {
-    return user.value?.roles?.includes('client') ?? false;
+    return user.value?.roles?.includes('customer') ?? false;
   });
 
   const isAdmin = computed(() => {

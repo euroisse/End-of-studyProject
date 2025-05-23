@@ -146,13 +146,15 @@ const openDeleteModal = (quoteItem: quote) => {
   quoteToDelete.value = quoteItem;
   showEditModal.value = true;
 };
+const quotes = ref<quote[]>([]);
 const showEditPricesModal = ref(false);
 const quoteToEditPrices = ref<quote | null>(null);
 const quoteToDelete = ref<quote | null>(null);
 const showEditModal = ref(false);
 const searchQuery = ref("");
 const quoteStore = useQuoteStore();
-
+const loading = ref(true);
+const error = ref<any>(null);
 const filteredQuotes = computed(() => {
   const searchLower = searchQuery.value.toLowerCase();
   return quoteStore.quotesList.filter((quote: any) => {
@@ -223,7 +225,7 @@ defineExpose({
   refreshQuotes,
 });
 
-onMounted(() => {
+onMounted(async () => {
   quoteStore.fetchQuotesList();
   const updatequote = quoteStore.quotesList.find(
     (q) => q.id === quoteToEditPrices.value?.id
@@ -231,6 +233,28 @@ onMounted(() => {
   if (updatequote) {
     updatequote.newTotalPrice;
     updatequote.totalPrice;
+  }
+  const userString = localStorage.getItem("user");
+  if (!userString) {
+    error.value = {
+      message: "Utilisateur non connecté. Veuillez vous connecter.",
+    };
+    loading.value = false;
+    return;
+  }
+  try {
+    const user = JSON.parse(userString);
+    const userId = user.id;
+    const userRole = user.role;
+    const data = await $fetch<quote[]>(
+      userRole === "ADMIN" ? "/api/quotes" : `/api/quotes/user/${userId}`
+    );
+    quotes.value = data;
+    loading.value = false;
+  } catch (err: any) {
+    error.value = err;
+    loading.value = false;
+    console.error("Error fetching quotes:", err);
   }
 });
 </script>
