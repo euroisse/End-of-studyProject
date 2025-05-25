@@ -23,7 +23,7 @@
         </div>
 
         <div
-          v-else-if="quoteStore.quotesList.length === 0"
+          v-else-if="quoteStore.quotesList.length === 0 && !quoteStore.loading"
           class="text-center py-8"
         >
           <p class="text-gray-500">Aucun devis disponible</p>
@@ -93,9 +93,19 @@
                   <div class="flex space-x-6">
                     <button
                       @click="previewQuote(quoteItem)"
-                      class="text-green-600 hover:text-green-900 cursor-pointer"
+                      class="text-green-600 hover:text-green-900 cursor-pointer relative"
                     >
-                      <i class="ri-eye-line"></i>
+                      <i
+                        class="ri-eye-line"
+                        :class="{
+                          'text-yellow-500': quoteItem.status === 'EN_ATTENTE',
+                        }"
+                      ></i>
+                      <span
+                        v-if="quoteItem.status === 'EN_ATTENTE'"
+                        class="absolute -top-1 -right-1 bg-yellow-500 rounded-full w-2 h-2"
+                        title="Action requise"
+                      ></span>
                     </button>
                     <button
                       v-if="isAdmin"
@@ -144,20 +154,21 @@ import { useQuoteStore } from "~/stores/quoteStore";
 import type { quote } from "~/types";
 import DeleteConfirmModal from "./DeleteConfirmModal.vue";
 import EditQuotePriceModal from "./EditQuotePriceModal.vue";
+
 const openDeleteModal = (quoteItem: quote) => {
   quoteToDelete.value = quoteItem;
   showEditModal.value = true;
 };
+
 const { isAdmin } = useIsRole();
-const quotes = ref<quote[]>([]);
+
 const showEditPricesModal = ref(false);
 const quoteToEditPrices = ref<quote | null>(null);
 const quoteToDelete = ref<quote | null>(null);
 const showEditModal = ref(false);
 const searchQuery = ref("");
 const quoteStore = useQuoteStore();
-const loading = ref(true);
-const error = ref<any>(null);
+
 const filteredQuotes = computed(() => {
   const searchLower = searchQuery.value.toLowerCase();
   return quoteStore.quotesList.filter((quote: any) => {
@@ -177,10 +188,12 @@ const cancelDelete = () => {
 };
 
 const handleQuoteFormSuccess = async () => {
+  // Après une modification ou suppression réussie, rafraîchissez la liste via le store
   await quoteStore.fetchQuotesList();
   showEditPricesModal.value = false;
   quoteToEditPrices.value = null;
 };
+
 const previewQuote = (quoteItem: quote) => {
   emit("preview", quoteItem);
 };
@@ -202,62 +215,31 @@ const statusClass = (status: string) => {
       return "bg-gray-100 text-gray-700";
   }
 };
+
 const getDisplayPrice = (quoteItem: quote): number => {
-  //  Vérifie si un 'newTotalPrice' existe et n'est pas vide
   if (
     quoteItem.newTotalPrice !== undefined &&
     quoteItem.newTotalPrice !== null
   ) {
-    // Si oui, c'est le nouveau prix et nous l'affichons
     return quoteItem.newTotalPrice;
   } else if (
     quoteItem.totalPrice !== undefined &&
     quoteItem.totalPrice !== null
   ) {
-    // Sinon, si 'totalPrice' existe et n'est pas vide, nous l'affichons
     return quoteItem.totalPrice;
   }
-  // Si aucun des deux n'existe, nous retournons 0 par défaut
   return 0;
 };
 
 const refreshQuotes = async () => {
   await quoteStore.fetchQuotesList();
 };
+
 defineExpose({
   refreshQuotes,
 });
 
 onMounted(async () => {
-  quoteStore.fetchQuotesList();
-  const updatequote = quoteStore.quotesList.find(
-    (q) => q.id === quoteToEditPrices.value?.id
-  );
-  if (updatequote) {
-    updatequote.newTotalPrice;
-    updatequote.totalPrice;
-  }
-  const userString = localStorage.getItem("user");
-  if (!userString) {
-    error.value = {
-      message: "Utilisateur non connecté. Veuillez vous connecter.",
-    };
-    loading.value = false;
-    return;
-  }
-  try {
-    const user = JSON.parse(userString);
-    const userId = user.id;
-    const userRole = user.role;
-    const data = await $fetch<quote[]>(
-      userRole === "ADMIN" ? "/api/quotes" : `/api/quotes/user/${userId}`
-    );
-    quotes.value = data;
-    loading.value = false;
-  } catch (err: any) {
-    error.value = err;
-    loading.value = false;
-    console.error("Error fetching quotes:", err);
-  }
+  await quoteStore.fetchQuotesList();
 });
 </script>

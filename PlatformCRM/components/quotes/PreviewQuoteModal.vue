@@ -19,7 +19,15 @@
             <h1 class="text-2xl font-bold text-gray-800">
               Devis #{{ quoteDetails.number }}
             </h1>
+            <button
+              v-if="quoteDetails.status === 'EN_ATTENTE'"
+              @click="validateQuote"
+              class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-700 transition-all whitespace-nowrap cursor-pointer !rounded-button"
+            >
+              Valider le Devis
+            </button>
             <span
+              v-else
               :class="[
                 'inline-block mt-2 px-3 py-1 text-sm rounded-full font-medium',
                 statusClass(quoteDetails.status),
@@ -95,6 +103,7 @@
 
         <div class="flex justify-end mt-6 space-x-4">
           <button
+            v-if="quoteDetails.status === 'ACCEPTE'"
             @click="downloadPDF"
             class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all whitespace-nowrap cursor-pointer !rounded-button"
           >
@@ -188,4 +197,15 @@ const downloadPDF = () => {
     console.log("Télécharger PDF pour le devis :", quoteDetails.value.id);
   }
 };
+async function validateQuote() {
+  if (quoteDetails.value && confirm("Voulez vous vraiment valider ce devis?")) {
+    try {
+      await devisStore.updateQuoteStatus(quoteDetails.value.id, "ACCEPTE");
+      await fetchQuoteData(quoteDetails.value.id);
+      console.log(`Le devis ${quoteDetails.value.id} valide avec succes`);
+    } catch (error) {
+      console.log("erreur lors de la validation", error);
+    }
+  }
+}
 </script>
