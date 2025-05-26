@@ -164,3 +164,16 @@ export interface CreateUpdateQuotePayload {
   dateLivraison?: string | null;
   status?: string;
 }
+
+export interface CreateInvoicePayload {
+  quoteId: number;
+  amountPaid: number;
+  paymentMethod: string; 
+  invoiceDate: string; 
+  userId: number; 
+  projectId: number; 
+  stages: Array<{
+    projectStageId: number;
+    price: number;
+  }>;
+}

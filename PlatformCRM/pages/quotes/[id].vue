@@ -112,13 +112,19 @@
     <div class="flex justify-end">
       <button
         v-if="quoteDetails && quoteDetails.status === 'ACCEPTE' && isAdmin"
-        @click="createInvoice"
+        @click="openCreateInvoiceModal(quoteDetails.id)"
         class="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-blue-700 transition-all whitespace-nowrap cursor-pointer !rounded-button"
       >
         <i class="ri-file-text-line mr-2"></i>
         Créer une Facture
       </button>
     </div>
+    <CreateInvoiceModal
+      v-if="showCreateInvoiceModal && selectedQuoteForInvoice"
+      :quoteId="selectedQuoteForInvoice.id"
+      @close="showCreateInvoiceModal = false"
+      @success="handleInvoiceCreationSuccess"
+    />
   </div>
 </template>
 
@@ -129,15 +135,16 @@ import { fr } from "date-fns/locale";
 import { useRoute, useRouter } from "vue-router";
 import { useQuoteStore } from "#imports";
 import type { quote } from "~/types";
+import CreateInvoiceModal from "~/components/invoices/CreateInvoiceModal.vue";
 
 definePageMeta({ layout: "admin" });
 
 const route = useRoute();
-const router = useRouter();
 const devisStore = useQuoteStore();
 const { isClient, isAdmin } = useIsRole();
 const quoteDetails = ref<quote | null>(null);
-
+const showCreateInvoiceModal = ref(false);
+const selectedQuoteForInvoice = ref<quote | null>(null);
 watch(
   () => route.params.id,
   async (newId) => {
@@ -204,7 +211,7 @@ async function validateQuote() {
   if (quoteDetails.value && confirm("Voulez-vous vraiment valider ce devis?")) {
     try {
       await devisStore.updateQuoteStatus(quoteDetails.value.id, "ACCEPTE");
-      await fetchQuoteData(quoteDetails.value.id); // Refresh data after update
+      await fetchQuoteData(quoteDetails.value.id);
       console.log(`Le devis ${quoteDetails.value.id} validé avec succès`);
     } catch (error) {
       console.log("Erreur lors de la validation", error);
@@ -212,13 +219,13 @@ async function validateQuote() {
   }
 }
 
-const createInvoice = () => {
-  if (quoteDetails.value) {
-    router.push({
-      name: "create-invoice",
-      params: { quoteId: quoteDetails.value.id },
-    });
-    console.log("Créer une facture pour le devis :", quoteDetails.value.id);
-  }
+const openCreateInvoiceModal = (quoteId: number) => {
+  selectedQuoteForInvoice.value = quoteDetails.value;
+  showCreateInvoiceModal.value = true;
+};
+
+const handleInvoiceCreationSuccess = async () => {
+  await fetchQuoteData(Number(route.params.id));
+  console.log("Invoice created successfully!");
 };
 </script>
