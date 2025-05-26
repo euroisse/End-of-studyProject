@@ -27,7 +27,7 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import PreviewQuoteModal from "~/components/quotes/PreviewQuoteModal.vue";
+import PreviewQuoteModal from "~/pages/quotes/[id].vue";
 import QuotesQuoteList from "~/components/quotes/QuoteList.vue";
 import QuoteModal from "~/components/quotes/QuoteModal.vue";
 import { useIsRole } from "~/composables/useIsRole";

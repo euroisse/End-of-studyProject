@@ -91,8 +91,8 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <div class="flex space-x-6">
-                    <button
-                      @click="previewQuote(quoteItem)"
+                    <router-link
+                      :to="`/quotes/${quoteItem.id}`"
                       class="text-green-600 hover:text-green-900 cursor-pointer relative"
                     >
                       <i
@@ -106,7 +106,7 @@
                         class="absolute -top-1 -right-1 bg-yellow-500 rounded-full w-2 h-2"
                         title="Action requise"
                       ></span>
-                    </button>
+                    </router-link>
                     <button
                       v-if="isAdmin"
                       @click="openEditPricesModal(quoteItem)"
@@ -180,22 +180,15 @@ const filteredQuotes = computed(() => {
   });
 });
 
-const emit = defineEmits(["preview"]);
-
 const cancelDelete = () => {
   showEditModal.value = false;
   quoteToDelete.value = null;
 };
 
 const handleQuoteFormSuccess = async () => {
-  // Après une modification ou suppression réussie, rafraîchissez la liste via le store
   await quoteStore.fetchQuotesList();
   showEditPricesModal.value = false;
   quoteToEditPrices.value = null;
-};
-
-const previewQuote = (quoteItem: quote) => {
-  emit("preview", quoteItem);
 };
 
 const openEditPricesModal = (quoteItem: quote) => {
