@@ -1,29 +1,52 @@
 import prisma from "~/server/database";
-import { defineEventHandler } from "h3";
+import { defineEventHandler, getQuery } from "h3"; // <-- Importez getQuery ici
 
 export default defineEventHandler(async (event) => {
   try {
-    // Récupère toutes les factures, en sélectionnant UNIQUEMENT les champs nécessaires pour le tableau
+    // 1. Lire le paramètre de requête
+    const query = getQuery(event);
+    const quoteId = query.quoteId ? parseInt(query.quoteId.toString(), 10) : undefined;
+
+    // 2. Définir la clause where de Prisma de manière conditionnelle
+    const whereClause: any = {};
+    if (quoteId) {
+      whereClause.quoteId = quoteId;
+    }
+
+    // 3. Récupérer les factures avec le filtre
     const invoices = await prisma.invoice.findMany({
+      where: whereClause, 
       select: {
-        id: true, 
+        id: true,
         invoiceNumber: true,
         invoiceDate: true,
-      
+        amountPaid: true, 
+        quote: {
+          select: {
+            id: true,
+            customerId: true,
+            customer: {
+              select: {
+                name: true 
+              }
+            }
+          }
+        }
       },
       orderBy: {
-        createdAt: 'desc', 
+        createdAt: 'desc',
       },
     });
 
     // Retourne la liste des factures
     return new Response(JSON.stringify(invoices), {
-      status: 200, 
+      status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error: any) {
     console.error("API Error fetching invoices:", error);
-    return new Response(JSON.stringify({ message: error.message || "Erreur interne du serveur lors de la récupération." }), {
+    // Retourne un message d'erreur plus détaillé
+    return new Response(JSON.stringify({ message: error.message || "Erreur interne du serveur lors de la récupération des factures." }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });

@@ -1,81 +1,35 @@
-import prisma from "~/server/database";
-import type { CreateInvoicePayload } from "~/types";
-export async function createInvoice(payload: CreateInvoicePayload) {
-  const { quoteId, amountPaid,  invoiceDate, userId } = payload;
 
+import { defineEventHandler, readBody, createError } from 'h3';
+import { createInvoice } from '../services/invoice';
+import type { CreateInvoicePayload } from '~/types'; 
+
+export default defineEventHandler(async (event) => {
   try {
-  
-    const quote = await prisma.quote.findUnique({
-      where: { id: quoteId },
-      include: {
-        stages: true,
-        project: true,
-        customer: true
-      },
-    });
+    const body = await readBody<CreateInvoicePayload>(event);
 
-    if (!quote) {
-      throw new Error(`Devis avec l'ID ${quoteId} non trouvé.`);
+  
+    if (!body.quoteId || !body.amountPaid || !body.invoiceDate || !body.paymentMethod || !body.userId) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'Données de facture incomplètes.',
+      });
     }
 
-    const totalQuoteAmount = quote.totalPrice;
-
-    // 2. Récupérer les factures existantes pour ce devis
-    const existingInvoices = await prisma.invoice.findMany({
-      where: { quoteId: quoteId },
-    });
-
-    const totalAmountAlreadyPaid = existingInvoices.reduce((sum, inv) => sum + inv.amountPaid, 0);
-    const newTotalAmountPaid = totalAmountAlreadyPaid + amountPaid;
-    const balanceDue = totalQuoteAmount - newTotalAmountPaid;
-
-  
-
-    // 3. Générer un numéro de facture unique
-    
-    const lastInvoice = await prisma.invoice.findFirst({
-      orderBy: { createdAt: 'desc' }, 
-    });
-
-    let newInvoiceNumber: string;
-    if (lastInvoice && lastInvoice.invoiceNumber.startsWith('INV-')) {
-      const lastNumber = parseInt(lastInvoice.invoiceNumber.split('-')[1]);
-      newInvoiceNumber = `FACT-${String(lastNumber + 1).padStart(4, '0')}`;
-    } else {
-      newInvoiceNumber = `FACT-${String(1).padStart(4, '0')}`; 
-    }
-
-  
-
-    // 4. Créer la nouvelle facture
-    const newInvoice = await prisma.invoice.create({
-      data: {
-      
-        invoiceNumber: newInvoiceNumber,
-        quote: { connect: { id: quoteId } },
-        totalAmount: totalQuoteAmount,
-        amountPaid: amountPaid,
-        balanceDue: balanceDue,
-        invoiceDate: invoiceDate ? new Date(invoiceDate) : new Date(),
-        User: { connect: { id: userId } },
-        
-      },
-    });
-
-    const clientName = quote.customer?.name;
-    const projectName = quote.project?.title;
+    const result = await createInvoice(body);
 
     return {
-      success: true,
-      message: 'Facture créée avec succès.',
-      invoice: newInvoice,
-      clientName: clientName,
-      projectName: projectName,
-      newBalanceDue: balanceDue,
+      statusCode: 201,
+      message: result.message,
+      invoice: result.invoice,
+      clientName: result.clientName,
+      projectName: result.projectName,
+      newBalanceDue: result.newBalanceDue,
     };
-
-  } catch (error) {
-    console.error("Erreur lors de la création de la facture:", error);
-    throw new Error("Impossible de créer la facture: " + (error as Error).message);
+  } catch (error: any) {
+    console.error('API Error creating invoice:', error);
+    throw createError({
+      statusCode: error.statusCode || 500, 
+      statusMessage: error.statusMessage || error.message || 'Erreur interne du serveur lors de la création de la facture.',
+    });
   }
-}
+});

@@ -119,6 +119,11 @@
         Créer une Facture
       </button>
     </div>
+    <InvoiceTable v-if="quoteDetails" :quoteId="quoteDetails.id" />
+
+    <div v-else class="text-center text-gray-600 py-4">
+      <p>Chargement des factures du devis...</p>
+    </div>
     <CreateInvoiceModal
       v-if="showCreateInvoiceModal && selectedQuoteForInvoice"
       :quoteId="selectedQuoteForInvoice.id"
@@ -136,6 +141,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useQuoteStore } from "#imports";
 import type { quote } from "~/types";
 import CreateInvoiceModal from "~/components/invoices/CreateInvoiceModal.vue";
+import InvoiceTable from "~/components/invoices/InvoiceTable.vue";
 
 definePageMeta({ layout: "admin" });
 

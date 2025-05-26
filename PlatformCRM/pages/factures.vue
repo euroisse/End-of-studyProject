@@ -15,14 +15,14 @@
         Erreur: {{ error }}
       </div>
       <div
-        v-if="!loading && !error && displayedInvoices.length === 0"
+        v-if="!loading && !error && filteredAndSortedInvoices.length === 0"
         class="text-center text-gray-600 py-8"
       >
         Aucune facture trouvée.
       </div>
 
       <div
-        v-if="displayedInvoices.length > 0"
+        v-if="filteredAndSortedInvoices.length > 0"
         class="bg-white shadow rounded-lg overflow-hidden"
       >
         <div class="overflow-x-auto">
@@ -60,7 +60,7 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
               <tr
-                v-for="facture in displayedInvoices"
+                v-for="facture in filteredAndSortedInvoices"
                 :key="facture.id"
                 class="hover:bg-gray-50 cursor-pointer"
               >
@@ -90,29 +90,6 @@
           </table>
         </div>
       </div>
-
-      <div
-        v-if="filteredInvoices.length > itemsPerPage"
-        class="mt-6 flex justify-center"
-      >
-        <button
-          @click="prevPage"
-          :disabled="currentPage === 1"
-          class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-l disabled:opacity-50"
-        >
-          Précédent
-        </button>
-        <span class="bg-white px-4 py-2 border-t border-b border-gray-200"
-          >{{ currentPage }} / {{ totalPages }}</span
-        >
-        <button
-          @click="nextPage"
-          :disabled="currentPage === totalPages"
-          class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-r disabled:opacity-50"
-        >
-          Suivant
-        </button>
-      </div>
     </main>
 
     <CreateInvoiceModal
@@ -141,10 +118,6 @@ const searchTerm = ref("");
 const sortField = ref("invoiceDate");
 const sortDirection = ref("desc");
 
-// --- Pagination ---
-const currentPage = ref(1);
-const itemsPerPage = ref(10);
-
 const fetchInvoices = async () => {
   loading.value = true;
   error.value = null;
@@ -153,19 +126,21 @@ const fetchInvoices = async () => {
     error.value = {
       message: "Utilisateur non connecté",
     };
+    loading.value = false;
     return;
   }
   try {
     const user = JSON.parse(userString);
     const userId = user.id;
+
     const userRole = user.role;
-    const data = await $fetch<Invoice[]>(
+
+    const data = await $fetch<any>(
       userRole === "ADMIN" ? "/api/invoices" : `/api/invoices/user/${userId}`
     );
-    invoices.value = data;
-    loading.value = false;
+    invoices.value = data.data || [];
   } catch (err: any) {
-    error.value = err.message;
+    error.value = err.data?.statusMessage || err.message;
   } finally {
     loading.value = false;
   }
@@ -175,9 +150,8 @@ onMounted(() => {
   fetchInvoices();
 });
 
-const filteredInvoices = computed(() => {
+const filteredAndSortedInvoices = computed(() => {
   let filtered = invoices.value.filter((invoice) => {
-    // Pour ce tableau simplifié, on ne recherche que dans le numéro de facture
     const matchesSearch =
       searchTerm.value === "" ||
       invoice.invoiceNumber
@@ -186,7 +160,6 @@ const filteredInvoices = computed(() => {
     return matchesSearch;
   });
 
-  // Trie les factures
   return filtered.sort((a, b) => {
     let comparison = 0;
     const aValue = (a as any)[sortField.value];
@@ -196,35 +169,16 @@ const filteredInvoices = computed(() => {
       const dateA = new Date(aValue).getTime();
       const dateB = new Date(bValue).getTime();
       comparison = dateA - dateB;
-    }
-    // Logique de tri pour les chaînes de caractères (numéro de facture)
-    else if (typeof aValue === "string" && typeof bValue === "string") {
+    } else if (typeof aValue === "string" && typeof bValue === "string") {
       comparison = aValue.localeCompare(bValue);
-    }
-    // Cas générique pour d'autres types si nécessaire (pas le cas ici)
-    else {
+    } else {
       comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
     }
 
-    // Applique la direction de tri
     return sortDirection.value === "asc" ? comparison : -comparison;
   });
 });
 
-// Calcule les factures à afficher sur la page actuelle (pour la pagination)
-const displayedInvoices = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value;
-  const end = start + itemsPerPage.value;
-  return filteredInvoices.value.slice(start, end);
-});
-
-// Calcule le nombre total de pages pour la pagination
-const totalPages = computed(() =>
-  Math.ceil(filteredInvoices.value.length / itemsPerPage.value)
-);
-
-// --- Méthodes ---
-// Gère le tri du tableau
 const sortBy = (field: string) => {
   if (sortField.value === field) {
     sortDirection.value = sortDirection.value === "asc" ? "desc" : "asc";
@@ -234,13 +188,10 @@ const sortBy = (field: string) => {
   }
 };
 
-// Gère la recherche
 const handleSearch = (query: string) => {
   searchTerm.value = query;
-  currentPage.value = 1;
 };
 
-// Ouvre la modale de création de facture
 const openCreateInvoiceModal = (quoteId: number | null) => {
   selectedQuoteIdForInvoice.value = quoteId;
   showCreateInvoiceModal.value = true;
@@ -251,30 +202,15 @@ const handleInvoiceCreated = (newInvoice: Invoice) => {
   showCreateInvoiceModal.value = false;
 };
 
-// Gère le téléchargement d'une facture (logique à implémenter)
 const downloadInvoice = (facture: Invoice) => {
   alert(`Téléchargement de la facture ${facture.invoiceNumber}`);
 };
 
-// Formate une date au format DD/MM/YYYY
 const formatDate = (dateString: string | Date) => {
   if (!dateString) return "";
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return "Date Invalide";
   return date.toLocaleDateString("fr-FR");
-};
-
-// Méthodes de pagination
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++;
-  }
-};
-
-const prevPage = () => {
-  if (currentPage.value > 1) {
-    currentPage.value--;
-  }
 };
 </script>
 

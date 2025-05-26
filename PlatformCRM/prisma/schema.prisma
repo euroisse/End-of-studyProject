@@ -178,4 +178,11 @@ model Invoice {
   createdAt     DateTime @default(now())
   User          User?    @relation(fields: [userId], references: [id])
   userId        Int?
+  paymentMethod String
+}
+
+enum paymentMethod {
+  OrangeMoney
+  MTNMoney
+  BankTransfer
 }

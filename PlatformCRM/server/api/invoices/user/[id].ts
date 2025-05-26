@@ -33,10 +33,10 @@ export default defineEventHandler(async (event) => {
         statusMessage: 'Utilisateur non trouvé.',
       });
     }
-
+ const userRoles = user.UserRole || [];
     // Determine user roles
-    const isAdmin = user.UserRole.some((userRole) => userRole.role.name === 'admin');
-    const isClient = user.UserRole.some((userRole) => userRole.role.name === 'customer');
+    const isAdmin = userRoles.some((userRole) => userRole.role?.name === 'admin'); 
+    const isClient = userRoles.some((userRole) => userRole.role?.name === 'customer');
 
     let invoices; 
 
@@ -45,7 +45,7 @@ export default defineEventHandler(async (event) => {
       invoices = await prisma.invoice.findMany({
         include: {
           quote: {
-            select: { id: true }
+            select: { id: true, customerId: true }
           },
         },
         orderBy: {

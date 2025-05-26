@@ -114,9 +114,16 @@ const submitInvoice = async () => {
     );
     return;
   }
+  const userString = localStorage.getItem("user");
+  const user = userString ? JSON.parse(userString) : null;
+  const userId = user ? user.id : null;
 
+  if (!props.quoteId || !userId) {
+    alert("Erreur: Informations utilisateur ou ID devis manquants.");
+    return;
+  }
   try {
-    const response = await $fetch(`/api/invoices`, {
+    await $fetch(`/api/invoices`, {
       method: "POST",
 
       body: JSON.stringify({
@@ -124,20 +131,10 @@ const submitInvoice = async () => {
         amountPaid: invoiceData.value.amount,
         invoiceDate: invoiceData.value.date,
         paymentMethod: invoiceData.value.paymentMethod,
-        // userId: userId,
+        userId: userId,
       }),
     });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(
-        errorData.message || "Erreur lors de la création de la facture"
-      );
-    }
-
-    const result = await response.json();
-    alert("Facture créée avec succès !");
-    emit("success", result.body);
+    emit("success");
     emit("close");
   } catch (error: any) {
     console.error("Erreur lors de la création de la facture:", error);
