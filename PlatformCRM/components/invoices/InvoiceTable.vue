@@ -74,7 +74,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { fr, id } from "date-fns/locale";
+import { generateInvoicePdf } from "~/Functions/pdf";
 
 interface SimplifiedInvoice {
   id: number;
@@ -90,14 +91,10 @@ const fetchAllInvoices = async () => {
   loading.value = true;
   error.value = null;
   try {
-    // L'appel à l'API reste le même, car elle est déjà configurée pour renvoyer
-    // toutes les factures si aucun quoteId n'est fourni, et elle renvoie
-    // toujours les détails complets (amountPaid, quote) même si ce composant ne les affiche pas.
     const response: SimplifiedInvoice[] = await $fetch<SimplifiedInvoice[]>(
       `/api/invoices`
     );
 
-    // Assurez-vous que la réponse de l'API est directement un tableau
     invoices.value = response || [];
   } catch (err: any) {
     console.error("Erreur lors du chargement des factures:", err);
@@ -126,9 +123,8 @@ const formatDate = (dateString: string | Date) => {
 
 const downloadInvoice = (invoice: SimplifiedInvoice) => {
   alert(`Téléchargement de la facture ${invoice.invoiceNumber}`);
+  generateInvoicePdf(invoice.id);
 };
 </script>
 
-<style scoped>
-/* Ajoutez des styles spécifiques à ce composant ici */
-</style>
+<style scoped></style>
