@@ -75,7 +75,6 @@
 import { ref, onMounted } from "vue";
 import { format } from "date-fns";
 import { fr, id } from "date-fns/locale";
-import { generateInvoicePdf } from "~/Functions/pdf";
 
 interface SimplifiedInvoice {
   id: number;
@@ -86,7 +85,7 @@ interface SimplifiedInvoice {
 const invoices = ref<SimplifiedInvoice[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
-
+const pdf = ref(null);
 const fetchAllInvoices = async () => {
   loading.value = true;
   error.value = null;
@@ -121,9 +120,8 @@ const formatDate = (dateString: string | Date) => {
   }
 };
 
-const downloadInvoice = (invoice: SimplifiedInvoice) => {
+const downloadInvoice = async (invoice: SimplifiedInvoice) => {
   alert(`Téléchargement de la facture ${invoice.invoiceNumber}`);
-  generateInvoicePdf(invoice.id);
 };
 </script>
 
