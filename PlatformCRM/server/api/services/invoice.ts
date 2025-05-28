@@ -27,7 +27,7 @@ export async function createInvoice(payload: CreateInvoicePayload) {
     }
 
     
-    const totalQuoteAmount = quote.totalPrice ?? newTotalPrice; 
+   const totalQuoteAmount = newTotalPrice;
 
     // Vérification pour s'assurer que totalQuoteAmount est un nombre valide
     if (typeof totalQuoteAmount !== 'number' || isNaN(totalQuoteAmount)) {

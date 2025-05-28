@@ -207,7 +207,7 @@ const statusClass = (status: string) => {
   }
 };
 
-const downloadPDF = () => {
+const downloadPDF = async () => {
   if (quoteDetails.value) {
     console.log("Télécharger PDF pour le devis :", quoteDetails.value.id);
   }
@@ -232,6 +232,5 @@ const openCreateInvoiceModal = (quoteId: number) => {
 
 const handleInvoiceCreationSuccess = async () => {
   await fetchQuoteData(Number(route.params.id));
-  console.log("Invoice created successfully!");
 };
 </script>

@@ -3,9 +3,8 @@ import { readFile } from 'fs/promises';
 import path from 'path';
 
 export default defineEventHandler(async (event) => {
-  
-  const invoiceNumber = event.context.params?.invoiceNumber;
-
+  const query = getQuery(event)
+  const invoiceNumber = query?.id;
   if (!invoiceNumber) {
     throw createError({
       statusCode: 400,

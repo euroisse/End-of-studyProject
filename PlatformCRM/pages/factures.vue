@@ -79,7 +79,7 @@
                     <button
                       class="text-blue-500 hover:text-blue-700 cursor-pointer"
                       title="Télécharger"
-                      @click="downloadInvoice(facture)"
+                      @click="downloadInvoice(facture.invoiceNumber)"
                     >
                       <i class="ri-download-fill"></i>
                     </button>
@@ -148,6 +148,7 @@ const fetchInvoices = async () => {
 
 onMounted(() => {
   fetchInvoices();
+  downloadInvoice;
 });
 
 const filteredAndSortedInvoices = computed(() => {
@@ -202,10 +203,21 @@ const handleInvoiceCreated = (newInvoice: Invoice) => {
   showCreateInvoiceModal.value = false;
 };
 
-const downloadInvoice = (facture: Invoice) => {
-  alert(`Téléchargement de la facture ${facture.invoiceNumber}`);
+const downloadInvoice = async (invoiceNumber: string) => {
+  const response = await $fetch<Blob>(
+    `/api/file?invoiceNumber=${invoiceNumber}`
+  );
+  console.log(response);
+  const blob = new Blob([response], { type: "application/pdf" });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `invoices`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
 };
-
 const formatDate = (dateString: string | Date) => {
   if (!dateString) return "";
   const date = new Date(dateString);

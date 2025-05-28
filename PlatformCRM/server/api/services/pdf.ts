@@ -6,17 +6,17 @@ export type InvoiceWithQuote = Prisma.InvoiceGetPayload<{
   include: { 
     quote: {include: {
       customer: true,
-      stages: {include: {projectStage: true}},      
+      stages: {include: {projectStage: true}},       
     }},
     User: true
   };
 }>;
 
- export default async function generateInvoicePdf(invoice: InvoiceWithQuote) {
- console.log("--- donnees de facture genere par le pdf ---");
-    console.log("Invoice Object:", JSON.stringify(invoice, null, 2));
-    console.log("Invoice Quote:", JSON.stringify(invoice.quote, null, 2));
-    console.log("Invoice Quote Stages:", JSON.stringify(invoice.quote?.stages, null, 2));
+export default async function generateInvoicePdf(invoice: InvoiceWithQuote) {
+  console.log("--- donnees de facture genere par le pdf ---");
+  console.log("Invoice Object:", JSON.stringify(invoice, null, 2));
+  console.log("Invoice Quote:", JSON.stringify(invoice.quote, null, 2));
+  console.log("Invoice Quote Stages:", JSON.stringify(invoice.quote?.stages, null, 2));
 
   try {
     if (!invoice) {
@@ -32,6 +32,10 @@ export type InvoiceWithQuote = Prisma.InvoiceGetPayload<{
     const accentColor = "#E44933";
     const fontBase = "Helvetica";
     const fontBold = "Helvetica-Bold";
+
+    // Define margins 
+    const leftMargin = 50;
+    const rightMargin = doc.page.width - 50; 
 
     // --- En-tête ---
     doc
@@ -64,14 +68,15 @@ export type InvoiceWithQuote = Prisma.InvoiceGetPayload<{
     doc.text(clientCompany);
 
     const invoiceDate = new Date(invoice.invoiceDate).toLocaleDateString('fr-FR');
-    const currentYForDate = doc.y;
-    doc.text(`Date de facture: ${invoiceDate}`, 0, currentYForDate, { align: "right" });
+   
+    const currentYForClientInfo = doc.y;
+    doc.text(`Date de facture: ${invoiceDate}`, leftMargin, currentYForClientInfo - doc.currentLineHeight(), { align: "right", width: rightMargin - leftMargin }); // Adjust Y to align with the last line of client info
     doc.moveDown(2);
 
     // --- Tableau d'articles ---
     const tableTop = doc.y;
-    const itemColumnX = 50;
-    const amountColumnX = doc.page.width - 130;
+    const itemColumnX = leftMargin;
+    const amountColumnX = doc.page.width - 130; 
     const columnWidth = 180;
     const amountWidth = 80;
     const rowHeight = 20;
@@ -86,7 +91,7 @@ export type InvoiceWithQuote = Prisma.InvoiceGetPayload<{
     doc
       .lineWidth(0.5)
       .moveTo(itemColumnX, tableTop + rowHeight)
-      .lineTo(doc.page.width - 50, tableTop + rowHeight)
+      .lineTo(rightMargin, tableTop + rowHeight) 
       .stroke();
 
     let y = tableTop + rowHeight + 10;
@@ -109,7 +114,7 @@ export type InvoiceWithQuote = Prisma.InvoiceGetPayload<{
         doc
           .lineWidth(0.5)
           .moveTo(itemColumnX, y)
-          .lineTo(doc.page.width - 50, y)
+          .lineTo(rightMargin, y) 
           .stroke();
         y += 15;
       }
@@ -118,40 +123,61 @@ export type InvoiceWithQuote = Prisma.InvoiceGetPayload<{
       y += rowHeight + 15;
     }
 
-    // --- Totaux ---
+    // --- Totaux (Taxe, TOTAL, Montant Payé, Solde Dû)
     doc.moveDown(1);
     doc.fontSize(10).font(fontBase);
-    doc.moveDown(0.5);
 
-    
-
-    const taxRate = 0.05;
+    const taxRate = 0.01;
     const taxAmount = calculatedSubtotal * taxRate;
-    doc.text(`Taxe: ${taxAmount.toFixed(2)} CFA`, { align: "right" });
+    doc.moveDown(1)
+    // Taxe
+    let currentY = doc.y;
+    doc.text(`Taxe:`, leftMargin, currentY);
+    doc.text(`${taxAmount.toFixed(2)} CFA`, leftMargin, currentY, { align: "right", width: rightMargin - leftMargin });
     doc.moveDown(0.5);
 
-    doc.fontSize(12).text(`TOTAL: ${invoice.totalAmount.toFixed(2)} CFA`, { align: "right" });
-    doc.moveDown(0.2);
+    // TOTAL
+    currentY = doc.y;
+    doc.fontSize(12).font(fontBold); 
+    doc.text(`TOTAL:`, leftMargin, currentY);
+    doc.text(`${invoice.totalAmount.toFixed(2)} CFA`, leftMargin, currentY, { align: "right", width: rightMargin - leftMargin });
+    doc.moveDown(0.5);
 
-    doc.fontSize(10).text(`Montant Payé: ${invoice.amountPaid.toFixed(2)} CFA`, { align: "right" });
-    doc.moveDown(0.2);
+    // Montant Payé
+    currentY = doc.y;
+    doc.fontSize(10).font(fontBase);
+    doc.text(`Montant Payé:`, leftMargin, currentY);
+    doc.text(`${invoice.amountPaid.toFixed(2)} CFA`, leftMargin, currentY, { align: "right", width: rightMargin - leftMargin });
+    doc.moveDown(0.5);
 
+    // Solde Dû
+    currentY = doc.y;
     const balanceDue = invoice.totalAmount - invoice.amountPaid;
     doc.fontSize(10)
-       .fillColor(accentColor) 
-       .text(`Solde Dû:  ${balanceDue.toFixed(2)} CFA`, { align: "right" });
+       .fillColor(accentColor); 
+    doc.text(`Solde Dû:`, leftMargin, currentY);
+    doc.text(`${balanceDue.toFixed(2)} CFA`, leftMargin, currentY, { align: "right", width: rightMargin - leftMargin });
+    doc.fillColor(textColor); 
     doc.moveDown(2);
 
-   
-    doc.fillColor(textColor) 
-       .fontSize(8)
-       .font(fontBase)
-       .text("MÉTHODE DE PAIEMENT", { underline: true, align: "left" });
-       doc.text(`${invoice.paymentMethod}`, { align: "left" });
-    doc.moveDown(1);
+    // --- Méthode de Paiement et Signature ---
+    currentY = doc.y;
+    doc.fontSize(8).font(fontBase);
 
-    // --- Signature ---
-    doc.font(fontBold).fontSize(10).text("SIGNATURE", { align: "right" });
+    // MÉTHODE DE PAIEMENT 
+    doc.text("MÉTHODE DE PAIEMENT", leftMargin, currentY, { underline: true });
+
+    // SIGNATURE (right)
+    doc.font(fontBold).fontSize(10); 
+    doc.text("SIGNATURE", leftMargin, currentY, { align: "right", width: rightMargin - leftMargin });
+    
+    doc.moveDown(0.5); 
+
+    currentY = doc.y;
+    doc.font(fontBase).fontSize(8); 
+    doc.text(`${invoice.paymentMethod}`, leftMargin, currentY); 
+
+    doc.text("_______________________", leftMargin, currentY, { align: "right", width: rightMargin - leftMargin }); 
 
     doc.end();
     console.log(`Facture ${invoice.invoiceNumber}.pdf générée avec succès à ${outputPath}`);
@@ -159,4 +185,3 @@ export type InvoiceWithQuote = Prisma.InvoiceGetPayload<{
     console.error("Erreur lors de la génération de la facture PDF :", error);
   } 
 }
-

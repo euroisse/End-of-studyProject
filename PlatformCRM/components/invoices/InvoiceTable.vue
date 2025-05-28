@@ -56,7 +56,7 @@
                 class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
               >
                 <button
-                  @click="downloadInvoice(invoice)"
+                  @click="downloadInvoice(invoice.invoiceNumber)"
                   class="text-blue-500 hover:text-blue-700"
                   title="Télécharger"
                 >
@@ -120,8 +120,18 @@ const formatDate = (dateString: string | Date) => {
   }
 };
 
-const downloadInvoice = async (invoice: SimplifiedInvoice) => {
-  alert(`Téléchargement de la facture ${invoice.invoiceNumber}`);
+const downloadInvoice = async (invoiceNumber: string) => {
+  const response = await $fetch<Blob>(`/api/file?id=${invoiceNumber}`);
+  console.log(response);
+  const blob = new Blob([response], { type: "application/pdf" });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `invoices.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
 };
 </script>
 
