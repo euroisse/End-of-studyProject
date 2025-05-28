@@ -142,7 +142,6 @@ export interface QuoteStageInput {
      email: string;
      company:string;
    };
-    projectName: string;
   totalPrice: number;
   newTotalPrice?: number;
   dateLivraison?:string
@@ -176,5 +175,6 @@ export interface CreateInvoicePayload {
     projectStageId: number;
     price: number;
   }>;
+  newTotalPrice?:number
 }
 
