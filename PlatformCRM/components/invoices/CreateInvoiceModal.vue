@@ -123,7 +123,7 @@ const submitInvoice = async () => {
     return;
   }
   try {
-    await $fetch(`/api/invoices`, {
+    const response = await $fetch(`/api/invoices`, {
       method: "POST",
 
       body: JSON.stringify({
@@ -134,6 +134,7 @@ const submitInvoice = async () => {
         userId: userId,
       }),
     });
+    console.log("Invoice creation response:", response);
     emit("success");
     emit("close");
   } catch (error: any) {
