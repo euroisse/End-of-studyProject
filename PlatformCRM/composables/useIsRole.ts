@@ -4,6 +4,7 @@ export const useIsRole = () => {
   const userString = ref<string | null>(null);
 
   onMounted(() => {
+    if (import.meta.server) return
     userString.value = localStorage.getItem('user');
   });
 
