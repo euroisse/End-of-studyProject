@@ -119,11 +119,25 @@
         Créer une Facture
       </button>
     </div>
-    <InvoiceTable v-if="quoteDetails" :quoteId="quoteDetails.id" />
 
-    <div v-else class="text-center text-gray-600 py-4">
+    <InvoiceTable
+      v-if="quoteDetails && isAdmin && quoteDetails.status !== 'EN_ATTENTE'"
+      :quoteId="quoteDetails.id"
+    />
+
+    <div
+      v-else-if="
+        quoteDetails && isAdmin && quoteDetails.status === 'EN_ATTENTE'
+      "
+      class="text-center text-gray-600 py-4"
+    >
+      <p>Les factures seront affichées une fois le devis validé.</p>
+    </div>
+
+    <div v-else-if="!quoteDetails" class="text-center text-gray-600 py-4">
       <p>Chargement des factures du devis...</p>
     </div>
+
     <CreateInvoiceModal
       v-if="showCreateInvoiceModal && selectedQuoteForInvoice"
       :quoteId="selectedQuoteForInvoice.id"
@@ -147,10 +161,11 @@ definePageMeta({ layout: "admin" });
 
 const route = useRoute();
 const devisStore = useQuoteStore();
-const { isClient, isAdmin } = useIsRole();
+const { isClient, isAdmin } = useIsRole(); // Ensure useIsRole correctly provides isAdmin
 const quoteDetails = ref<quote | null>(null);
 const showCreateInvoiceModal = ref(false);
 const selectedQuoteForInvoice = ref<quote | null>(null);
+
 watch(
   () => route.params.id,
   async (newId) => {
@@ -180,7 +195,7 @@ async function fetchQuoteData(id: number) {
 const formatDate = (dateStr: string) => {
   if (!dateStr) return "N/A";
   try {
-    return format(new Date(dateStr), "dd MMMM yyyy à HH:mm", { locale: fr });
+    return format(new Date(dateStr), "dd MMMM 'à' HH:mm", { locale: fr });
   } catch (e) {
     console.error("Erreur de formatage de date:", e);
     return "Date invalide";
@@ -217,10 +232,10 @@ async function validateQuote() {
   if (quoteDetails.value && confirm("Voulez-vous vraiment valider ce devis?")) {
     try {
       await devisStore.updateQuoteStatus(quoteDetails.value.id, "ACCEPTE");
-      await fetchQuoteData(quoteDetails.value.id);
+      await fetchQuoteData(quoteDetails.value.id); // Re-fetch data to update status
       console.log(`Le devis ${quoteDetails.value.id} validé avec succès`);
     } catch (error) {
-      console.log("Erreur lors de la validation", error);
+      console.error("Erreur lors de la validation", error);
     }
   }
 }
@@ -234,3 +249,5 @@ const handleInvoiceCreationSuccess = async () => {
   await fetchQuoteData(Number(route.params.id));
 };
 </script>
+
+<style scoped></style>

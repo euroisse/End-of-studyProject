@@ -81,7 +81,7 @@ interface SimplifiedInvoice {
   invoiceNumber: string;
   invoiceDate: string | Date;
 }
-
+const { isAdmin } = useIsRole();
 const invoices = ref<SimplifiedInvoice[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);

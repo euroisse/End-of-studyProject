@@ -204,15 +204,13 @@ const handleInvoiceCreated = (newInvoice: Invoice) => {
 };
 
 const downloadInvoice = async (invoiceNumber: string) => {
-  const response = await $fetch<Blob>(
-    `/api/file?invoiceNumber=${invoiceNumber}`
-  );
+  const response = await $fetch<Blob>(`/api/file?id=${invoiceNumber}`);
   console.log(response);
   const blob = new Blob([response], { type: "application/pdf" });
   const url = window.URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `invoices`;
+  link.download = `invoices.pdf`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
