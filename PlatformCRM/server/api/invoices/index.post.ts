@@ -2,7 +2,7 @@
 import { defineEventHandler, readBody, createError } from 'h3';
 import { createInvoice } from '../services/invoice';
 import type { CreateInvoicePayload } from '~/types'; 
-
+import generateInvoicePdf from '../services/pdf';
 export default defineEventHandler(async (event) => {
   try {
     const body = await readBody<CreateInvoicePayload>(event);
@@ -16,7 +16,12 @@ export default defineEventHandler(async (event) => {
     }
 
     const result = await createInvoice(body);
-
+    
+ if (result.invoice) {
+      await generateInvoicePdf(result.invoice);
+    } else {
+     console.log('Erreur lors de la genération du pdf')
+    }
     return {
       statusCode: 201,
       message: result.message,
