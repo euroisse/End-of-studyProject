@@ -1,9 +1,16 @@
-
 import prisma from "~/server/database";
-import type { CreateInvoicePayload } from "~/types";
+import type { CreateInvoicePayload } from "~/types"; // Assurez-vous que ce chemin est correct
+
+enum PaymentMethodEnum {
+  OrangeMoney = 'OrangeMoney',
+  MTNMoney = 'MTNMoney',
+  BankTransfer = 'BankTransfer',
+  Cash = 'Cash',
+}
 
 export async function createInvoice(payload: CreateInvoicePayload) {
-  const { quoteId, amountPaid, invoiceDate, paymentMethod, userId } = payload;
+  // Déstructurez newTotalPrice du payload
+  const { quoteId, amountPaid, invoiceDate, paymentMethod, userId, newTotalPrice } = payload; 
 
   try {
     const quote = await prisma.quote.findUnique({
@@ -19,7 +26,13 @@ export async function createInvoice(payload: CreateInvoicePayload) {
       throw new Error(`Devis avec l'ID ${quoteId} non trouvé.`);
     }
 
-    const totalQuoteAmount = quote.totalPrice;
+    
+    const totalQuoteAmount = quote.totalPrice ?? newTotalPrice; 
+
+    // Vérification pour s'assurer que totalQuoteAmount est un nombre valide
+    if (typeof totalQuoteAmount !== 'number' || isNaN(totalQuoteAmount)) {
+      throw new Error("Le montant total du devis n'a pas pu être déterminé. Veuillez vérifier quote.totalPrice ou newTotalPrice.");
+    }
 
     // 2. Récupérer les factures existantes pour ce devis
     const existingInvoices = await prisma.invoice.findMany({
@@ -34,7 +47,6 @@ export async function createInvoice(payload: CreateInvoicePayload) {
     const balanceDue = totalQuoteAmount - newTotalAmountPaid;
 
     // 3. Générer un numéro de facture unique
-    
     const lastInvoice = await prisma.invoice.findFirst({
       where: {
         invoiceNumber: {
@@ -61,6 +73,24 @@ export async function createInvoice(payload: CreateInvoicePayload) {
       newInvoiceNumber = `FACT-${String(1).padStart(4, '0')}`;
     }
 
+    let validatedPaymentMethod: PaymentMethodEnum;
+    switch (paymentMethod) {
+      case PaymentMethodEnum.OrangeMoney:
+        validatedPaymentMethod = PaymentMethodEnum.OrangeMoney;
+        break;
+      case PaymentMethodEnum.MTNMoney:
+        validatedPaymentMethod = PaymentMethodEnum.MTNMoney;
+        break;
+      case PaymentMethodEnum.BankTransfer:
+        validatedPaymentMethod = PaymentMethodEnum.BankTransfer;
+        break;
+      case PaymentMethodEnum.Cash:
+        validatedPaymentMethod = PaymentMethodEnum.Cash;
+        break;
+      default:
+        throw new Error(`Méthode de paiement invalide fournie: "${paymentMethod}". Les options valides sont: ${Object.values(PaymentMethodEnum).join(', ')}.`);
+    }
+
     // 4. Créer la nouvelle facture
     const newInvoice = await prisma.invoice.create({
       data: {
@@ -70,9 +100,16 @@ export async function createInvoice(payload: CreateInvoicePayload) {
         amountPaid: amountPaid,
         balanceDue: balanceDue,
         invoiceDate: invoiceDate ? new Date(invoiceDate) : new Date(),
-        paymentMethod: paymentMethod,
+        paymentMethod: validatedPaymentMethod,
         User: { connect: { id: userId } },
       },
+      include: {
+        quote:  {include: {
+          customer: true,
+          stages: {include: {projectStage: true}},       
+        }},
+        User: true
+      }
     });
 
     const clientName = quote.customer?.name;
@@ -88,7 +125,8 @@ export async function createInvoice(payload: CreateInvoicePayload) {
     };
   } catch (error) {
     console.error("Erreur lors de la création de la facture:", error);
-  
     throw error; 
   }
 }
+
+
