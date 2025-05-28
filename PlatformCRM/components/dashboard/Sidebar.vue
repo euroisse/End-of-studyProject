@@ -144,14 +144,6 @@ const employeMenu: MenuItem[] = [
   { label: "Clients", to: "/clients", icon: "ri-user-3-line" },
   { label: "Projets", to: "/projects", icon: "ri-projector-2-line" },
   {
-    label: "Factures & Devis",
-    icon: "ri-file-line",
-    children: [
-      { label: "Factures", to: "/factures" },
-      { label: "Devis", to: "/devis" },
-    ],
-  },
-  {
     label: "Messages",
     to: "/messages",
     icon: "ri-chat-3-line",
@@ -188,16 +180,8 @@ const clientMenu: MenuItem[] = [
 
 const adminMenu: MenuItem[] = [
   { label: "Projets", to: "/projects", icon: "ri-projector-2-line" },
-
-  { label: "Clients", to: "/clients", icon: "ri-user-3-line" },
-  {
-    label: "Factures & Devis",
-    icon: "ri-file-line",
-    children: [
-      { label: "Factures", to: "/factures" },
-      { label: "Devis", to: "/devis" },
-    ],
-  },
+  { label: "Devis", to: "/devis", icon: "ri-file-line" },
+  { label: "Utilisateurs", to: "/utilisateurs", icon: "ri-group-line" },
   { label: "Déconnexion", icon: "ri-logout-box-line" },
 ];
 
