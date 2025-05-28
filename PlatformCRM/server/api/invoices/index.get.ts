@@ -1,5 +1,5 @@
 import prisma from "~/server/database";
-import { defineEventHandler, getQuery } from "h3"; // <-- Importez getQuery ici
+import { defineEventHandler, getQuery } from "h3"; 
 
 export default defineEventHandler(async (event) => {
   try {
