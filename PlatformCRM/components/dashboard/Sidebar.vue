@@ -141,7 +141,6 @@ const employeMenu: MenuItem[] = [
     to: "/dashboard",
     icon: "ri-dashboard-line",
   },
-  { label: "Clients", to: "/clients", icon: "ri-user-3-line" },
   { label: "Projets", to: "/projects", icon: "ri-projector-2-line" },
   {
     label: "Messages",
@@ -229,7 +228,7 @@ onMounted(() => {
   });
 
   const currentPath = route.path;
-  for (const item of [...employeMenu, ...clientMenu]) {
+  for (const item of [...clientMenu]) {
     if (item.children?.some((child) => child.to === currentPath)) {
       activeSubMenu.value = item.label;
       break;
