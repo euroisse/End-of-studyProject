@@ -113,6 +113,7 @@ const login = async () => {
   utilisateur.value.roleId = userType.value;
   console.log("login en cours", utilisateur.value);
   try {
+    // @ts-ignore
     const response = (await $fetch("/api/auth/login", {
       method: "POST",
       body: utilisateur.value,
@@ -129,6 +130,7 @@ const login = async () => {
         department: user.department || null,
         adresse: user.adresse || null,
         company: user.company || null,
+        contacts: user.contacts || null,
         industry: user.industry || null,
       };
       localStorage.setItem("user", JSON.stringify(userData));

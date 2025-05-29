@@ -282,6 +282,29 @@
         </div>
       </div>
     </div>
+    <div>
+      <!-- contacts -->
+        <label
+          for="register-address"
+          class="block text-sm font-medium text-gray-700 mb-1"
+          >Contacts</label
+        >
+        <div class="relative">
+          <div
+            class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+          >
+            <i class="ri-map-pin-line text-gray-400"></i>
+          </div>
+          <input
+            id="register-address"
+            v-model="clientDetails.contacts"
+            type="number"
+            class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            placeholder="000-000-000"
+          />
+        </div>
+      </div>
+    </div>
 
     <!-- Terms -->
     <div class="flex items-center">
@@ -336,6 +359,7 @@ const clientDetails = ref({
   company: "",
   industry: "",
   address: "",
+  contacts: "",
 });
 
 const passwordStrength = computed(() => {
@@ -377,6 +401,7 @@ const register = async () => {
           company: clientDetails.value.company,
           industry: clientDetails.value.industry,
           address: clientDetails.value.address,
+          contacts: clientDetails.value.contacts,
         }),
   };
   await useFetch("/api/users/create", {
@@ -397,6 +422,7 @@ const register = async () => {
   clientDetails.value.company = "";
   clientDetails.value.industry = "";
   clientDetails.value.address = "";
+  clientDetails.value.contacts = "";
 };
 
 defineEmits(["register"]);
