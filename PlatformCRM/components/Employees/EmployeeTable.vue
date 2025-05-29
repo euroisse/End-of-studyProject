@@ -14,19 +14,13 @@
               scope="col"
               class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
-              Name
+              Nom
             </th>
             <th
               scope="col"
               class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
-              Post
-            </th>
-            <th
-              scope="col"
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Project
+              Poste
             </th>
             <th
               scope="col"
@@ -37,7 +31,12 @@
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-          <tr v-for="employee in employees" :key="employee.id">
+          <tr v-if="employees.length === 0">
+            <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
+              Aucun employé trouvé.
+            </td>
+          </tr>
+          <tr v-else v-for="employee in employees" :key="employee.id">
             <td
               class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
             >
@@ -47,26 +46,23 @@
               {{ employee.name }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {{ employee.post }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {{ employee.project }}
+              {{ employee.post || "N/A" }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
               <div class="flex items-center space-x-4">
                 <button
                   @click="viewEmployee(employee.id)"
-                  class="text-indigo-600 hover:text-indigo-900"
+                  class="text-green-600 hover:text-green-900"
                   title="Voir plus"
                 >
-                  <i class="ri-eye-line text-lg"></i>
+                  <i class="ri-eye-line"></i>
                 </button>
                 <button
                   @click="editEmployee(employee.id)"
                   class="text-blue-600 hover:text-blue-900"
                   title="Modifier"
                 >
-                  <i class="ri-pencil-line text-lg"></i>
+                  <i class="ri-pencil-line"></i>
                 </button>
               </div>
             </td>
@@ -78,17 +74,17 @@
 </template>
 
 <script setup lang="ts">
-import type { Employees } from "~/types";
+import type { EmployeeDisplayData } from "~/types";
+
 defineProps<{
-  employees: Employees[];
+  employees: EmployeeDisplayData[];
 }>();
 
-// Fonctions pour les actions
-const viewEmployee = (id: string) => {
+const viewEmployee = (id: number) => {
   console.log("Voir l'employé avec l'ID :", id);
 };
 
-const editEmployee = (id: string) => {
+const editEmployee = (id: number) => {
   console.log("Modifier l'employé avec l'ID :", id);
 };
 </script>

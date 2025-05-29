@@ -37,32 +37,37 @@
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-          <tr v-for="contact in contacts" :key="contact.id">
+          <tr v-if="clients.length === 0">
+            <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+              Aucun client trouvé.
+            </td>
+          </tr>
+          <tr v-else v-for="client in clients" :key="client.id">
             <td
               class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
             >
-              {{ contact.id }}
+              {{ client.id }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {{ contact.name }}
+              {{ client.name }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {{ contact.email }}
+              {{ client.email }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {{ contact.phoneNumber }}
+              {{ client.phoneNumber || "N/A" }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
               <div class="flex items-center space-x-4">
                 <button
-                  @click="viewContact(contact.id)"
+                  @click="viewContact(client.id)"
                   class="text-green-600 hover:text-green-900"
                   title="Voir plus"
                 >
                   <i class="ri-eye-line"></i>
                 </button>
                 <button
-                  @click="editContact(contact.id)"
+                  @click="editContact(client.id)"
                   class="text-blue-600 hover:text-blue-900"
                   title="Modifier"
                 >
@@ -78,22 +83,20 @@
 </template>
 
 <script setup lang="ts">
-import type { Contact } from "~/types";
+import type { ClientDisplayData } from "~/types";
 
-// Définition des props pour le composant ClientTable
 defineProps<{
-  contacts: Contact[];
+  clients: ClientDisplayData[];
 }>();
 
-const viewContact = (id: string) => {
+const viewContact = (id: number) => {
   console.log("Voir le contact avec l'ID :", id);
+  navigateTo(`/clients/${id}`);
 };
 
-const editContact = (id: string) => {
+const editContact = (id: number) => {
   console.log("Modifier le contact avec l'ID :", id);
 };
 </script>
 
-<style scoped>
-/* Pas de styles spécifiques ici car Tailwind gère la plupart du design */
-</style>
+<style scoped></style>

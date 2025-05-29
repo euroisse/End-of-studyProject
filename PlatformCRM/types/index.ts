@@ -24,6 +24,7 @@ export interface Message {
    
 }
 export interface Invoice {
+  id:number,
     numero: string;
     projet: string;
     date: string;
@@ -42,6 +43,7 @@ export interface Invoice {
       adresse?: string;
       company?: string;
       industry?: string;
+      contacts?: string;
       
 };}
 
@@ -178,3 +180,36 @@ export interface CreateInvoicePayload {
   newTotalPrice?:number
 }
 
+
+
+export interface UserData {
+  id: number;
+  name: string;
+  email: string;
+  contacts?: string; 
+  company?: string;
+  industry?: string;
+  adresse?: string;
+  poste?: string; 
+  department?: string;
+  profilePicture?: string;
+  UserRole: { role: { name: string } }[];
+}
+
+export interface ClientDisplayData {
+  id: number;
+  name: string;
+  email: string;
+  phoneNumber?: string; 
+  company?: string;
+ 
+}
+
+
+export interface EmployeeDisplayData {
+  id: number;
+  name: string;
+  post?: string; 
+  project?: string; 
+ 
+}

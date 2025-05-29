@@ -2,7 +2,6 @@
   <div class="space-y-4">
     <h2 class="text-2xl font-bold text-gray-800 mb-6">Créez votre compte</h2>
 
-    <!-- User Type Selection -->
     <div class="relative">
       <label class="block text-sm font-medium text-gray-700 mb-1"
         >Type d'utilisateur</label
@@ -25,7 +24,6 @@
       </div>
     </div>
 
-    <!-- Name -->
     <div>
       <label
         for="register-name"
@@ -48,7 +46,6 @@
       </div>
     </div>
 
-    <!-- Email -->
     <div>
       <label
         for="register-email"
@@ -71,7 +68,6 @@
       </div>
     </div>
 
-    <!-- Password -->
     <div>
       <label
         for="register-password"
@@ -103,7 +99,6 @@
         </div>
       </div>
 
-      <!-- Password Strength -->
       <div class="mt-1">
         <div class="w-full bg-gray-200 rounded-full h-1.5">
           <div
@@ -137,7 +132,6 @@
       </div>
     </div>
 
-    <!-- Confirm Password -->
     <div>
       <label
         for="register-confirm-password"
@@ -170,7 +164,6 @@
       </div>
     </div>
 
-    <!-- Employee Fields -->
     <div v-if="userType === '1'" class="space-y-4">
       <div>
         <label
@@ -216,7 +209,6 @@
       </div>
     </div>
 
-    <!-- Client Fields -->
     <div v-if="userType === '2'" class="space-y-4">
       <div>
         <label
@@ -281,9 +273,7 @@
           />
         </div>
       </div>
-    </div>
-    <div>
-      <!-- contacts -->
+      <div>
         <label
           for="register-address"
           class="block text-sm font-medium text-gray-700 mb-1"
@@ -306,7 +296,6 @@
       </div>
     </div>
 
-    <!-- Terms -->
     <div class="flex items-center">
       <input
         id="terms"
@@ -326,7 +315,6 @@
       </label>
     </div>
 
-    <!-- Register Button -->
     <button
       @click="register"
       class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition whitespace-nowrap cursor-pointer"

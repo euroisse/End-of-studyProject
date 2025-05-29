@@ -48,7 +48,8 @@ export default defineEventHandler(async (event) => {
         ...(user.department && { department: user.department }),
         ...(user.adresse && { adresse: user.adresse }),
         ...(user.company && { company: user.company }),
-        ...(user.industry && { industry: user.industry })
+        ...(user.industry && { industry: user.industry }),
+         ...(user.contacts && { contacts: user.contacts })
       }
     }
   } catch (error) {
