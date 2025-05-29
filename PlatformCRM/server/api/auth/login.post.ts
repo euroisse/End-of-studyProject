@@ -56,6 +56,7 @@ export default defineEventHandler(async (event) => {
                 department: user.department ?? null,
                 adresse: user.adresse ?? null,
                 company: user.company ?? null,
+                contacts : user.contacts ?? null,
                 industry: user.industry ?? null,
             },
         };
