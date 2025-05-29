@@ -33,6 +33,7 @@ model User {
   adresse        String?
   company        String?
   industry       String?
+  contacts       String?
   clientProjects Project[]            @relation("CustomerProjects")
   clientQuote    Quote[]
   clientInvoice  Invoice[]
