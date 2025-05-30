@@ -1,5 +1,13 @@
 <template>
   <div class="pt-4">
+    <div class="flex justify-end space-x-3 p-3">
+      <button
+        class="px-2 py-2 bg-blue-500 hover:bg-blue-700 text-white rounded-md"
+        @click="showRegisterModal = true"
+      >
+        Créer un Client
+      </button>
+    </div>
     <div class="overflow-x-auto shadow-md sm:rounded-lg">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
@@ -79,15 +87,35 @@
         </tbody>
       </table>
     </div>
+
+    <BaseModal :show="showRegisterModal" @close="showRegisterModal = false">
+      <template #body>
+        <LoginCustomer @client-registered="handleClientRegistered" />
+      </template>
+      <template #footer>
+        <button
+          class="text-blue-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+          type="button"
+          @click="showRegisterModal = false"
+        >
+          Fermer
+        </button>
+      </template>
+    </BaseModal>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref } from "vue";
 import type { ClientDisplayData } from "~/types";
+import BaseModal from "./BaseModal.vue";
+import LoginCustomer from "../authentification/SingUpCustomer.vue";
 
 defineProps<{
   clients: ClientDisplayData[];
 }>();
+
+const showRegisterModal = ref(false);
 
 const viewContact = (id: number) => {
   console.log("Voir le contact avec l'ID :", id);
@@ -97,6 +125,16 @@ const viewContact = (id: number) => {
 const editContact = (id: number) => {
   console.log("Modifier le contact avec l'ID :", id);
 };
+
+const handleClientRegistered = () => {
+  showRegisterModal.value = false;
+
+  console.log("Client enregistré avec succès.");
+
+  emit("refresh-clients");
+};
+
+const emit = defineEmits(["refresh-clients"]);
 </script>
 
 <style scoped></style>

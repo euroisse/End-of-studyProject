@@ -36,17 +36,6 @@
           >
             Connexion
           </button>
-          <button
-            @click="activeTabLocal = 'register'"
-            :class="[
-              'px-4 py-3 font-medium whitespace-nowrap cursor-pointer',
-              activeTabLocal === 'register'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-500 hover:text-blue-500',
-            ]"
-          >
-            Créer un compte
-          </button>
         </div>
 
         <Login v-if="activeTabLocal === 'login'" @login="handleLogin" />
@@ -65,7 +54,6 @@ import { ref } from "vue";
 
 import image1 from "~/assets/Images/image1.jpg";
 import Login from "./authentification/Login.vue";
-import SingUp from "./authentification/SingUp.vue";
 
 const heroImage = image1;
 
