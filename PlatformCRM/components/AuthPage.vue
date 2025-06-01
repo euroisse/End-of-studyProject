@@ -39,11 +39,6 @@
         </div>
 
         <Login v-if="activeTabLocal === 'login'" @login="handleLogin" />
-
-        <SingUp
-          v-if="activeTabLocal === 'register'"
-          @register="handleRegister"
-        />
       </div>
     </div>
   </div>
@@ -76,17 +71,9 @@ watch(
 const handleLogin = (loginData: any) => {
   console.log("Login data received in AuthPage:", loginData);
 };
-
-const handleRegister = (registerData: any) => {
-  console.log("Register data received in AuthPage:", registerData);
-};
 </script>
 
 <style scoped>
-input[type="number"] {
-  -moz-appearance: textfield;
-}
-
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease;

@@ -4,6 +4,7 @@
       <h2 class="text-2xl font-bold text-gray-800 mb-6">
         Connectez-vous à votre compte
       </h2>
+
       <div>
         <label
           for="login-email"
@@ -67,8 +68,9 @@
       <button
         type="submit"
         class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition whitespace-nowrap cursor-pointer"
+        :disabled="isLoading"
       >
-        Se connecter
+        {{ isLoading ? "Connexion en cours..." : "Se connecter" }}
       </button>
 
       <div class="relative flex items-center py-2">
@@ -79,17 +81,23 @@
 
       <div class="grid grid-cols-2 gap-4">
         <button
+          type="button"
           class="flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 py-2.5 px-4 rounded-lg hover:bg-gray-50 transition whitespace-nowrap cursor-pointer"
         >
           <i class="ri-google-fill text-red-500"></i>
           <span>Google</span>
         </button>
         <button
+          type="button"
           class="flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 py-2.5 px-4 rounded-lg hover:bg-gray-50 transition whitespace-nowrap cursor-pointer"
         >
           <i class="ri-linkedin-fill text-blue-700"></i>
           <span>LinkedIn</span>
         </button>
+      </div>
+
+      <div v-if="loginError" class="text-red-600 text-sm mt-3">
+        {{ loginError }}
       </div>
     </div>
   </form>
@@ -99,25 +107,33 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import type { LoginResponse } from "~/types";
+
 const email = ref("");
 const password = ref("");
-const userType = ref("");
 const showPassword = ref(false);
 const router = useRouter();
 const loginError = ref("");
+const isLoading = ref(false);
 
-const utilisateur = ref({ email: "", password: "", roleId: "" });
 const login = async () => {
-  utilisateur.value.email = email.value;
-  utilisateur.value.password = password.value;
-  utilisateur.value.roleId = userType.value;
-  console.log("login en cours", utilisateur.value);
+  loginError.value = "";
+  isLoading.value = true;
+
+  if (!email.value || !password.value) {
+    loginError.value = "Veuillez entrer votre email et votre mot de passe.";
+    isLoading.value = false;
+    return;
+  }
+
   try {
-    // @ts-ignore
     const response = (await $fetch("/api/auth/login", {
       method: "POST",
-      body: utilisateur.value,
+      body: {
+        email: email.value,
+        password: password.value,
+      },
     })) as LoginResponse;
+
     if (response && response?.user) {
       const user = response.user;
 
@@ -126,33 +142,45 @@ const login = async () => {
         name: user.name,
         email: user.email,
         roles: user?.roles ? user.roles[0] : undefined,
-        poste: user.poste || null,
-        department: user.department || null,
-        adresse: user.adresse || null,
-        company: user.company || null,
-        contacts: user.contacts || null,
-        industry: user.industry || null,
+        ...(user.poste && { poste: user.poste }),
+        ...(user.department && { department: user.department }),
+        ...(user.adresse && { adresse: user.adresse }),
+        ...(user.contacts && { contacts: user.contacts }),
+        ...(user.company && { company: user.company }),
+        ...(user.industry && { industry: user.industry }),
       };
       localStorage.setItem("user", JSON.stringify(userData));
-      router.push("/dashboard");
+
+      const userRole = user.roles && user.roles.length > 0 ? user.roles[0] : "";
+
+      if (userRole === "customer") {
+        router.push("/dashboard");
+      } else if (userRole === "employee") {
+        router.push("/dashboard");
+      } else {
+        console.warn(
+          "User role not recognized or missing. Redirecting to a default dashboard."
+        );
+      }
+
+      // Clear form fields
       email.value = "";
       password.value = "";
-      userType.value = "";
     } else {
-      console.error(
-        "Erreur de connexion: Utilisateur non trouvé ou informations incorrectes."
-      );
+      loginError.value = "Email ou mot de passe incorrect.";
     }
   } catch (error: any) {
-    console.error("Erreur lors de la requête de connexion:", error);
-    loginError.value = "Une erreur s'est produite lors de la connexion.";
-    if (error?.statusCode === 403) {
-      loginError.value = "Type d'utilisateur incorrect.";
+    console.error("Error during login request:", error);
+    if (error?.statusCode === 401 || error?.statusCode === 400) {
+      loginError.value = "Email ou mot de passe incorrect.";
+    } else {
+      loginError.value =
+        "Une erreur inattendue est survenue. Veuillez réessayer.";
     }
+  } finally {
+    isLoading.value = false;
   }
 };
-
-defineEmits(["login"]);
 </script>
 
 <style scoped></style>
