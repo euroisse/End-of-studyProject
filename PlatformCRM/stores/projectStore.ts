@@ -1,12 +1,14 @@
-import { defineStore,  } from "pinia";
-import type { ProjectStage, Project} from "~/generated/prisma";
-import type { ProjectWithProjectStages } from "~/types";
+// stores/projects.ts
+import { defineStore, } from "pinia";
+import type { ProjectStage, Project } from "~/generated/prisma"; 
+import type { ProjectWithProjectStages } from "~/types"; 
+import { ref } from 'vue'; 
 
 export const useProjectStore = defineStore('projects', {
   state: () => ({
     selectedProject: ref<ProjectWithProjectStages | null>(null),
     projectStages: ref<ProjectStage[]>([]),
-    projects: ref<Project[]>([]),
+    projects: ref<Project[]>([]), 
     projectToEdit: ref<ProjectWithProjectStages | null>(null),
     selectedProjectStage: ref<ProjectStage | null>(null),
   }),
@@ -19,11 +21,14 @@ export const useProjectStore = defineStore('projects', {
     },
 
     async fetchProjects() {
-      const response = await $fetch<Project[]>('/api/Projects/projects',{
-        method: 'POST',
-        
-      });
-      this.projects = response;
+      try {
+       
+        const response = await $fetch<Project[]>('/api/Projects/projects');
+        this.projects = response;
+      } catch (error) {
+        console.error("Erreur lors de la récupération de tous les projets:", error);
+        this.projects = [];
+      }
     },
 
     async fetchProject(id: number) {
@@ -44,10 +49,16 @@ export const useProjectStore = defineStore('projects', {
         }
       }
     },
-    
-    async fetchUserProjects(userId: number) { 
-      const response = await $fetch<Project[]>(`/api/Projects/user/${userId}`);
-      this.projects = response;
+
+    async fetchUserProjects(userId: number) {
+      try {
+     
+        const response = await $fetch<Project[]>(`/api/Projects/user/${userId}`);
+        this.projects = response; 
+      } catch (error) {
+        console.error(`Erreur lors de la récupération des projets de l'utilisateur ${userId}:`, error);
+        this.projects = [];
+      }
     },
     async deleteProjectStage(stageId: number) {
       await $fetch(`/api/projectStage/${stageId}`, {
@@ -58,7 +69,7 @@ export const useProjectStore = defineStore('projects', {
       }
     },
     async updateProject(projectId: number, projectData: Partial<Project>) {
-      const response = await $fetch<ProjectWithProjectStages>(`/api/Projects/${projectId}`, { 
+      const response = await $fetch<ProjectWithProjectStages>(`/api/Projects/${projectId}`, {
         method: 'PUT',
         body: projectData,
       });

@@ -180,19 +180,8 @@ const stageAdded = async (newStage: ProjectStage) => {
 };
 
 onMounted(() => {
-  console.log("ProjectsProjectTimeline mounted.");
-  console.log(
-    "projectStore.selectedProject in Timeline:",
-    projectStore.selectedProject
-  );
-  console.log(
-    "projectStages in Timeline:",
-    projectStore.selectedProject?.projectStages
-  );
-  console.log(
-    "projectStages length in Timeline:",
-    projectStore.selectedProject?.projectStages?.length
-  );
+  handleSaveProjectStage;
+  stageAdded;
 });
 
 watch(

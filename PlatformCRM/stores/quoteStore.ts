@@ -1,19 +1,17 @@
+
 import { defineStore } from 'pinia';
-import { ref, type Ref } from 'vue'; 
-import QuoteList from '~/components/quotes/QuoteList.vue';
-import type { quoteStatus } from '~/generated/prisma';
+import { ref, type Ref } from 'vue';
+import type { quoteStatus } from '~/generated/prisma'; 
 import type { quote, CreateUpdateQuotePayload } from '~/types'; 
 
 export const useQuoteStore = defineStore('devis', () => {
-  // Définition des états du store
   const quote: Ref<quote | null> = ref(null);
   const quoteDetails: Ref<quote | null> = ref(null);
-  const loading: Ref<boolean> = ref(false); 
-  const error: Ref<any> = ref(null); 
-  const quotesList: Ref<quote[]> = ref([]);
-  const currentStagesPrices: Ref<Record<number, number>> = ref({}); 
+  const loading: Ref<boolean> = ref(false);
+  const error: Ref<any> = ref(null);
+  const quotesList: Ref<quote[]> = ref([]); 
+  const currentStagesPrices: Ref<Record<number, number>> = ref({});
 
-  // Fonctions utilitaires pour gérer les états de chargement et d'erreur
   function setLoading(isLoading: boolean) {
     loading.value = isLoading;
   }
@@ -26,14 +24,12 @@ export const useQuoteStore = defineStore('devis', () => {
     error.value = null;
   }
 
- 
   async function createQuote(payload: CreateUpdateQuotePayload): Promise<quote> {
     setLoading(true);
     clearError();
     try {
       const newQuote = await $fetch<quote>('/api/quotes', { method: 'POST', body: payload });
       quote.value = newQuote;
-      // Après la création, rafraîchir la liste pour qu'elle inclue le nouveau devis (si pertinent pour le rôle)
       await fetchQuotesList(); 
       return newQuote;
     } catch (err: any) {
@@ -44,7 +40,6 @@ export const useQuoteStore = defineStore('devis', () => {
     }
   }
 
-  
   async function fetchQuoteDetails(quoteId: number): Promise<quote | null> {
     setLoading(true);
     quoteDetails.value = null;
@@ -53,7 +48,6 @@ export const useQuoteStore = defineStore('devis', () => {
       const details = await $fetch<quote>(`/api/quotes/${quoteId}`);
       quoteDetails.value = details;
 
-      // Initialise les prix des étapes pour l'édition
       const prices: Record<number, number> = {};
       details.stages.forEach(stage => {
         prices[stage.projectStageId] = stage.prix;
@@ -69,7 +63,6 @@ export const useQuoteStore = defineStore('devis', () => {
     }
   }
 
- 
   async function fetchQuotesList(): Promise<void> {
     setLoading(true);
     clearError();
@@ -78,25 +71,25 @@ export const useQuoteStore = defineStore('devis', () => {
       if (!userString) {
         console.warn("Utilisateur non connecté. Impossible de récupérer les devis.");
         quotesList.value = [];
-        setLoading(false); 
-        return; 
+        setLoading(false);
+        return;
       }
 
       const user = JSON.parse(userString);
       const userId = user.id;
-      const userRole = user.role; 
+      // Votre API `/api/quotes/user/${userId}` utilise `user.role`, assurez-vous que `user.role` existe ou utilisez `user.roles[0]`
+      const userRole = user.role || (user.roles && user.roles.length > 0 ? user.roles[0].name : null); 
 
       let apiEndpoint: string;
 
-      if (userRole === "ADMIN") {
-        apiEndpoint = "/api/quotes"; 
-      } else {
-
-        apiEndpoint = `/api/quotes/user/${userId}`; 
+      if (userRole === "admin") { 
+        apiEndpoint = "/api/quotes";
+      } else { // Par défaut pour les clients
+        apiEndpoint = `/api/quotes/user/${userId}`;
       }
-      
 
-      const quotes = await $fetch<any[]>(apiEndpoint);
+      // Votre API de devis retourne directement un tableau, pas un objet `{ data: [] }`
+      const quotes = await $fetch<quote[]>(apiEndpoint); 
 
       quotesList.value = quotes.map(q => ({
         ...q,
@@ -105,29 +98,26 @@ export const useQuoteStore = defineStore('devis', () => {
     } catch (err: any) {
       setError(err);
       console.error("Erreur lors de la récupération des devis dans le store:", err);
-
-      quotesList.value = []; 
+      quotesList.value = [];
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   }
 
-  
   async function updatequote(quoteId: number, payload: CreateUpdateQuotePayload): Promise<quote> {
     setLoading(true);
     clearError();
     try {
       const updatedQuote = await $fetch<quote>(`/api/quotes/${quoteId}`, { method: 'PUT', body: payload });
       quoteDetails.value = updatedQuote;
-      
+
       const prices: Record<number, number> = {};
       updatedQuote.stages.forEach(stage => {
         prices[stage.projectStageId] = stage.prix;
       });
       currentStagesPrices.value = prices;
 
-      // Après la mise à jour, rafraîchir la liste pour refléter les changements
-      await fetchQuotesList(); 
+      await fetchQuotesList();
       return updatedQuote;
     } catch (err: any) {
       setError(err);
@@ -137,35 +127,35 @@ export const useQuoteStore = defineStore('devis', () => {
     }
   }
 
- async function updateQuoteStatus(quoteId: number, status: quoteStatus): Promise<quote> {
-  setLoading(true);
-  clearError();
-  try {
-    const updatedQuote = await $fetch<quote>(`api/quotes/${quoteId}`, {
-      method: 'PUT',
-      body: { status }
-    });
-    quoteDetails.value = updatedQuote;
-    
-    const index = quotesList.value.findIndex(q => q.id === quoteId);
-    if (index !== -1) { 
-      quotesList.value[index] = updatedQuote;
+  async function updateQuoteStatus(quoteId: number, status: quoteStatus): Promise<quote> {
+    setLoading(true);
+    clearError();
+    try {
+      const updatedQuote = await $fetch<quote>(`api/quotes/${quoteId}`, {
+        method: 'PUT',
+        body: { status }
+      });
+      quoteDetails.value = updatedQuote;
+
+      const index = quotesList.value.findIndex(q => q.id === quoteId);
+      if (index !== -1) {
+        quotesList.value[index] = updatedQuote;
+      }
+      return updatedQuote;
+    } catch (err: any) {
+      setError(err);
+      throw err;
+    } finally {
+      setLoading(false);
     }
-    return updatedQuote;
-  } catch (err: any) {
-    setError(err);
-    throw err;
-  } finally {
-    setLoading(false);
   }
-}
   async function deleteQuote(quoteId: number): Promise<void> {
     setLoading(true);
     clearError();
     try {
       await $fetch<void>(`/api/quotes/${quoteId}`, { method: 'DELETE' });
 
-      await fetchQuotesList(); 
+      await fetchQuotesList();
     } catch (err: any) {
       setError(err);
       throw err;
@@ -174,7 +164,6 @@ export const useQuoteStore = defineStore('devis', () => {
     }
   }
 
-  // Retourne tous les états et actions pour être utilisés par les composants
   return {
     quote,
     quoteDetails,

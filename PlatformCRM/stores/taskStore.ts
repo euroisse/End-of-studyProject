@@ -1,9 +1,10 @@
+
 import { defineStore } from 'pinia';
-import type { Task, State, TaskUpdatePayload } from '~/types/';
+import type { Task, State, TaskUpdatePayload } from '~/types/'; 
 
 export const useTaskStore = defineStore('task', {
   state: (): State => ({
-    tasks: [],
+    tasks: [], 
     selectedTaskIds: [],
     selectedProjectId: null,
     assignedEmployeeId: null,
@@ -19,13 +20,19 @@ export const useTaskStore = defineStore('task', {
     ],
     taskToEditId: null,
     taskBeingEdited: null,
-    
   }),
   actions: {
     async fetchTasks() {
-      const response = await $fetch<Task[]>('/api/Tasks/tasks?_expand=project');
-      this.tasks = response;
+      try {
+        // Cette API `/api/Tasks/tasks` retourne toutes les tâches, comme vous l'avez fourni.
+        const response = await $fetch<Task[]>('/api/Tasks/tasks');
+        this.tasks = response; // Stocke toutes les tâches ici
+      } catch (error) {
+        console.error("Erreur lors de la récupération de toutes les tâches:", error);
+        this.tasks = []; // En cas d'erreur, assurez-vous que le tableau est vide
+      }
     },
+    // ... (autres actions restent inchangées)
     setTasks(newTasks: Task[]) {
       this.tasks = newTasks;
     },
@@ -46,7 +53,6 @@ export const useTaskStore = defineStore('task', {
       this.taskToEditId = taskId;
       this.taskBeingEdited = this.tasks.find(task => task.id === taskId) || null;
     },
- 
     async createTask(taskData: Omit<Task, 'id' | 'employee' | 'project'> & { projectId?: number; employeeId?: number }) {
       const response = await $fetch<Task>('/api/Tasks/tasks', {
         method: 'POST',
@@ -63,7 +69,6 @@ export const useTaskStore = defineStore('task', {
         const index = this.tasks.findIndex(task => task.id === taskId);
         if (index !== -1) {
           this.tasks[index] = { ...this.tasks[index], ...response };
-          
         }
         return response;
       } catch (error) {
@@ -71,19 +76,17 @@ export const useTaskStore = defineStore('task', {
         return null;
       }
     },
-     async deleteTask(taskId: number): Promise<void> {
+    async deleteTask(taskId: number): Promise<void> {
       try {
-      await $fetch(`/api/Tasks/${taskId}`, {
+        await $fetch(`/api/Tasks/${taskId}`, {
           method: 'DELETE',
         });
         this.tasks = this.tasks.filter(task => task.id !== taskId);
-       
       } catch (error) {
         console.error("Erreur lors de la suppression de la tâche", error);
       }
     },
-
-     async updateTaskStatus(taskId: number, newStatus: Task['status']) {
+    async updateTaskStatus(taskId: number, newStatus: Task['status']) {
       try {
         const response = await $fetch<Task>(`/api/Tasks/status/${taskId}`, {
           method: 'PATCH',
@@ -96,7 +99,8 @@ export const useTaskStore = defineStore('task', {
         return response
       } catch (error: any) {
         console.error('Erreur lors de la mise à jour du statut de la tâche:', error.message);
-        throw error; 
+        throw error;
       }
-    },}
+    },
+  },
 });

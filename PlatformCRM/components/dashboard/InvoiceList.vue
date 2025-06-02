@@ -90,7 +90,7 @@ const fetchInvoices = async () => {
     let apiUrl = "";
     if (userRole === "ADMIN") {
       apiUrl = "/api/invoices";
-    } else if (userRole === "CUSTOMER") {
+    } else if (userRole === "customer") {
       apiUrl = `/api/invoices/user/${userId}`;
     } else {
       error.value = {

@@ -232,7 +232,7 @@ async function validateQuote() {
   if (quoteDetails.value && confirm("Voulez-vous vraiment valider ce devis?")) {
     try {
       await devisStore.updateQuoteStatus(quoteDetails.value.id, "ACCEPTE");
-      await fetchQuoteData(quoteDetails.value.id); // Re-fetch data to update status
+      await fetchQuoteData(quoteDetails.value.id);
       console.log(`Le devis ${quoteDetails.value.id} validé avec succès`);
     } catch (error) {
       console.error("Erreur lors de la validation", error);
