@@ -111,13 +111,10 @@ onMounted(() => {
 });
 
 const formatDate = (dateString: string | Date) => {
-  if (!dateString) return "N/A";
-  try {
-    return format(new Date(dateString), "dd MMMM", { locale: fr });
-  } catch (e) {
-    console.error("Erreur de formatage de date:", e);
-    return "Date invalide";
-  }
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return "Date Invalide";
+  return date.toLocaleDateString("fr-FR");
 };
 
 const downloadInvoice = async (invoiceNumber: string) => {

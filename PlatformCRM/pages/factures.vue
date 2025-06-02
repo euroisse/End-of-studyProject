@@ -1,7 +1,16 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <InvoicesHeaderComponent @create-invoice="openCreateInvoiceModal" />
-
+    <InvoicesHeaderComponent
+      @create-invoice="openCreateInvoiceModal"
+      v-if="isAdmin"
+    />
+    <header class="bg-white shadow-sm">
+      <div
+        class="max-w-7xl mx-auto px-4 py-6 flex flex-wrap justify-between items-center"
+      >
+        <h1 class="text-2xl font-bold text-gray-800">Mes Factures</h1>
+      </div>
+    </header>
     <main class="max-w-7xl mx-auto px-4 py-6">
       <InvoicesFilterSearch
         searchPlaceholder="Rechercher une facture..."
@@ -105,10 +114,18 @@
 import { ref, computed, onMounted } from "vue";
 import CreateInvoiceModal from "~/components/invoices/CreateInvoiceModal.vue";
 import type { Invoice } from "~/generated/prisma";
-
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+const { isAdmin } = useIsRole();
 definePageMeta({ layout: "admin" });
 const error = ref<any>(null);
-const invoices = ref<Invoice[]>([]);
+interface SimplifiedInvoice {
+  id: number;
+  invoiceNumber: string;
+  invoiceDate: string | Date;
+  totalAmount: number;
+}
+const invoices = ref<SimplifiedInvoice[]>([]);
 const loading = ref(false);
 
 const showCreateInvoiceModal = ref(false);
@@ -218,9 +235,12 @@ const downloadInvoice = async (invoiceNumber: string) => {
 };
 const formatDate = (dateString: string | Date) => {
   if (!dateString) return "";
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return "Date Invalide";
-  return date.toLocaleDateString("fr-FR");
+  try {
+    return format(new Date(dateString), "dd/MM/yyyy", { locale: fr });
+  } catch (e) {
+    console.error("Erreur de formatage de date:", e);
+    return "Date invalide";
+  }
 };
 </script>
 

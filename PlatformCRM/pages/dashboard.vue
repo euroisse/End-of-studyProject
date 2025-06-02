@@ -1,22 +1,17 @@
 <template>
   <div class="flex-1 p-4 md:p-8 lg:p-12 xl:p-16">
-    <DashboardHeader v-if="isEmploye" />
-    <DashboardSummary v-if="isEmploye" />
+    <h1 class="text-2xl font-bold text-gray-800 mb-2">Tableau de bord</h1>
+    <DashboardHeader v-if="isAdmin" />
+    <DashboardSummary v-if="isEmploye || isClient" />
 
     <div v-if="isEmploye">
       <ProjectProgress :projects="projectProgress" class="mb-6" />
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <RecentMessage :messages="recentMessages" />
-        <clientInvoiceList :invoices="clientInvoices" />
-      </div>
     </div>
 
     <div v-else>
       <ClientProjectProgress class="mb-6" />
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <InvoiceList :invoices="employeeInvoices" />
-        <RecentMessage :messages="MessageClient" />
+        <InvoiceList :invoices="invoices" />
       </div>
     </div>
   </div>
@@ -26,13 +21,20 @@
 import DashboardHeader from "~/components/dashboard/DashboardHeader.vue";
 import DashboardSummary from "~/components/dashboard/DashboardSummary.vue";
 import ProjectProgress from "~/components/dashboard/ProjectProgress.vue";
-import RecentMessage from "~/components/dashboard/RecentMessage.vue";
 import InvoiceList from "~/components/dashboard/InvoiceList.vue";
 import ClientProjectProgress from "~/components/dashboard/ClientProjectProgress.vue";
-import clientInvoiceList from "~/components/dashboard/clientInvoiceList.vue";
 
 definePageMeta({ layout: "admin" });
-const { isEmploye } = useIsRole();
+const { isEmploye, isAdmin, isClient } = useIsRole();
+
+const invoices = ref<
+  {
+    id: number;
+    invoiceNumber: string;
+    invoiceDate: string | Date;
+    totalAmount: number;
+  }[]
+>([]);
 
 // Données pour l'employé
 const projectProgress = [

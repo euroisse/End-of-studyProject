@@ -161,7 +161,7 @@ definePageMeta({ layout: "admin" });
 
 const route = useRoute();
 const devisStore = useQuoteStore();
-const { isClient, isAdmin } = useIsRole(); // Ensure useIsRole correctly provides isAdmin
+const { isClient, isAdmin } = useIsRole();
 const quoteDetails = ref<quote | null>(null);
 const showCreateInvoiceModal = ref(false);
 const selectedQuoteForInvoice = ref<quote | null>(null);
