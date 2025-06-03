@@ -1,5 +1,5 @@
 import prisma from "~/server/database";
-import type { Project } from "~/generated/prisma";
+import type { Project } from "~/generated/prisma"; // Assurez-vous que ce chemin est correct
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event);
@@ -20,22 +20,41 @@ export default defineEventHandler(async (event) => {
           role: true,
         },
       },
+      // Inclure les factures (comme avant)
       clientInvoice: {
         select: {
           id: true,
           invoiceNumber: true,
           invoiceDate: true,
           totalAmount: true,
+          amountPaid: true, // Ajouté pour un résumé potentiel
+          balanceDue: true, // Ajouté pour un résumé potentiel
         },
         orderBy: {
           invoiceDate: "desc",
         },
-        take: 5,
+        take: 5, // Limite à 5 dernières factures
+      },
+      // Inclure les devis (NOUVEAU)
+      clientQuote: {
+        select: {
+          id: true,
+          number: true,
+          status: true,
+          totalPrice: true,
+          createdAt: true,
+          newTotalPrice: true, 
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        take: 5, // Limite à 5 derniers devis
       },
       _count: {
         select: {
           projects: true,
           clientInvoice: true,
+          clientQuote: true, 
         },
       },
     },
@@ -86,13 +105,11 @@ export default defineEventHandler(async (event) => {
       },
       include: {
         customer: true,
-      
         projectStages: {
           include: {
-            stages: true, 
+            stages: true,
           },
         },
-     
         tasks: {
           where: { employeeId: userId },
           include: {
@@ -111,7 +128,7 @@ export default defineEventHandler(async (event) => {
       projects: projects,
       summary: {
         assignedProjectsCount: projects.length,
-        assignedTasksCount: assignedTasksCount, 
+        assignedTasksCount: assignedTasksCount,
       },
     };
 
@@ -122,34 +139,33 @@ export default defineEventHandler(async (event) => {
       },
       include: {
         customer: true,
-     
         projectStages: {
           include: {
-            stages: true, 
+            stages: true,
           },
         },
-       
         users: {
           include: {
             employee: true,
           },
         },
-        
       },
     });
 
     dashboardData = {
       projects: projects,
-      invoices: user.clientInvoice,
+      invoices: user.clientInvoice, 
+      quotes: user.clientQuote,     
       summary: {
         yourProjectsCount: projects.length,
         yourInvoicesCount: user._count?.clientInvoice || 0,
+        yourQuotesCount: user._count?.clientQuote || 0, 
       },
-    }; 
+    };
   } else {
     throw createError({
       statusCode: 403,
-      statusMessage: "Access interdit.",
+      statusMessage: "Accès interdit.",
     });
   }
 

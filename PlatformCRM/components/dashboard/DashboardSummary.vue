@@ -43,12 +43,12 @@
       <div>
         <h3 class="text-gray-500 text-sm font-medium">
           <span v-if="isAdmin">Total Factures</span>
-          <span v-else-if="isClient">Vos Factures</span>
+          <span v-else-if="isClient">Vos Devis</span>
         </h3>
         <p class="text-2xl font-bold text-gray-800">
           <span v-if="isAdmin">{{ summaryData?.totalInvoices || 0 }}</span>
           <span v-else-if="isClient">{{
-            summaryData?.yourInvoicesCount || 0
+            summaryData?.yourQuotesCount || 0
           }}</span>
           <span v-else>0</span>
         </p>
@@ -95,6 +95,7 @@ defineProps<{
     assignedProjectsCount?: number;
     yourProjectsCount?: number;
     yourInvoicesCount?: number;
+    yourQuotesCount?: number;
     assignedTasksCount?: number;
   };
 }>();

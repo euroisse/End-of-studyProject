@@ -32,8 +32,11 @@
           class="mb-6"
         />
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <InvoiceList :invoices="dashboardData?.invoices || []" />
+          <QuoteList :quotes="dashboardData?.quotes || []" />
         </div>
+      </div>
+      <div v-if="isAdmin" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <InvoiceList :invoices="dashboardData?.invoices || []" />
       </div>
     </div>
   </div>
@@ -47,6 +50,7 @@ import ProjectProgress from "~/components/dashboard/ProjectProgress.vue";
 import InvoiceList from "~/components/dashboard/InvoiceList.vue";
 import ClientProjectProgress from "~/components/dashboard/ClientProjectProgress.vue";
 import { useProjectStore } from "#imports";
+import QuoteList from "~/components/dashboard/QuoteList.vue";
 
 definePageMeta({ layout: "admin" });
 const { isEmploye, isAdmin, isClient } = useIsRole();
@@ -59,11 +63,13 @@ interface DashboardApiResponse {
       yourProjectsCount?: number;
       yourInvoicesCount?: number;
       totalProjects?: number;
+      yourQuotesCount?: number;
       totalInvoices?: number;
       totalClients?: number;
       totalEmployees?: number;
     };
     invoices?: any[];
+    quotes?: any[];
   };
 }
 const projectStore = useProjectStore();
