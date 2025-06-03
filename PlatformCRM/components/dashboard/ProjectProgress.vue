@@ -1,10 +1,13 @@
 <template>
   <div class="bg-white rounded-lg shadow-md p-6">
     <h2 class="text-lg font-semibold mb-4">Avancement des projets</h2>
-    <div class="space-y-8 min-w-[600px]">
+    <div v-if="projects.length === 0" class="text-gray-500 text-center py-4">
+      Aucun projet attribué pour le moment.
+    </div>
+    <div v-else class="space-y-8 min-w-[600px]">
       <div
-        v-for="(project, index) in projects"
-        :key="index"
+        v-for="project in projects"
+        :key="project.id"
         class="border-b pb-6 last:border-b-0 last:pb-0"
       >
         <div class="mb-4">
@@ -15,29 +18,28 @@
 
         <div class="flex justify-between mb-8 space-x-4">
           <div
-            v-for="(step, stepIndex) in projectStore.selectedProject
-              ?.projectStages"
-            :key="step.id"
-            class="relative flex items-center"
+            v-for="(stage, stageIndex) in project.projectStages"
+            :key="stage.id"
+            class="relative flex items-center flex-shrink-0"
           >
             <div
-              v-if="stepIndex !== 0"
+              v-if="stageIndex !== 0"
               class="absolute left-[-50%] top-1/2 w-[50%] h-1 bg-gray-300 z-0"
             ></div>
 
             <div
               :class="[
                 'w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold relative z-10 transition-colors duration-300',
-                getStepColor(step.status),
+                getStageColor(stage.status),
               ]"
             >
-              <i :class="getIconClass(step.status)" class="text-xl"></i>
+              <i :class="getIconClass(stage.status)" class="text-xl"></i>
             </div>
 
             <div
               class="absolute items-center top-14 w-20 text-center text-xs text-gray-600"
             >
-              {{ step.title }}
+              {{ stage.title }}
             </div>
           </div>
         </div>
@@ -48,11 +50,24 @@
 
 <script setup lang="ts">
 import type { Project, ProjectStageStatus } from "~/generated/prisma";
-defineProps<{
-  projects: Project[];
-}>();
 
-const projectStore = useProjectStore();
+interface ProjectStage {
+  id: number;
+  projectId: number;
+  title: string;
+  description: string;
+  status: ProjectStageStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ExtendedProject extends Project {
+  projectStages: ProjectStage[];
+}
+
+defineProps<{
+  projects: ExtendedProject[];
+}>();
 
 const getIconClass = (status: ProjectStageStatus) => {
   return (
@@ -65,7 +80,7 @@ const getIconClass = (status: ProjectStageStatus) => {
   );
 };
 
-const getStepColor = (status: ProjectStageStatus) => {
+const getStageColor = (status: ProjectStageStatus) => {
   return (
     {
       TERMINE: "bg-green-500",
@@ -78,5 +93,5 @@ const getStepColor = (status: ProjectStageStatus) => {
 </script>
 
 <style scoped>
-/* Pour plus de style, tu peux personnaliser ici */
+/* You can add more specific styling here */
 </style>

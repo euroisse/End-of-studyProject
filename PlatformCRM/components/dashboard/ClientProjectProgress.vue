@@ -1,68 +1,101 @@
 <template>
   <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
     <h2 class="text-xl font-bold mb-6">Avancement de votre projet</h2>
-    <div class="relative">
-      <div class="flex justify-between mb-8">
-        <div class="w-1/5 text-center">
+    <div v-if="projects.length === 0" class="text-gray-500 text-center py-4">
+      Aucun projet disponible pour le moment.
+    </div>
+    <div v-else>
+      <div v-for="project in projects" :key="project.id" class="relative mb-8">
+        <h3 class="font-semibold text-gray-800 text-lg mb-4">
+          {{ project.title }}
+        </h3>
+        <div class="flex justify-between mb-8 space-x-4">
           <div
-            class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-2"
+            v-for="(stage, stageIndex) in project.projectStages"
+            :key="stage.id"
+            class="relative flex items-center flex-shrink-0"
           >
-            <i class="ri-check-line text-white text-xl"></i>
-          </div>
-          <p class="text-sm font-medium text-green-500">Analyse</p>
-        </div>
+            <div
+              v-if="stageIndex !== 0"
+              class="absolute left-[-50%] top-1/2 w-[50%] h-1 bg-gray-300 z-0"
+              :style="{
+                backgroundColor: getLineColor(
+                  project.projectStages[stageIndex - 1]?.status
+                ),
+              }"
+            ></div>
 
-        <div class="w-1/5 text-center">
-          <div
-            class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-2"
-          >
-            <i class="ri-check-line text-white text-xl"></i>
+            <div
+              :class="[
+                'w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-2 relative z-10',
+                getStageColor(stage.status),
+              ]"
+            >
+              <i
+                :class="getIconClass(stage.status)"
+                class="text-white text-xl"
+              ></i>
+            </div>
+            <p
+              class="absolute top-12 w-20 text-center text-sm font-medium text-gray-600"
+            >
+              {{ stage.title }}
+            </p>
           </div>
-          <p class="text-sm font-medium text-green-500">Design</p>
         </div>
-
-        <div class="w-1/5 text-center">
-          <div
-            class="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center mx-auto mb-2"
-          >
-            <i class="ri-code-line text-white text-xl"></i>
-          </div>
-          <p class="text-sm font-medium text-indigo-500">Développement</p>
-        </div>
-
-        <div class="w-1/5 text-center">
-          <div
-            class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-2"
-          >
-            <i class="ri-flask-line text-gray-400 text-xl"></i>
-          </div>
-          <p class="text-sm font-medium text-gray-400">Tests</p>
-        </div>
-
-        <div class="w-1/5 text-center">
-          <div
-            class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-2"
-          >
-            <i class="ri-rocket-line text-gray-400 text-xl"></i>
-          </div>
-          <p class="text-sm font-medium text-gray-400">Livraison</p>
-        </div>
-      </div>
-
-      <div class="absolute top-4 left-0 right-0 h-0.5 bg-gray-200">
-        <div
-          class="absolute left-0 h-0.5 bg-green-500"
-          style="width: 60%"
-        ></div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-// Vous pouvez ajouter ici des logiques spécifiques à ce composant si nécessaire
+import type { Project, ProjectStageStatus } from "~/generated/prisma";
+
+interface ProjectStage {
+  id: number;
+  projectId: number;
+  title: string;
+  description: string;
+  status: ProjectStageStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ExtendedProject extends Project {
+  projectStages: ProjectStage[];
+}
+
+defineProps<{
+  projects: ExtendedProject[];
+}>();
+
+const getIconClass = (status: ProjectStageStatus) => {
+  return (
+    {
+      TERMINE: "ri-check-line",
+      EN_COURS: "ri-code-line",
+      A_VENIR: "ri-time-line",
+      EN_ATTENTE: "ri-pause-circle-line",
+    }[status] || "ri-question-line"
+  );
+};
+
+const getStageColor = (status: ProjectStageStatus) => {
+  return (
+    {
+      TERMINE: "bg-green-500",
+      EN_COURS: "bg-indigo-500",
+      A_VENIR: "bg-gray-200",
+      EN_ATTENTE: "bg-yellow-400",
+    }[status] || "bg-gray-200"
+  );
+};
+
+const getLineColor = (previousStageStatus: ProjectStageStatus) => {
+  return previousStageStatus === "TERMINE" ? "bg-green-500" : "bg-gray-300";
+};
 </script>
 
 <style scoped>
-/* Vous pouvez ajouter ici des styles spécifiques à ce composant si nécessaire */
+/* You can add specific styles here if needed */
 </style>

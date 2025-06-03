@@ -178,6 +178,11 @@ const clientMenu: MenuItem[] = [
 ];
 
 const adminMenu: MenuItem[] = [
+  {
+    label: "Tableau de bord",
+    to: "/dashboard",
+    icon: "ri-dashboard-line",
+  },
   { label: "Projets", to: "/projects", icon: "ri-projector-2-line" },
   { label: "Devis", to: "/devis", icon: "ri-file-line" },
   { label: "Utilisateurs", to: "/utilisateurs", icon: "ri-group-line" },

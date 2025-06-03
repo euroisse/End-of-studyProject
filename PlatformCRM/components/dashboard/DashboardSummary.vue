@@ -1,139 +1,103 @@
 <template>
-  <div class="grid grid-cols-1 md:grid-cols-1 gap-6 mb-6 w-full">
-    <CardSummary
-      title="Projets"
-      :value="counts.projectsInProgress"
-      icon="ri-task-line"
-      color="indigo"
-    />
+  <div class="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <div
+      class="bg-white rounded-lg shadow-md p-6 flex items-center justify-between"
+    >
+      <div>
+        <h3 class="text-gray-500 text-sm font-medium">
+          <span v-if="isAdmin">Total Projets</span>
+          <span v-else-if="isEmploye">Projets attribués</span>
+          <span v-else-if="isClient">Vos Projets</span>
+        </h3>
+        <p class="text-2xl font-bold text-gray-800">
+          <span v-if="isAdmin">{{ summaryData?.totalProjects || 0 }}</span>
+          <span v-else-if="isEmploye">{{
+            summaryData?.assignedProjectsCount || 0
+          }}</span>
+          <span v-else-if="isClient">{{
+            summaryData?.yourProjectsCount || 0
+          }}</span>
+          <span v-else>0</span>
+        </p>
+      </div>
+      <i class="ri-folders-line text-indigo-500 text-4xl"></i>
+    </div>
 
-    <CardSummary
+    <div
+      v-if="isEmploye"
+      class="bg-white rounded-lg shadow-md p-6 flex items-center justify-between"
+    >
+      <div>
+        <h3 class="text-gray-500 text-sm font-medium">Tâches attribuées</h3>
+        <p class="text-2xl font-bold text-gray-800">
+          {{ summaryData?.assignedTasksCount || 0 }}
+        </p>
+      </div>
+      <i class="ri-task-line text-orange-500 text-4xl"></i>
+    </div>
+
+    <div
       v-if="isClient || isAdmin"
-      title="Devis en attente"
-      :value="counts.pendingQuotes"
-      icon="ri-file-list-2-line"
-      color="yellow"
-    />
+      class="bg-white rounded-lg shadow-md p-6 flex items-center justify-between"
+    >
+      <div>
+        <h3 class="text-gray-500 text-sm font-medium">
+          <span v-if="isAdmin">Total Factures</span>
+          <span v-else-if="isClient">Vos Factures</span>
+        </h3>
+        <p class="text-2xl font-bold text-gray-800">
+          <span v-if="isAdmin">{{ summaryData?.totalInvoices || 0 }}</span>
+          <span v-else-if="isClient">{{
+            summaryData?.yourInvoicesCount || 0
+          }}</span>
+          <span v-else>0</span>
+        </p>
+      </div>
+      <i class="ri-bill-line text-green-500 text-4xl"></i>
+    </div>
 
-    <CardSummary
-      v-if="isClient || isAdmin"
-      title="Factures validées"
-      :value="counts.validatedInvoices"
-      icon="ri-check-line"
-      color="green"
-    />
+    <div
+      v-if="isAdmin"
+      class="bg-white rounded-lg shadow-md p-6 flex items-center justify-between"
+    >
+      <div>
+        <h3 class="text-gray-500 text-sm font-medium">Clients total</h3>
+        <p class="text-2xl font-bold text-gray-800">
+          {{ summaryData?.totalClients || 0 }}
+        </p>
+      </div>
+      <i class="ri-group-line text-purple-500 text-4xl"></i>
+    </div>
 
-    <CardSummary
-      v-if="isEmploye || isAdmin"
-      title="Tâches à faire"
-      :value="counts.tasksToDo"
-      icon="ri-clipboard-line"
-      color="red"
-    />
+    <div
+      v-if="isAdmin"
+      class="bg-white rounded-lg shadow-md p-6 flex items-center justify-between"
+    >
+      <div>
+        <h3 class="text-gray-500 text-sm font-medium">Employés total</h3>
+        <p class="text-2xl font-bold text-gray-800">
+          {{ summaryData?.totalEmployees || 0 }}
+        </p>
+      </div>
+      <i class="ri-user-2-line text-blue-500 text-4xl"></i>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-import CardSummary from "../Cards/CardSummary.vue";
-import { useIsRole } from "#imports";
-
-import { useProjectStore, useQuoteStore, useTaskStore } from "#imports";
-import type { ProjectStageStatus } from "~/generated/prisma";
-
-const projectStore = useProjectStore();
-const quoteStore = useQuoteStore();
-const taskStore = useTaskStore();
-const ACTIVE_PROJECT_STAGE_STATUSES: ProjectStageStatus[] = [
-  "EN_COURS",
-  "A_VENIR",
-  "EN_ATTENTE",
-];
-const counts = ref({
-  projectsInProgress: 0,
-  pendingQuotes: 0,
-  validatedInvoices: 0,
-  tasksToDo: 0,
-});
-
-const { isClient, isAdmin, isEmploye } = useIsRole();
-
-const fetchDashboardCounts = async () => {
-  const userString = localStorage.getItem("user");
-  if (!userString) {
-    console.warn(
-      "Utilisateur non connecté. Impossible de récupérer les données du tableau de bord."
-    );
-    return;
-  }
-
-  try {
-    const user = JSON.parse(userString);
-    const userId = user.id;
-
-    if (isClient.value) {
-      await projectStore.fetchUserProjects(userId);
-    } else {
-      await projectStore.fetchProjects();
-
-      counts.value.projectsInProgress = projectStore.projects.filter(
-        (project) => {
-          if (!project.projectStages || project.projectStages.length === 0) {
-            return false;
-          }
-
-          return project.projectStages.some((stage) =>
-            ACTIVE_PROJECT_STAGE_STATUSES.includes(stage.status)
-          );
-        }
-      ).length;
-    }
-
-    if (isClient.value || isAdmin.value) {
-      await quoteStore.fetchQuotesList();
-      counts.value.pendingQuotes = quoteStore.quotesList.filter(
-        (q) => q.status === "EN_ATTENTE"
-      ).length;
-    }
-
-    let invoicesApiUrl = "";
-    if (isAdmin.value) {
-      invoicesApiUrl = `/api/invoices`;
-    } else if (isClient.value) {
-      invoicesApiUrl = `/api/invoices/user/${userId}`;
-    }
-
-    if (invoicesApiUrl) {
-      const response = await $fetch<any>(invoicesApiUrl);
-      const invoices = response.data || [];
-      counts.value.validatedInvoices = invoices.filter(
-        (inv: any) => inv.status === "VALIDATED"
-      ).length;
-    }
-
-    if (isEmploye.value || isAdmin.value) {
-      await taskStore.fetchTasks();
-
-      if (isEmploye.value) {
-        counts.value.tasksToDo = taskStore.tasks.filter(
-          (task) => task.status === "A_FAIRE" && task.employeeId === userId
-        ).length;
-      } else {
-        // Admin
-        counts.value.tasksToDo = taskStore.tasks.filter(
-          (task) => task.status === "A_FAIRE"
-        ).length;
-      }
-    }
-  } catch (error) {
-    console.error(
-      "Erreur lors de la récupération des données du tableau de bord via les stores:",
-      error
-    );
-  }
-};
-
-onMounted(() => {
-  fetchDashboardCounts();
-});
+const { isAdmin, isClient, isEmploye } = useIsRole();
+defineProps<{
+  summaryData?: {
+    totalProjects?: number;
+    totalInvoices?: number;
+    totalClients?: number;
+    totalEmployees?: number;
+    assignedProjectsCount?: number;
+    yourProjectsCount?: number;
+    yourInvoicesCount?: number;
+    assignedTasksCount?: number;
+  };
+}>();
 </script>
+
+<style scoped></style>
