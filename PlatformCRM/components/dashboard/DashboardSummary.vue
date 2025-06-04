@@ -57,6 +57,19 @@
     </div>
 
     <div
+      v-if="isClient"
+      class="bg-white rounded-lg shadow-md p-6 flex items-center justify-between"
+    >
+      <div>
+        <h3 class="text-gray-500 text-sm font-medium">Vos Factures</h3>
+        <p class="text-2xl font-bold text-gray-800">
+          {{ summaryData?.yourInvoicesCount || 0 }}
+        </p>
+      </div>
+      <i class="ri-money-euro-box-line text-purple-500 text-4xl"></i>
+    </div>
+
+    <div
       v-if="isAdmin"
       class="bg-white rounded-lg shadow-md p-6 flex items-center justify-between"
     >

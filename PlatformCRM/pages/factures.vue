@@ -116,7 +116,7 @@ import CreateInvoiceModal from "~/components/invoices/CreateInvoiceModal.vue";
 import type { Invoice } from "~/generated/prisma";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-const { isAdmin } = useIsRole();
+const { isAdmin, isClient } = useIsRole();
 definePageMeta({ layout: "admin" });
 const error = ref<any>(null);
 interface SimplifiedInvoice {
@@ -149,9 +149,7 @@ const fetchInvoices = async () => {
   try {
     const user = JSON.parse(userString);
     const userId = user.id;
-
-    const userRole = user.role;
-
+    const userRole = user.roles;
     const data = await $fetch<any>(
       userRole === "ADMIN" ? "/api/invoices" : `/api/invoices/user/${userId}`
     );

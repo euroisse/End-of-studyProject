@@ -2,11 +2,12 @@
   <div class="bg-white rounded-lg shadow-md p-6 h-full w-full flex flex-col">
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-lg font-semibold text-gray-800">Devis</h2>
-      <Button
+      <NuxtLink
         to="/devis"
-        content="Voir tout"
-        customClass="text-gray-600 hover:text-indigo-700 text-sm font-medium cursor-pointer whitespace-nowrap"
-      />
+        class="text-gray-600 hover:text-indigo-700 text-sm font-medium cursor-pointer whitespace-nowrap"
+      >
+        Voir tout
+      </NuxtLink>
     </div>
 
     <div
@@ -32,16 +33,12 @@
             </p>
           </div>
         </div>
-        <div class="text-right font-semibold">
-          {{ quote.newTotalPrice ? `${quote.newTotalPrice} FCFA` : "N/A" }}
-        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import Button from "../iu/Button.vue";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
