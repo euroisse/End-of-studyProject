@@ -146,7 +146,7 @@ export default async function generateInvoicePdf(invoice: InvoiceWithQuote) {
     // Montant Payé
     currentY = doc.y;
     doc.fontSize(10).font(fontBase);
-    doc.text(`Montant Payé:`, leftMargin, currentY);
+    doc.text(`Montant Payé: `, leftMargin, currentY);
     doc.text(`${invoice.amountPaid.toFixed(2)} CFA`, leftMargin, currentY, { align: "right", width: rightMargin - leftMargin });
     doc.moveDown(0.5);
 

@@ -43,7 +43,7 @@ console.log('id utilisateur',userId)
 
     // Calcul du montant total du devis, en privilégiant newTotalPrice si défini
     const totalQuoteAmount = newTotalPrice !== undefined && newTotalPrice !== null ? newTotalPrice : quote.totalPrice;
-
+console.log(totalQuoteAmount)
     // Vérification pour s'assurer que totalQuoteAmount est un nombre valide
     if (typeof totalQuoteAmount !== 'number' || isNaN(totalQuoteAmount)) {
       throw new Error("Le montant total du devis n'a pas pu être déterminé. Veuillez vérifier quote.totalPrice ou newTotalPrice.");
@@ -58,9 +58,11 @@ console.log('id utilisateur',userId)
       (sum, inv) => sum + inv.amountPaid,
       0
     );
+    console.log(totalAmountAlreadyPaid)
     const newTotalAmountPaid = totalAmountAlreadyPaid + amountPaid;
+        console.log(newTotalAmountPaid)
     const balanceDue = totalQuoteAmount - newTotalAmountPaid;
-
+    console.log(balanceDue)
     // 3. Générer un numéro de facture unique
     const lastInvoice = await prisma.invoice.findFirst({
       where: {
