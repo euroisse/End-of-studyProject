@@ -1,5 +1,7 @@
+
 import prisma from "~/server/database";
-import type { Project } from "~/generated/prisma"; // Assurez-vous que ce chemin est correct
+import type { Project } from "~/generated/prisma";
+import { defineEventHandler, getQuery, createError } from 'h3';
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event);
@@ -12,165 +14,183 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: {
-      UserRole: {
-        select: {
-          role: true,
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        UserRole: {
+          select: {
+            role: true,
+          },
+        },
+        
+        _count: {
+          select: {
+      
+            projects: true,
+          
+            clientInvoice: true, 
+            clientQuote: true,  
+          },
         },
       },
-      // Inclure les factures (comme avant)
-      clientInvoice: {
-        select: {
-          id: true,
-          invoiceNumber: true,
-          invoiceDate: true,
-          totalAmount: true,
-          amountPaid: true, // Ajouté pour un résumé potentiel
-          balanceDue: true, // Ajouté pour un résumé potentiel
-        },
-        orderBy: {
-          invoiceDate: "desc",
-        },
-        take: 5, // Limite à 5 dernières factures
-      },
-      // Inclure les devis (NOUVEAU)
-      clientQuote: {
-        select: {
-          id: true,
-          number: true,
-          status: true,
-          totalPrice: true,
-          createdAt: true,
-          newTotalPrice: true, 
-        },
-        orderBy: {
-          createdAt: "desc",
-        },
-        take: 5, // Limite à 5 derniers devis
-      },
-      _count: {
-        select: {
-          projects: true,
-          clientInvoice: true,
-          clientQuote: true, 
-        },
-      },
-    },
-  });
-
-  if (!user) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: "utilisateur non trouvé.",
     });
+
+    if (!user) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: "Utilisateur non trouvé.",
+      });
+    }
+
+    const userRoles = user.UserRole || [];
+
+    const isAdmin = userRoles.some((userRole) => userRole.role?.name === "admin");
+    const isClient = userRoles.some((userRole) => userRole.role?.name === "customer");
+    const isEmploye = userRoles.some((userRole) => userRole.role?.name === "employee");
+
+    let dashboardData: any = {};
+    let projects: Project[] = [];
+    let invoices: any[] = []; 
+    let quotes: any[] = [];   
+
+    if (isAdmin) {
+      const totalProjects = await prisma.project.count();
+      const totalInvoices = await prisma.invoice.count();
+      const totalClients = await prisma.user.count({
+        where: { UserRole: { some: { role: { name: "customer" } } } },
+      });
+      const totalEmployees = await prisma.user.count({
+        where: { UserRole: { some: { role: { name: "employee" } } } },
+      });
+
+     
+      invoices = await prisma.invoice.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: 5, 
+      });
+
+      dashboardData = {
+        summary: {
+          totalProjects,
+          totalInvoices,
+          totalClients,
+          totalEmployees,
+        },
+        invoices: invoices, 
+      };
+    } else if (isEmploye) {
+      projects = await prisma.project.findMany({
+        where: {
+          tasks: {
+            some: {
+              employeeId: userId,
+            },
+          },
+        },
+        include: {
+          customer: true,
+          projectStages: {
+            include: {
+              stages: true,
+            },
+          },
+          tasks: {
+            where: { employeeId: userId },
+            include: {
+              employee: true,
+            },
+          },
+        },
+      });
+      const assignedTasksCount = await prisma.tasks.count({
+        where: {
+          employeeId: userId,
+        },
+      });
+
+      dashboardData = {
+        projects: projects,
+        summary: {
+          assignedProjectsCount: projects.length,
+          assignedTasksCount: assignedTasksCount,
+        },
+      };
+
+    } else if (isClient) {
+     
+      invoices = await prisma.invoice.findMany({
+        where: {
+          userId: userId, 
+        },
+        include: {
+          quote: true,
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 5, 
+      });
+      console.log('Dashboard API - Factures trouvées pour client', userId, ':', invoices.length);
+
+      projects = await prisma.project.findMany({
+        where: {
+          customerId: userId, 
+        },
+        include: {
+          customer: true,
+          projectStages: {
+            include: {
+              stages: true,
+            },
+          },
+          users: {
+            include: {
+              employee: true, 
+            },
+          },
+        },
+        take: 5, 
+      });
+
+      
+      quotes = await prisma.quote.findMany({
+        where: {
+          customerId: userId, 
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 5, 
+      });
+
+      dashboardData = {
+        projects: projects,
+        invoices: invoices, 
+        quotes: quotes,    
+        summary: {
+          yourProjectsCount: projects.length,
+          yourInvoicesCount: invoices.length, 
+          yourQuotesCount: quotes.length,     
+        },
+      };
+    } else {
+      throw createError({
+        statusCode: 403,
+        statusMessage: "Accès interdit.",
+      });
+    }
+
+    return {
+      statusCode: 200,
+      data: dashboardData,
+    };
+  } catch (error: any) {
+    console.error('Erreur lors de la récupération des données du tableau de bord :', error);
+    if (error.statusCode && error.statusMessage) {
+      throw error;
+    } else {
+      throw createError({
+        statusCode: 500,
+        statusMessage: 'Impossible de récupérer les données du tableau de bord.',
+        data: error.message || 'Erreur inconnue',
+      });
+    }
   }
-
-  const userRoles = user.UserRole || [];
-
-  const isAdmin = userRoles.some((userRole) => userRole.role?.name === "admin");
-  const isClient = userRoles.some((userRole) => userRole.role?.name === "customer");
-  const isEmploye = userRoles.some((userRole) => userRole.role?.name === "employee");
-
-  let dashboardData: any = {};
-  let projects: Project[] = [];
-
-  if (isAdmin) {
-    const totalProjects = await prisma.project.count();
-    const totalInvoices = await prisma.invoice.count();
-    const totalClients = await prisma.user.count({
-      where: { UserRole: { some: { role: { name: "customer" } } } },
-    });
-    const totalEmployees = await prisma.user.count({
-      where: { UserRole: { some: { role: { name: "employee" } } } },
-    });
-
-    dashboardData = {
-      summary: {
-        totalProjects,
-        totalInvoices,
-        totalClients,
-        totalEmployees,
-      },
-    };
-  } else if (isEmploye) {
-    projects = await prisma.project.findMany({
-      where: {
-        tasks: {
-          some: {
-            employeeId: userId,
-          },
-        },
-      },
-      include: {
-        customer: true,
-        projectStages: {
-          include: {
-            stages: true,
-          },
-        },
-        tasks: {
-          where: { employeeId: userId },
-          include: {
-            employee: true,
-          },
-        },
-      },
-    });
-    const assignedTasksCount = await prisma.tasks.count({
-      where: {
-        employeeId: userId,
-      },
-    });
-
-    dashboardData = {
-      projects: projects,
-      summary: {
-        assignedProjectsCount: projects.length,
-        assignedTasksCount: assignedTasksCount,
-      },
-    };
-
-  } else if (isClient) {
-    projects = await prisma.project.findMany({
-      where: {
-        customerId: userId,
-      },
-      include: {
-        customer: true,
-        projectStages: {
-          include: {
-            stages: true,
-          },
-        },
-        users: {
-          include: {
-            employee: true,
-          },
-        },
-      },
-    });
-
-    dashboardData = {
-      projects: projects,
-      invoices: user.clientInvoice, 
-      quotes: user.clientQuote,     
-      summary: {
-        yourProjectsCount: projects.length,
-        yourInvoicesCount: user._count?.clientInvoice || 0,
-        yourQuotesCount: user._count?.clientQuote || 0, 
-      },
-    };
-  } else {
-    throw createError({
-      statusCode: 403,
-      statusMessage: "Accès interdit.",
-    });
-  }
-
-  return {
-    statusCode: 200,
-    data: dashboardData,
-  };
 });

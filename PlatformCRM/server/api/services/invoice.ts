@@ -12,7 +12,7 @@ enum PaymentMethodEnum {
 export async function createInvoice(payload: CreateInvoicePayload) {
 
   const { quoteId, amountPaid, invoiceDate, paymentMethod, userId, newTotalPrice } = payload;
-
+console.log('id utilisateur',userId)
   try {
     
     // Si userId est maintenant obligatoire dans le schéma, il doit être fourni.
@@ -35,8 +35,8 @@ export async function createInvoice(payload: CreateInvoicePayload) {
     }
 
    
-    if (quote.customerId !== userId) {
-        console.warn(`Le userId fourni (${userId}) ne correspond pas au customerId du devis (${quote.customerId}). La facture sera liée au userId fourni.`);
+    if (!quote.customerId ) {
+        console.warn(`Le devis du client est introuvable`);
       
     }
 
@@ -111,7 +111,7 @@ export async function createInvoice(payload: CreateInvoicePayload) {
         balanceDue: balanceDue,
         invoiceDate: invoiceDate ? new Date(invoiceDate) : new Date(),
         paymentMethod: validatedPaymentMethod,
-        User: { connect: { id: userId } }, 
+        User: { connect: { id: quote.customerId } }, 
       },
       include: {
         quote: {
@@ -137,7 +137,7 @@ export async function createInvoice(payload: CreateInvoicePayload) {
     };
   } catch (error) {
     console.error("Erreur lors de la création de la facture:", error);
-    // Re-lancer l'erreur pour qu'elle puisse être gérée plus haut dans la pile d'appels
+   
     throw error;
   }
 }
