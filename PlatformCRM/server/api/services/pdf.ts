@@ -127,27 +127,27 @@ export default async function generateInvoicePdf(invoice: InvoiceWithQuote) {
     doc.moveDown(1);
     doc.fontSize(10).font(fontBase);
 
-    const taxRate = 0.01;
+    const taxRate = 0.1;
     const taxAmount = calculatedSubtotal * taxRate;
     doc.moveDown(1)
     // Taxe
     let currentY = doc.y;
     doc.text(`Taxe:`, leftMargin, currentY);
-    doc.text(`${taxAmount.toFixed(2)} CFA`, leftMargin, currentY, { align: "right", width: rightMargin - leftMargin });
+    doc.text(`${taxAmount} CFA`, leftMargin, currentY, { align: "right", width: rightMargin - leftMargin });
     doc.moveDown(0.5);
 
     // TOTAL
     currentY = doc.y;
     doc.fontSize(12).font(fontBold); 
     doc.text(`TOTAL:`, leftMargin, currentY);
-    doc.text(`${invoice.totalAmount.toFixed(2)} CFA`, leftMargin, currentY, { align: "right", width: rightMargin - leftMargin });
+    doc.text(`${invoice.totalAmount} CFA`, leftMargin, currentY, { align: "right", width: rightMargin - leftMargin });
     doc.moveDown(0.5);
 
     // Montant Payé
     currentY = doc.y;
     doc.fontSize(10).font(fontBase);
     doc.text(`Montant Payé: `, leftMargin, currentY);
-    doc.text(`${invoice.amountPaid.toFixed(2)} CFA`, leftMargin, currentY, { align: "right", width: rightMargin - leftMargin });
+    doc.text(`${invoice.amountPaid} CFA`, leftMargin, currentY, { align: "right", width: rightMargin - leftMargin });
     doc.moveDown(0.5);
 
     // Solde Dû
@@ -156,7 +156,7 @@ export default async function generateInvoicePdf(invoice: InvoiceWithQuote) {
     doc.fontSize(10)
        .fillColor(accentColor); 
     doc.text(`Solde Dû:`, leftMargin, currentY);
-    doc.text(`${balanceDue.toFixed(2)} CFA`, leftMargin, currentY, { align: "right", width: rightMargin - leftMargin });
+    doc.text(`${balanceDue} CFA`, leftMargin, currentY, { align: "right", width: rightMargin - leftMargin });
     doc.fillColor(textColor); 
     doc.moveDown(2);
 

@@ -149,6 +149,7 @@ export interface QuoteStageInput {
   dateLivraison?:string
    createdAt: string;
    updatedAt: string;
+   projectName:string,
  }
  export type stageStatus = 
 'ACCEPTE'|'REFUSE'|'EN_ATTENTE'
