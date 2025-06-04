@@ -61,7 +61,6 @@ onMounted(async () => {
     const user = JSON.parse(userString);
     const userId = user.id;
     const userRole = user.role;
-
     const data = await $fetch<Project[]>(
       userRole === "ADMIN" ? "/api/Projects" : `/api/Projects/user/${userId}`
     );
