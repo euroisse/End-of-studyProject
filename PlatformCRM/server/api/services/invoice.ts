@@ -42,7 +42,7 @@ console.log('id utilisateur',userId)
 
 
     // Calcul du montant total du devis, en privilégiant newTotalPrice si défini
-    const totalQuoteAmount = newTotalPrice !== undefined && newTotalPrice !== null ? newTotalPrice : quote.totalPrice;
+    const totalQuoteAmount = newTotalPrice !== undefined && newTotalPrice !== null ? newTotalPrice : quote.newTotalPrice;
 console.log(totalQuoteAmount)
     // Vérification pour s'assurer que totalQuoteAmount est un nombre valide
     if (typeof totalQuoteAmount !== 'number' || isNaN(totalQuoteAmount)) {

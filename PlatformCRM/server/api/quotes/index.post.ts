@@ -2,7 +2,7 @@
 
 import prisma from "~/server/database";
 
-interface BodyReauestInterface {
+interface BodyRequestInterface {
   projectId: number,
   stagesWithPrices: Array<{
     projectStageId: number,
@@ -11,7 +11,7 @@ interface BodyReauestInterface {
 }
 
 export default defineEventHandler(async (event) => {
-  const body: BodyReauestInterface = await readBody(event);
+  const body: BodyRequestInterface = await readBody(event);
   const {  projectId, stagesWithPrices } = body;
   if ( !projectId) {
     throw createError({
