@@ -141,6 +141,7 @@
     <CreateInvoiceModal
       v-if="showCreateInvoiceModal && selectedQuoteForInvoice"
       :quoteId="selectedQuoteForInvoice.id"
+      :quoteTotalPrice="getDisplayPrice(selectedQuoteForInvoice)"
       @close="showCreateInvoiceModal = false"
       @success="handleInvoiceCreationSuccess"
     />
@@ -208,7 +209,20 @@ const formatPrice = (price: number): string => {
     maximumFractionDigits: 2,
   });
 };
-
+const getDisplayPrice = (quoteItem: quote): number => {
+  if (
+    quoteItem.newTotalPrice !== undefined &&
+    quoteItem.newTotalPrice !== null
+  ) {
+    return quoteItem.newTotalPrice;
+  } else if (
+    quoteItem.totalPrice !== undefined &&
+    quoteItem.totalPrice !== null
+  ) {
+    return quoteItem.totalPrice;
+  }
+  return 0;
+};
 const statusClass = (status: string) => {
   switch (status) {
     case "ACCEPTE":

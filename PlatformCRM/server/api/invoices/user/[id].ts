@@ -1,6 +1,6 @@
 
 import prisma from "~/server/database";
-import { defineEventHandler, createError } from 'h3'; // Assurez-vous d'importer createError
+
 
 export default defineEventHandler(async (event) => {
   const userId = parseInt(event.context.params?.id as string || '');

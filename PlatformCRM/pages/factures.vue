@@ -100,13 +100,6 @@
         </div>
       </div>
     </main>
-
-    <CreateInvoiceModal
-      v-if="showCreateInvoiceModal"
-      :quoteId="selectedQuoteIdForInvoice"
-      @close="showCreateInvoiceModal = false"
-      @success="handleInvoiceCreated"
-    />
   </div>
 </template>
 

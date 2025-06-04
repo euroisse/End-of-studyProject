@@ -17,6 +17,10 @@
           <p class="text-gray-700 mb-4">
             Création de facture pour le devis #{{ quoteId }}.
           </p>
+          <p class="text-gray-700 mb-4 font-bold">
+            Montant total du devis: {{ quoteTotalPrice }} FCFA
+          </p>
+
           <form @submit.prevent="submitInvoice">
             <div class="mb-4">
               <label
@@ -97,6 +101,7 @@ import { ref } from "vue";
 
 const props = defineProps<{
   quoteId: number | null;
+  quoteTotalPrice: number;
 }>();
 
 const emit = defineEmits(["close", "success"]);
@@ -125,13 +130,13 @@ const submitInvoice = async () => {
   try {
     const response = await $fetch(`/api/invoices`, {
       method: "POST",
-
       body: JSON.stringify({
         quoteId: props.quoteId,
         amountPaid: invoiceData.value.amount,
         invoiceDate: invoiceData.value.date,
         paymentMethod: invoiceData.value.paymentMethod,
         userId: userId,
+        newTotalPrice: props.quoteTotalPrice,
       }),
     });
     console.log("Invoice creation response:", response);
