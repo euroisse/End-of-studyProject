@@ -15,8 +15,6 @@ export type InvoiceWithQuote = Prisma.InvoiceGetPayload<{
 export default async function generateInvoicePdf(invoice: InvoiceWithQuote) {
   console.log("--- donnees de facture genere par le pdf ---");
   console.log("Invoice Object:", JSON.stringify(invoice, null, 2));
-  console.log("Invoice Quote:", JSON.stringify(invoice.quote, null, 2));
-  console.log("Invoice Quote Stages:", JSON.stringify(invoice.quote?.stages, null, 2));
 
   try {
     if (!invoice) {
@@ -28,16 +26,38 @@ export default async function generateInvoicePdf(invoice: InvoiceWithQuote) {
     const outputPath = `invoices/facture_${invoice.invoiceNumber}.pdf`;
     doc.pipe(fs.createWriteStream(outputPath));
 
-    const textColor = "black";
-    const accentColor = "#E44933";
+    // COULEURS MISES À JOUR
+    const darkBlue = "#004080"; 
+    const lightBlue = "#ADD8E6"; 
+    const textColor = "black"; 
+       const Color = "#E44933";
+    const accentColor = darkBlue; 
+    
     const fontBase = "Helvetica";
     const fontBold = "Helvetica-Bold";
 
-    // Define margins 
+   
     const leftMargin = 50;
     const rightMargin = doc.page.width - 50; 
 
-    // --- En-tête ---
+    
+    const logoPath = "path/to/your/logo.png"; 
+    const logoX = leftMargin;
+    const logoY = 20;
+    const logoWidth = 80; 
+    const logoHeight = 60; 
+
+   
+    if (fs.existsSync(logoPath)) {
+      doc.image(logoPath, logoX, logoY, { width: logoWidth, height: logoHeight });
+    } else {
+      doc.fontSize(12)
+        .fillColor(darkBlue) 
+        .font(fontBold)
+        .text("Votre Logo Ici", logoX, logoY + (logoHeight / 2) - 6);
+    }
+    doc.moveDown(0.5)
+    // Le titre "FACTURE" et le numéro de facture sont maintenant accentués en darkBlue
     doc
       .fontSize(24)
       .font(fontBase)
@@ -54,8 +74,11 @@ export default async function generateInvoicePdf(invoice: InvoiceWithQuote) {
 
     // --- Infos de l'entreprise ---
     doc.fontSize(12).text("OPENINTECH", { align: "right" });
+    doc.moveDown(0.5)
     doc.text("YDE-SIMBOCK", { align: "right" });
+    doc.moveDown(0.5)
     doc.text(`Tel: 00000000`, { align: "right" });
+    doc.moveDown(0.5)
     doc.text(`Email: contact@gmail.com`, { align: "right" });
     doc.moveDown(1);
 
@@ -68,7 +91,7 @@ export default async function generateInvoicePdf(invoice: InvoiceWithQuote) {
     doc.text(clientCompany);
 
     const invoiceDate = new Date(invoice.invoiceDate).toLocaleDateString('fr-FR');
-   
+    
     const currentYForClientInfo = doc.y;
     doc.text(`Date de facture: ${invoiceDate}`, leftMargin, currentYForClientInfo - doc.currentLineHeight(), { align: "right", width: rightMargin - leftMargin }); // Adjust Y to align with the last line of client info
     doc.moveDown(2);
@@ -88,8 +111,10 @@ export default async function generateInvoicePdf(invoice: InvoiceWithQuote) {
       align: "right",
     });
 
+    // Ligne de séparation de l'en-tête du tableau, colorée en darkBlue
     doc
       .lineWidth(0.5)
+      .strokeColor(darkBlue) 
       .moveTo(itemColumnX, tableTop + rowHeight)
       .lineTo(rightMargin, tableTop + rowHeight) 
       .stroke();
@@ -111,8 +136,10 @@ export default async function generateInvoicePdf(invoice: InvoiceWithQuote) {
         calculatedSubtotal += amount;
         y += rowHeight;
 
+       
         doc
           .lineWidth(0.5)
+          .strokeColor(lightBlue) 
           .moveTo(itemColumnX, y)
           .lineTo(rightMargin, y) 
           .stroke();
@@ -136,27 +163,29 @@ export default async function generateInvoicePdf(invoice: InvoiceWithQuote) {
     doc.text(`${taxAmount} CFA`, leftMargin, currentY, { align: "right", width: rightMargin - leftMargin });
     doc.moveDown(0.5);
 
-    // TOTAL
+    // TOTAL (accentué en darkBlue)
     currentY = doc.y;
     doc.fontSize(12).font(fontBold); 
+    doc.fillColor(accentColor); 
     doc.text(`TOTAL:`, leftMargin, currentY);
-    doc.text(`${invoice.totalAmount} CFA`, leftMargin, currentY, { align: "right", width: rightMargin - leftMargin });
+    doc.text(`${invoice.totalAmount.toFixed(2)} CFA`, leftMargin, currentY, { align: "right", width: rightMargin - leftMargin });
+    doc.fillColor(textColor); 
     doc.moveDown(0.5);
 
     // Montant Payé
     currentY = doc.y;
     doc.fontSize(10).font(fontBase);
     doc.text(`Montant Payé: `, leftMargin, currentY);
-    doc.text(`${invoice.amountPaid} CFA`, leftMargin, currentY, { align: "right", width: rightMargin - leftMargin });
+    doc.text(`${invoice.amountPaid.toFixed(2)} CFA`, leftMargin, currentY, { align: "right", width: rightMargin - leftMargin });
     doc.moveDown(0.5);
 
-    // Solde Dû
+    // Solde Dû (accentué en darkBlue)
     currentY = doc.y;
     const balanceDue = invoice.totalAmount - invoice.amountPaid;
     doc.fontSize(10)
-       .fillColor(accentColor); 
+       .fillColor(Color); 
     doc.text(`Solde Dû:`, leftMargin, currentY);
-    doc.text(`${balanceDue} CFA`, leftMargin, currentY, { align: "right", width: rightMargin - leftMargin });
+    doc.text(`${balanceDue.toFixed(2)} CFA`, leftMargin, currentY, { align: "right", width: rightMargin - leftMargin });
     doc.fillColor(textColor); 
     doc.moveDown(2);
 
@@ -165,11 +194,15 @@ export default async function generateInvoicePdf(invoice: InvoiceWithQuote) {
     doc.fontSize(8).font(fontBase);
 
     // MÉTHODE DE PAIEMENT 
+    doc.fillColor(accentColor); 
     doc.text("MÉTHODE DE PAIEMENT", leftMargin, currentY, { underline: true });
+    doc.fillColor(textColor);
 
-    // SIGNATURE (right)
+    // SIGNATURE 
     doc.font(fontBold).fontSize(10); 
+    doc.fillColor(accentColor); 
     doc.text("SIGNATURE", leftMargin, currentY, { align: "right", width: rightMargin - leftMargin });
+    doc.fillColor(textColor); 
     
     doc.moveDown(0.5); 
 
