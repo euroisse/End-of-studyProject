@@ -4,13 +4,13 @@
       <div class="flex items-center justify-between mb-4">
         <div class="flex items-center">
           <button
-            @click="$router.back()"
+            @click="goBackToDevis"
             class="text-gray-400 hover:text-gray-600"
           >
-            <i class="ri-arrow-go-back-line mr-2"></i>
+            <i class="ri-arrow-left-s-line text-xl mr-2 mt-1"></i>
           </button>
           <h1 class="text-2xl font-bold text-gray-800 mr-6">
-            Devis #{{ quoteDetails.number }}
+            Devis <span class="text-green-500">#{{ quoteDetails.number }}</span>
           </h1>
           <button
             v-if="quoteDetails.status === 'EN_ATTENTE' && isClient"
@@ -42,71 +42,98 @@
         </div>
       </div>
 
-      <p class="text-gray-600 font-bold">
-        Client: {{ quoteDetails.customer?.name || "N/A" }}
+      <p class="text-gray-600 font-bold ml-3 mb-1 tracking-wider">
+        Client:
+        <span class="text-gray-600 font-normal capitalize tracking-wider">{{
+          quoteDetails.customer?.name || "N/A"
+        }}</span>
       </p>
-      <p class="text-gray-600 font-bold">
-        Projet: {{ quoteDetails.project?.title || "N/A" }}
+      <p class="text-gray-600 font-bold ml-3 mb-1 tracking-wider">
+        Projet:
+        <span class="text-gray-600 font-normal capitalize tracking-wider">
+          {{ quoteDetails.project?.title || "N/A" }}</span
+        >
       </p>
-      <p class="text-gray-600 font-bold">
-        Date de livraison estimée:
-        {{
-          quoteDetails.dateLivraison
-            ? formatDate(quoteDetails.dateLivraison)
-            : "N/A"
-        }}
+      <p class="text-gray-600 font-bold ml-3 mb-1 tracking-wider">
+        Date:
+        <span class="text-gray-600 font-normal capitalize tracking-wider">
+          {{
+            quoteDetails.createdAt ? formatDate(quoteDetails.createdAt) : "N/A"
+          }}</span
+        >
       </p>
-      <p
-        class="text-lg font-bold mt-4"
-        :class="quoteDetails.newTotalPrice ? 'text-red-600' : 'text-gray-800'"
-      >
+      <p class="text-lg font-bold mt-4 ml-3 text-gray-800">
         Prix Total:
-        {{
-          formatPrice(
-            quoteDetails.newTotalPrice !== null &&
-              quoteDetails.newTotalPrice !== undefined
-              ? quoteDetails.newTotalPrice
-              : quoteDetails.totalPrice
-          )
-        }}
-        CFA
+        <span
+          v-if="quoteDetails.newTotalPrice"
+          class="line-through text-gray-500 mr-2"
+        >
+          {{ formatPrice(quoteDetails.totalPrice) }} CFA
+        </span>
+        <span
+          :class="quoteDetails.newTotalPrice ? 'text-red-600' : 'text-gray-800'"
+        >
+          {{
+            formatPrice(
+              quoteDetails.newTotalPrice !== null &&
+                quoteDetails.newTotalPrice !== undefined
+                ? quoteDetails.newTotalPrice
+                : quoteDetails.totalPrice
+            )
+          }}
+          CFA
+        </span>
       </p>
     </div>
     <div v-else class="text-center py-8">
       <p class="text-gray-500">Chargement des détails du devis...</p>
     </div>
 
-    <div class="space-y-6 mt-6" v-if="quoteDetails">
-      <h2 class="text-xl font-semibold text-gray-700">Étapes du devis</h2>
-      <div class="relative border-l-2 border-gray-200 pl-6 space-y-10">
+    <div class="space-y-6 mt-10" v-if="quoteDetails">
+      <h2 class="text-2xl font-semibold text-gray-800 ml-3">Étapes du devis</h2>
+      <div class="relative pl-8 py-2">
+        <div
+          class="absolute left-[17px] top-0 bottom-0 w-1 bg-blue-200 rounded-full"
+        ></div>
+
         <div
           v-for="(stage, index) in quoteDetails.stages"
           :key="stage.projectStageId"
-          class="relative"
+          class="relative mb-8 last:mb-0"
         >
-          <span
-            class="absolute -left-[9px] top-1.5 w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow"
-          ></span>
-          <div class="bg-gray-50 p-4 rounded-xl shadow-sm">
-            <div class="flex justify-between items-center mb-1">
-              <h3 class="text-lg font-medium text-gray-800">
+          <div
+            class="absolute -left-1 top-0 flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 text-white shadow-lg z-10"
+          >
+            <i :class="getStageIcon(index)"></i>
+          </div>
+
+          <div
+            class="bg-white p-5 rounded-xl shadow-md border border-gray-200 ml-8"
+          >
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="text-xl font-semibold text-blue-700">
                 {{ stage.projectStage.title }}
               </h3>
-              <span class="text-blue-600 font-semibold">
-                {{ stage.prix }} CFA
+              <span class="text-blue-600 font-bold text-lg whitespace-nowrap">
+                {{ formatPrice(stage.prix) }} CFA
               </span>
             </div>
-            <p class="text-gray-600 text-sm">
-              {{ stage.projectStage.description || "Pas de description." }}
+            <p class="text-gray-700 text-base leading-relaxed">
+              {{
+                stage.projectStage.description ||
+                "Pas de description détaillée pour cette étape."
+              }}
             </p>
           </div>
         </div>
-        <p v-if="quoteDetails.stages.length === 0" class="text-gray-500">
+        <p
+          v-if="quoteDetails.stages.length === 0"
+          class="text-gray-500 text-center py-4 ml-8"
+        >
           Aucune étape définie pour ce devis.
         </p>
       </div>
     </div>
-
     <hr class="my-10 border-gray-200" />
 
     <div class="flex justify-end">
@@ -234,6 +261,18 @@ const statusClass = (status: string) => {
     default:
       return "bg-gray-100 text-gray-700";
   }
+};
+
+const getStageIcon = (index: number) => {
+  const icons = [
+    "ri-lightbulb-line",
+    "ri-pencil-ruler-2-line",
+    "ri-tools-line",
+    "ri-check-double-line",
+    "ri-flag-line",
+    "ri-arrow-right-circle-line",
+  ];
+  return icons[index] || "ri-arrow-right-circle-line";
 };
 
 const downloadPDF = async () => {

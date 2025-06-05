@@ -70,7 +70,7 @@ export interface Project {
       email: string;
     };
   }[];
-  updatedAt: Date;
+  startDate: Date;
 }
 
 export type ProjectWithProjectStages = Prisma.ProjectGetPayload<{

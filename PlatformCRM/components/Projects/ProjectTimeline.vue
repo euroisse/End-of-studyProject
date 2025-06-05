@@ -1,6 +1,6 @@
 <template>
-  <div class="pt-4">
-    <h2 class="text-xl font-bold font-Roboto mb-6">Étapes du projet</h2>
+  <div class="mb-8 bg-white w-full rounded-sm flex-1 p-8 pt-4">
+    <h2 class="text-xl font-bold font-Roboto mb-6 ml-3">Étapes du projet</h2>
     <div class="relative">
       <div
         class="absolute top-5 left-5 h-[calc(100%-40px)] w-0.5 bg-gray-200"

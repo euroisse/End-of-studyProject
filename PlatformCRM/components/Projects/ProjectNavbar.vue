@@ -78,9 +78,7 @@
     </div>
 
     <div v-if="activeTab === 'apercu'">
-      <ProjectsProjectTimeline
-        class="mb-8 bg-white w-full rounded-sm flex-1 p-8"
-      />
+      <ProjectsProjectTimeline />
     </div>
 
     <div v-if="activeTab === 'taches'">
