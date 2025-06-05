@@ -1,7 +1,9 @@
 <template>
   <header class="fixed top-0 left-0 right-0 bg-white shadow-md z-50">
     <div class="container mx-auto px-6 py-4 flex items-center justify-between">
-      <div class="flex items-center">
+      <div
+        class="flex items-center gap-4 flex-shrink-0 h-12 border-b bg-white border-gray-200"
+      >
         <h1 class="text-2xl font-bold text-indigo-700">OpenCRM</h1>
       </div>
       <div

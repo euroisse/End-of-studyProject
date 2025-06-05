@@ -20,7 +20,9 @@
           <span v-else>0</span>
         </p>
       </div>
-      <i class="ri-folders-line text-indigo-500 text-4xl"></i>
+      <i
+        class="ri-folders-line text-indigo-500 text-4xl w-16 h-16 justify-center text-center pt-3 rounded-full bg-indigo-50"
+      ></i>
     </div>
 
     <div
@@ -33,7 +35,9 @@
           {{ summaryData?.assignedTasksCount || 0 }}
         </p>
       </div>
-      <i class="ri-task-line text-orange-500 text-4xl"></i>
+      <i
+        class="ri-task-line text-orange-500 text-4xl w-16 h-16 justify-center text-center pt-3 rounded-full bg-orange-50"
+      ></i>
     </div>
 
     <div
@@ -53,7 +57,9 @@
           <span v-else>0</span>
         </p>
       </div>
-      <i class="ri-bill-line text-green-500 text-4xl"></i>
+      <i
+        class="ri-bill-line text-green-500 text-4xl w-16 h-16 justify-center text-center pt-3 rounded-full bg-green-50"
+      ></i>
     </div>
 
     <div
@@ -66,7 +72,9 @@
           {{ summaryData?.yourInvoicesCount || 0 }}
         </p>
       </div>
-      <i class="ri-money-euro-box-line text-purple-500 text-4xl"></i>
+      <i
+        class="ri-money-euro-box-line text-purple-500 text-4xl w-16 h-16 justify-center text-center pt-3 rounded-full bg-purple-50"
+      ></i>
     </div>
 
     <div
@@ -79,7 +87,9 @@
           {{ summaryData?.totalClients || 0 }}
         </p>
       </div>
-      <i class="ri-group-line text-purple-500 text-4xl"></i>
+      <i
+        class="ri-group-line text-purple-500 text-4xl w-16 h-16 justify-center text-center pt-3 rounded-full bg-purple-50"
+      ></i>
     </div>
 
     <div
@@ -92,7 +102,9 @@
           {{ summaryData?.totalEmployees || 0 }}
         </p>
       </div>
-      <i class="ri-user-2-line text-blue-500 text-4xl"></i>
+      <i
+        class="ri-user-2-line text-blue-500 text-4xl w-16 h-16 justify-center text-center pt-3 rounded-full bg-blue-50"
+      ></i>
     </div>
   </div>
 </template>

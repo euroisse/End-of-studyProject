@@ -1,95 +1,104 @@
 <template>
-  <div
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-  >
-    <div class="bg-white rounded-lg w-full max-w-2xl">
-      <div class="p-6">
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="text-xl font-bold text-gray-800">Créer une Facture</h2>
-          <button
-            @click="$emit('close')"
-            class="text-gray-400 hover:text-gray-600"
-          >
-            <i class="ri-close-line"></i>
-          </button>
-        </div>
-        <div v-if="quoteId">
-          <p class="text-gray-700 mb-4">
-            Création de facture pour le devis #{{ quoteId }}.
-          </p>
-          <p class="text-gray-700 mb-4 font-bold">
-            Montant total du devis: {{ quoteTotalPrice }} FCFA
-          </p>
+  <div class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm">
+    <div class="fixed inset-0 overflow-y-auto">
+      <div class="flex min-h-full items-center justify-center p-4">
+        <div
+          class="rounded-2xl shadow-2xl max-w-lg w-full p-0 transform transition-all bg-white"
+        >
+          <div class="p-6 rounded-t-2xl bg-blue-600">
+            <div class="flex justify-between items-center mb-6">
+              <div class="flex items-center gap-3">
+                <h2 class="text-xl font-semibold text-white">
+                  Créer une Facture
+                </h2>
+              </div>
 
-          <form @submit.prevent="submitInvoice">
-            <div class="mb-4">
-              <label
-                for="invoiceDate"
-                class="block text-gray-700 text-sm font-bold mb-2"
-                >Date de la facture:</label
-              >
-              <input
-                type="date"
-                id="invoiceDate"
-                v-model="invoiceData.date"
-                class="shadow appearance-none border focus:ring-2 focus:ring-indigo-500 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                required
-              />
-            </div>
-            <div class="mb-6">
-              <label
-                for="amount"
-                class="block text-gray-700 text-sm font-bold mb-2"
-                >Montant Payé:</label
-              >
-              <input
-                type="number"
-                id="amount"
-                v-model.number="invoiceData.amount"
-                class="shadow appearance-none border focus:ring-2 focus:ring-indigo-500 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                required
-              />
-            </div>
-            <div class="mb-6">
-              <label
-                for="paymentMethod"
-                class="block text-gray-700 text-sm font-bold mb-2"
-                >Méthode de paiement:</label
-              >
-              <select
-                id="paymentMethod"
-                v-model="invoiceData.paymentMethod"
-                class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-500 bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
-                required
-              >
-                <option value="">Sélectionner une méthode</option>
-                <option value="OrangeMoney">OrangeMoney</option>
-                <option value="MTNMoney">MTNMoney</option>
-                <option value="BankTransfer">Virement Bancaire</option>
-                <option value="Cash">Espèces</option>
-              </select>
-            </div>
-            <div class="flex items-center justify-between">
               <button
-                type="submit"
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-              >
-                Enregistrer la Facture
-              </button>
-              <button
-                type="button"
                 @click="$emit('close')"
-                class="bg-gray-300 hover:bg-gray-500 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                class="text-blue-100 hover:text-white transition-colors duration-200"
               >
-                Annuler
+                <i class="ri-close-line"></i>
               </button>
             </div>
-          </form>
-        </div>
-        <div v-else>
-          <p class="text-red-500">
-            Aucun ID de devis fourni pour la création de facture.
-          </p>
+            <div v-if="quoteId">
+              <p class="text-gray-700 mb-4">
+                Création de facture pour le devis #{{ quoteId }}.
+              </p>
+              <p class="text-gray-700 mb-4 font-bold">
+                Montant total du devis: {{ quoteTotalPrice }} FCFA
+              </p>
+
+              <form @submit.prevent="submitInvoice">
+                <div class="mb-4">
+                  <label
+                    for="invoiceDate"
+                    class="block text-gray-700 text-sm font-bold mb-2"
+                    >Date de la facture:</label
+                  >
+                  <input
+                    type="date"
+                    id="invoiceDate"
+                    v-model="invoiceData.date"
+                    class="shadow appearance-none border focus:ring-2 focus:ring-indigo-500 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    required
+                  />
+                </div>
+                <div class="mb-6">
+                  <label
+                    for="amount"
+                    class="block text-gray-700 text-sm font-bold mb-2"
+                    >Montant Payé:</label
+                  >
+                  <input
+                    type="number"
+                    id="amount"
+                    v-model.number="invoiceData.amount"
+                    class="shadow appearance-none border focus:ring-2 focus:ring-indigo-500 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    required
+                  />
+                </div>
+                <div class="mb-6">
+                  <label
+                    for="paymentMethod"
+                    class="block text-gray-700 text-sm font-bold mb-2"
+                    >Méthode de paiement:</label
+                  >
+                  <select
+                    id="paymentMethod"
+                    v-model="invoiceData.paymentMethod"
+                    class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-500 bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    required
+                  >
+                    <option value="">Sélectionner une méthode</option>
+                    <option value="OrangeMoney">OrangeMoney</option>
+                    <option value="MTNMoney">MTNMoney</option>
+                    <option value="BankTransfer">Virement Bancaire</option>
+                    <option value="Cash">Espèces</option>
+                  </select>
+                </div>
+                <div class="flex items-center justify-between">
+                  <button
+                    type="submit"
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                  >
+                    Enregistrer la Facture
+                  </button>
+                  <button
+                    type="button"
+                    @click="$emit('close')"
+                    class="bg-gray-300 hover:bg-gray-500 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                  >
+                    Annuler
+                  </button>
+                </div>
+              </form>
+            </div>
+            <div v-else>
+              <p class="text-red-500">
+                Aucun ID de devis fourni pour la création de facture.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

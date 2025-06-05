@@ -1,8 +1,9 @@
 <template>
   <div class="bg-white rounded-lg shadow-md p-6 h-full w-full flex flex-col">
     <div class="flex justify-between items-center mb-6">
-      <h2 class="text-lg font-semibold text-gray-800">Devis</h2>
+      <h2 class="text-lg font-bold text-gray-800">Devis</h2>
       <NuxtLink
+        v-if="isClient"
         to="/devis"
         class="text-gray-600 hover:text-indigo-700 text-sm font-medium cursor-pointer whitespace-nowrap"
       >
@@ -10,27 +11,29 @@
       </NuxtLink>
     </div>
 
-    <div
-      class="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4 flex-grow w-full"
-    >
+    <div>
       <div
         v-if="quotes.length === 0"
         class="col-span-full text-gray-500 text-center py-4"
       >
         Aucun devis disponible pour le moment.
       </div>
-      <div
-        v-for="quote in quotes"
-        :key="quote.id"
-        class="flex items-center justify-between p-4 bg-gray-50 rounded-lg w-full"
-      >
-        <div class="flex items-center">
-          <i class="ri-file-text-line text-green-600 mr-4"></i>
-          <div>
-            <h4 class="font-medium">{{ quote.number }}</h4>
-            <p class="text-sm text-gray-500">
-              {{ formatDate(quote.createdAt) }}
-            </p>
+      <div v-else class="w-full">
+        <div
+          v-for="quote in quotes"
+          :key="quote.id"
+          class="flex items-center justify-between p-4 mb-2 bg-[#F9FAFB] rounded-lg"
+        >
+          <div class="flex items-center">
+            <i
+              class="ri-file-text-line text-[#22C55E] mr-4 w-12 h-12 justify-center text-center rounded-full pt-3 bg-[#DCFCE7]"
+            ></i>
+            <div>
+              <h4 class="font-medium">{{ quote.number }}</h4>
+              <p class="text-sm text-gray-500">
+                Date : {{ formatDate(quote.createdAt) }}
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -41,7 +44,7 @@
 <script setup lang="ts">
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-
+const { isClient } = useIsRole();
 interface SimplifiedQuote {
   id: number;
   number: string;

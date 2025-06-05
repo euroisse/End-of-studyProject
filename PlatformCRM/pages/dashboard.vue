@@ -31,15 +31,13 @@
           :projects="dashboardData?.projects || []"
           class="mb-6"
         />
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <QuoteList :quotes="dashboardData?.quotes || []" />
-        </div>
       </div>
       <div
         v-if="isAdmin || isClient"
         class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6"
       >
         <InvoiceList :invoices="dashboardData?.invoices || []" />
+        <QuoteList :quotes="dashboardData?.quotes || []" />
       </div>
     </div>
   </div>

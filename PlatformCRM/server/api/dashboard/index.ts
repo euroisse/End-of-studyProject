@@ -69,6 +69,10 @@ export default defineEventHandler(async (event) => {
         orderBy: { createdAt: 'desc' },
         take: 5, 
       });
+      quotes = await prisma.quote.findMany({
+        orderBy:{createdAt:'desc'},
+        take: 5,
+      })
 
       dashboardData = {
         summary: {
@@ -78,6 +82,7 @@ export default defineEventHandler(async (event) => {
           totalEmployees,
         },
         invoices: invoices, 
+        quotes:quotes,
       };
     } else if (isEmploye) {
       projects = await prisma.project.findMany({
