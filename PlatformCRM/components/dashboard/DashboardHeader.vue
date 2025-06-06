@@ -7,9 +7,6 @@
       <button class="btn btn-primary" @click="showCreateProject = true">
         <i class="ri-folder-add-line mr-2"></i>Nouveau projet
       </button>
-      <button class="btn btn-success">
-        <i class="ri-file-add-line mr-2"></i>Nouveau devis
-      </button>
     </div>
   </div>
   <div

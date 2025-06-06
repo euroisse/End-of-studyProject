@@ -39,7 +39,7 @@
         </template>
         <template v-else-if="item.label === 'Déconnexion'">
           <button
-            @click="showLogoutConfirmation = true"
+            @click="$emit('logout')"
             class="flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 w-full text-left"
           >
             <i :class="`${item.icon} w-5`"></i>
@@ -81,43 +81,15 @@
         </template>
       </template>
     </nav>
-
-    <div
-      v-if="showLogoutConfirmation"
-      class="fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center z-30"
-    >
-      <div class="bg-white rounded-md shadow-lg p-6">
-        <p class="mb-4 text-lg font-semibold text-gray-800">
-          Êtes-vous sûr de vouloir vous déconnecter ?
-        </p>
-        <div class="flex justify-end space-x-2">
-          <button
-            @click="showLogoutConfirmation = false"
-            class="px-4 py-2 text-gray-600 bg-gray-200 rounded-md hover:bg-gray-300"
-          >
-            Annuler
-          </button>
-          <button
-            @click="logoutUser"
-            class="px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700"
-          >
-            Déconnexion
-          </button>
-        </div>
-      </div>
-    </div>
   </aside>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 
 const route = useRoute();
-const router = useRouter();
-
-const showLogoutConfirmation = ref(false);
-
+const emit = defineEmits(["logout"]);
 const activeSubMenu = ref<string | null>(null);
 
 const { isEmploye, isClient, isAdmin } = useIsRole();
@@ -215,11 +187,6 @@ const isActive = (path: string) => route.path === path;
 const isChildActive = (item: MenuItem) =>
   item.children?.some((child: ChildMenuItem) => isActive(child.to));
 const getNotificationCount = (path: string) => (path === "/messages" ? 3 : 0);
-const logoutUser = () => {
-  localStorage.removeItem("user");
-  console.log("Déconnexion de l'utilisateur...");
-  router.push("/");
-};
 
 watch(() => route.path, closeSubMenus);
 
