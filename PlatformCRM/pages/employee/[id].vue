@@ -7,7 +7,7 @@
           class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
         >
           <div class="text-lg">
-            <i class="ri-arrow-left-s-line"></i>
+            <i class="ri-arrow-left-s-line mr-2"></i>
           </div>
           Retour aux utilisateurs
         </NuxtLink>
@@ -34,16 +34,16 @@
         </div>
 
         <div
-          class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 p-4 bg-blue-50 rounded-lg shadow-sm"
+          class="flex flex-row gap-6 mb-8 p-4 bg-gray-50 rounded-lg shadow-sm"
         >
           <div>
             <h2 class="text-xl font-semibold text-blue-700 mb-3">
               Informations de l'employé
             </h2>
-            <p class="text-gray-700 mb-1">
+            <p class="text-gray-700 mb-1 tracking-wider capitalize">
               <strong>Poste:</strong> {{ employeeData.poste || "N/A" }}
             </p>
-            <p class="text-gray-700">
+            <p class="text-gray-700 tracking-wider capitalize">
               <strong>Département:</strong>
               {{ employeeData.department || "N/A" }}
             </p>
@@ -61,15 +61,13 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-1 w-full gap-6">
-          <div
-            class="bg-green-50 p-5 rounded-lg shadow-sm h-full flex flex-col"
-          >
+          <div class="bg-gray-50 p-5 rounded-lg shadow-sm h-full flex flex-col">
             <h2
-              class="text-xl font-semibold text-green-700 mb-4 flex items-center justify-between"
+              class="text-xl font-semibold text-blue-700 mb-4 flex items-center justify-between"
             >
               Tâches assignées
               <span
-                class="text-sm font-normal text-green-600 px-3 py-1 bg-green-200 rounded-full"
+                class="text-sm font-normal text-blue-600 px-3 py-1 bg-blue-200 rounded-full"
               >
                 {{ employeeData.tasks?.length || 0 }}
               </span>
@@ -85,12 +83,16 @@
               >
                 <i class="ri-task-line text-green-500 text-lg mr-3"></i>
                 <div>
-                  <p class="font-medium text-gray-800">{{ task.title }}</p>
+                  <p
+                    class="font-medium text-gray-800 tracking-wider capitalize"
+                  >
+                    {{ task.title }}
+                  </p>
                   <p class="text-sm text-gray-600 mb-2">
                     Projet:
                     <NuxtLink
                       :to="`/projects/${task.project.id}`"
-                      class="text-blue-500 hover:underline"
+                      class="text-blue-500 hover:underline tracking-wider capitalize"
                     >
                       {{ task.project.title }}
                     </NuxtLink>
@@ -109,7 +111,7 @@
                     >
                     | Statut:
                     <span
-                      class="text-sm font-normal px-3 py-1 rounded-full"
+                      class="text-sm font-normal px-2 py-1 rounded-full mb-1"
                       :class="{
                         'text-green-600 bg-green-200':
                           task.status === 'TERMINE',

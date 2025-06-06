@@ -7,7 +7,7 @@
           class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
         >
           <div class="text-lg">
-            <i class="ri-arrow-left-s-line"></i>
+            <i class="ri-arrow-left-s-line mr-2"></i>
           </div>
           Retour aux utilisateurs
         </NuxtLink>
@@ -28,16 +28,16 @@
           <span class="text-lg text-gray-600">{{ clientData.email }}</span>
         </div>
         <div
-          class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 p-4 bg-blue-50 rounded-lg shadow-sm"
+          class="flex flex-row gap-6 mb-8 p-4 bg-gray-50 rounded-lg shadow-sm"
         >
           <div>
-            <h2 class="text-xl font-semibold text-blue-700 mb-3">
+            <h2 class="text-xl font-semibold text-blue-700 mb-3 tracking-wider">
               Informations de Contact
             </h2>
-            <p class="text-gray-700 mb-1">
+            <p class="text-gray-700 mb-1 tracking-wider">
               <strong>Téléphone:</strong> {{ clientData.contacts || "N/A" }}
             </p>
-            <p class="text-gray-700">
+            <p class="text-gray-700 tracking-wider capitalize">
               <strong>Adresse:</strong> {{ clientData.adresse || "N/A" }}
             </p>
           </div>
@@ -53,10 +53,10 @@
           </div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-1 gap-6">
-          <div
-            class="bg-purple-50 p-5 rounded-lg shadow-sm h-full flex flex-col"
-          >
-            <h2 class="text-xl font-semibold text-purple-700 mb-4">Projets</h2>
+          <div class="bg-gray-50 p-5 rounded-lg shadow-sm h-full flex flex-col">
+            <h2 class="text-xl font-semibold text-blue-700 mb-4 tracking-wider">
+              Projets
+            </h2>
             <div
               v-if="
                 clientData.clientProjects &&
@@ -69,11 +69,11 @@
                 :key="project.id"
                 class="bg-white p-3 rounded-md shadow-xs flex items-center"
               >
-                <i class="ri-folder-line text-purple-500 text-lg mr-3"></i>
+                <i class="ri-folder-line text-blue-500 text-lg mr-3"></i>
                 <div>
                   <NuxtLink
                     :to="`/projects/${project.id}`"
-                    class="font-medium text-gray-800 hover:text-purple-600"
+                    class="font-medium text-gray-800 hover:text-blue-600 tracking-wider capitalize"
                   >
                     {{ project.title }}
                   </NuxtLink>

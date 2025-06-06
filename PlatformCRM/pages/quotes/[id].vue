@@ -3,12 +3,9 @@
     <div v-if="quoteDetails">
       <div class="flex items-center justify-between mb-4">
         <div class="flex items-center">
-          <button
-            @click="goBackToDevis"
-            class="text-gray-400 hover:text-gray-600"
-          >
+          <NuxtLink to="/devis" class="text-gray-400 hover:text-gray-600">
             <i class="ri-arrow-left-s-line text-xl mr-2 mt-1"></i>
-          </button>
+          </NuxtLink>
           <h1 class="text-2xl font-bold text-gray-800 mr-6">
             Devis <span class="text-green-500">#{{ quoteDetails.number }}</span>
           </h1>
@@ -184,6 +181,7 @@ import { useQuoteStore } from "#imports";
 import type { quote } from "~/types";
 import CreateInvoiceModal from "~/components/invoices/CreateInvoiceModal.vue";
 import InvoiceTable from "~/components/invoices/InvoiceTable.vue";
+import { NuxtLink } from "#components";
 
 definePageMeta({ layout: "admin" });
 
