@@ -1,24 +1,28 @@
 <template>
   <div
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto backdrop-blur-sm"
   >
     <div
-      class="max-w-5xl w-[800px] mx-auto p-6 bg-white rounded-2xl shadow-md max-h-[100vh]"
+      class="rounded-2xl shadow-2xl max-w-xl w-full p-0 transform transition-all bg-white"
     >
-      <div class="p-6">
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="text-xl font-bold text-gray-800">
-            Éditer les prix du devis
-          </h2>
+      <div class="p-6 rounded-t-2xl bg-blue-600">
+        <div class="flex justify-between items-center">
+          <div class="text-xl font-semibold text-white">
+            <h2 class="text-xl font-bold tracking-wide">
+              Éditer les prix du devis
+            </h2>
+          </div>
+
           <button
             @click="$emit('close')"
-            class="text-gray-400 hover:text-gray-600"
+            class="text-blue-100 hover:text-white transition-colors duration-200"
           >
-            <i class="ri-close-line text-xl"></i>
+            <i class="ri-close-line text-2xl"></i>
           </button>
         </div>
-
-        <form @submit.prevent="handleSubmit" class="space-y-4">
+      </div>
+      <form @submit.prevent="handleSubmit" class="p-6">
+        <div class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2"
               >Projet</label
@@ -94,36 +98,36 @@
               readonly
             />
           </div>
+        </div>
 
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2"
-              >Statut du devis</label
-            >
-            <input
-              type="text"
-              :value="quoteStatusDisplayName"
-              class="w-full border rounded-xl px-3 py-2 bg-gray-100 cursor-not-allowed"
-              readonly
-            />
-          </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2"
+            >Statut du devis</label
+          >
+          <input
+            type="text"
+            :value="quoteStatusDisplayName"
+            class="w-full border rounded-xl px-3 py-2 bg-gray-100 cursor-not-allowed"
+            readonly
+          />
+        </div>
 
-          <div class="flex justify-end space-x-4 mt-6">
-            <button
-              type="submit"
-              :disabled="devisStore.loading"
-              class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        <div class="flex justify-end space-x-4 mt-6">
+          <button
+            type="submit"
+            :disabled="devisStore.loading"
+            class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span v-if="devisStore.loading"
+              >Mise à jour des prix en cours...</span
             >
-              <span v-if="devisStore.loading"
-                >Mise à jour des prix en cours...</span
-              >
-              <span v-else>Mettre à jour les prix</span>
-            </button>
-          </div>
-          <div v-if="devisStore.error" class="text-red-600 text-sm mt-2">
-            Erreur: {{ devisStore.error }}
-          </div>
-        </form>
-      </div>
+            <span v-else>Mettre à jour les prix</span>
+          </button>
+        </div>
+        <div v-if="devisStore.error" class="text-red-600 text-sm mt-2">
+          Erreur: {{ devisStore.error }}
+        </div>
+      </form>
     </div>
   </div>
 </template>
@@ -148,7 +152,7 @@ const stagePrices = ref<Record<number, number>>({});
 const quoteStatus = ref<string>("");
 const projectStagesForQuote = ref<ProjectStageRaw[]>([]);
 const projectTitle = ref<string>("");
-const originalTotalPrice = ref<number>(0); // New ref for original total price
+const originalTotalPrice = ref<number>(0);
 
 const quoteStatusDisplayName = computed(() => {
   switch (quoteStatus.value) {
