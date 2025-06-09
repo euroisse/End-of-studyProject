@@ -23,7 +23,7 @@
           </div>
           <div
             v-if="isSubMenuOpen(item.label)"
-            class="bg-white absolute left-full top-0 shadow-md rounded-md w-48 p-3 z-20"
+            class="bg-white absolute left-full shadow-md rounded-md w-48 p-3"
           >
             <NuxtLink
               v-for="child in item.children"

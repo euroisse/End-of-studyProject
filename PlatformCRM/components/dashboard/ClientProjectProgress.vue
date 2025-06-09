@@ -13,11 +13,11 @@
           <div
             v-for="(stage, stageIndex) in project.projectStages"
             :key="stage.id"
-            class="relative flex items-center flex-shrink-0"
+            class="relative flex items-center"
           >
             <div
               v-if="stageIndex !== 0"
-              class="absolute left-[-50%] top-1/2 w-[50%] h-1 bg-gray-300 z-0"
+              class="absolute left-[-50%] top-1/2 w-[50%] h-1 bg-gray-300"
               :style="{
                 backgroundColor: getLineColor(
                   project.projectStages[stageIndex - 1]?.status
@@ -27,7 +27,7 @@
 
             <div
               :class="[
-                'w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-2 relative z-10',
+                'w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-2 relative ',
                 getStageColor(stage.status),
               ]"
             >
@@ -37,7 +37,7 @@
               ></i>
             </div>
             <p
-              class="absolute top-12 w-20 text-center text-sm font-medium text-gray-600"
+              class="absolute top-12 w-10 text-center text-sm font-medium text-gray-600"
             >
               {{ stage.title }}
             </p>
