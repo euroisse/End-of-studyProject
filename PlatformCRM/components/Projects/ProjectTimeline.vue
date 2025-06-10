@@ -177,33 +177,21 @@ const deleteProjectStage = async (id: number) => {
     }
   }
 };
-const stageAdded = async (newStage: ProjectStage) => {
-  showCreateStageProject.value = true;
+const stageAdded = (newStage: ProjectStage) => {
+  if (projectStore.selectedProject && newStage) {
+    console.log("Nouvelle étape ajoutée:", newStage);
+    console.log(
+      "Project avant ajout de l'étape:",
+      projectStore.selectedProject
+    );
+    if (!projectStore.selectedProject.projectStages) {
+      projectStore.selectedProject.projectStages = [];
+    }
+
+    projectStore.selectedProject.projectStages.push(newStage);
+  }
+  showCreateStageProject.value = false;
 };
-
-onMounted(() => {
-  handleSaveProjectStage;
-  stageAdded;
-});
-
-watch(
-  () => projectStore.selectedProject,
-  (newProject) => {
-    console.log(
-      "projectStore.selectedProject changed in Timeline:",
-      newProject
-    );
-    console.log(
-      "projectStages after change in Timeline:",
-      newProject?.projectStages
-    );
-    console.log(
-      "projectStages length after change in Timeline:",
-      newProject?.projectStages?.length
-    );
-  },
-  { deep: true }
-);
 </script>
 
 <style scoped>
