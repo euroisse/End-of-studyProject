@@ -128,6 +128,49 @@
             </tbody>
           </table>
         </div>
+        <div class="flex justify-center mt-4 space-x-2">
+          <button
+            @click="goToPreviousPage"
+            :disabled="quoteStore.pagination.page <= 1"
+            :class="[
+              'px-3 py-1 rounded',
+              quoteStore.pagination.page <= 1
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-blue-500 text-white hover:bg-blue-600',
+            ]"
+          >
+            <i class="ri-arrow-left-s-line"></i>
+          </button>
+
+          <button
+            v-for="p in quoteStore.pagination.totalPages"
+            :key="p"
+            @click="goToPage(p)"
+            :class="[
+              'px-3 py-1 rounded',
+              p === quoteStore.pagination.page
+                ? 'bg-blue-400 text-white'
+                : 'bg-gray-200 hover:bg-gray-300',
+            ]"
+          >
+            {{ p }}
+          </button>
+
+          <button
+            @click="goToNextPage"
+            :disabled="
+              quoteStore.pagination.page >= quoteStore.pagination.totalPages
+            "
+            :class="[
+              'px-3 py-1 rounded',
+              quoteStore.pagination.page >= quoteStore.pagination.totalPages
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-blue-500 text-white hover:bg-blue-600',
+            ]"
+          >
+            <i class="ri-arrow-right-s-line"></i>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -160,6 +203,38 @@ const openDeleteModal = (quoteItem: quote) => {
   showEditModal.value = true;
 };
 
+const quoteStore = useQuoteStore();
+
+const fetchQuotes = async () => {
+  await quoteStore.fetchQuotesPaginated(
+    quoteStore.pagination.page,
+    quoteStore.pagination.pageSize
+  );
+};
+
+const goToPage = (p: number) => {
+  // Only navigate if the page number is valid
+  if (p > 0 && p <= quoteStore.pagination.totalPages) {
+    quoteStore.pagination.page = p;
+    fetchQuotes();
+  }
+};
+
+const goToPreviousPage = () => {
+  if (quoteStore.pagination.page > 1) {
+    quoteStore.pagination.page--;
+    fetchQuotes();
+  }
+};
+
+const goToNextPage = () => {
+  if (quoteStore.pagination.page < quoteStore.pagination.totalPages) {
+    quoteStore.pagination.page++;
+    fetchQuotes();
+  }
+};
+
+onMounted(fetchQuotes);
 const { isAdmin } = useIsRole();
 
 const showEditPricesModal = ref(false);
@@ -167,10 +242,10 @@ const quoteToEditPrices = ref<quote | null>(null);
 const quoteToDelete = ref<quote | null>(null);
 const showEditModal = ref(false);
 const searchQuery = ref("");
-const quoteStore = useQuoteStore();
 
 const filteredQuotes = computed(() => {
   const searchLower = searchQuery.value.toLowerCase();
+
   return quoteStore.quotesList.filter((quote: any) => {
     return (
       (quote.number && quote.number.toLowerCase().includes(searchLower)) ||
@@ -186,7 +261,7 @@ const cancelDelete = () => {
 };
 
 const handleQuoteFormSuccess = async () => {
-  await quoteStore.fetchQuotesList();
+  await fetchQuotes();
   showEditPricesModal.value = false;
   quoteToEditPrices.value = null;
 };
@@ -225,14 +300,11 @@ const getDisplayPrice = (quoteItem: quote): number => {
 };
 
 const refreshQuotes = async () => {
-  await quoteStore.fetchQuotesList();
+  await fetchQuotes();
 };
 
 defineExpose({
   refreshQuotes,
 });
-
-onMounted(async () => {
-  await quoteStore.fetchQuotesList();
-});
+defineEmits(["preview"]);
 </script>
