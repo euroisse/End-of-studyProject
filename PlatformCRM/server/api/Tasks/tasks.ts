@@ -1,6 +1,4 @@
-import { PrismaClient } from '~/generated/prisma';
-
-const prisma = new PrismaClient();
+import prisma from "~/server/database";
 
 export default defineEventHandler(async (event) => {
   if (event.node.req.method === 'POST') {

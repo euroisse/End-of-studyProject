@@ -32,7 +32,7 @@
           <div class="p-3 rounded-lg bg-blue-500/10">
             <i class="ri-file-text-line text-blue-500"></i>
           </div>
-          <span class="text-sm text-gray-500">tous les statuts</span>
+          <span class="text-sm text-gray-500">Tous les statuts</span>
         </div>
         <div class="mt-4">
           <p class="text-sm text-gray-500">Toutes les tâches combinées</p>
@@ -60,7 +60,7 @@
               }"
             ></i>
           </div>
-          <span class="text-sm text-gray-500"> statut(To Do) </span>
+          <span class="text-sm text-gray-500"> Statut(To Do) </span>
         </div>
         <div class="mt-4">
           <p class="text-sm text-gray-500">Tâches à Faire</p>
@@ -88,7 +88,7 @@
               }"
             ></i>
           </div>
-          <span class="text-sm text-gray-500"> statut(In Progress) </span>
+          <span class="text-sm text-gray-500"> Statut(In Progress) </span>
         </div>
         <div class="mt-4">
           <p class="text-sm text-gray-500">Tâches En Cours</p>
@@ -116,7 +116,7 @@
               }"
             ></i>
           </div>
-          <span class="text-sm text-gray-500"> statut(Completed) </span>
+          <span class="text-sm text-gray-500"> Statut(Completed) </span>
         </div>
         <div class="mt-4">
           <p class="text-sm text-gray-500">Tâches Terminées</p>
@@ -133,7 +133,10 @@
 
     <div v-if="tasksByProject.length > 0" class="mt-8 space-y-6">
       <div v-for="projectGroup in tasksByProject" :key="projectGroup.projectId">
-        <h2 v-if="isEmploye" class="text-xl font-semibold text-gray-800 mb-4">
+        <h2
+          v-if="isEmploye"
+          class="text-xl font-semibold text-gray-800 mb-4 capitalize"
+        >
           {{
             projectGroup.projectName || `Projet ID: ${projectGroup.projectId}`
           }}
@@ -147,10 +150,12 @@
             class="bg-white w-full rounded-xl shadow-md p-4 flex justify-between items-start"
           >
             <div>
-              <h4 class="text-lg font-semibold text-gray-800 mb-2">
+              <h4 class="text-lg font-semibold text-gray-800 mb-2 capitalize">
                 {{ task.title }}
               </h4>
-              <p class="text-sm text-gray-600 mb-2">{{ task.description }}</p>
+              <p class="text-sm text-gray-600 mb-2 capitalize">
+                {{ task.description }}
+              </p>
               <div class="flex items-center text-sm mb-2">
                 <span class="mr-4">
                   Priorité :

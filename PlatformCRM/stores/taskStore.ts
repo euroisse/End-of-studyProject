@@ -26,13 +26,13 @@ export const useTaskStore = defineStore('task', {
       try {
         // Cette API `/api/Tasks/tasks` retourne toutes les tâches, comme vous l'avez fourni.
         const response = await $fetch<Task[]>('/api/Tasks/tasks');
-        this.tasks = response; // Stocke toutes les tâches ici
+        this.tasks = response; 
       } catch (error) {
         console.error("Erreur lors de la récupération de toutes les tâches:", error);
         this.tasks = []; // En cas d'erreur, assurez-vous que le tableau est vide
       }
     },
-    // ... (autres actions restent inchangées)
+   
     setTasks(newTasks: Task[]) {
       this.tasks = newTasks;
     },

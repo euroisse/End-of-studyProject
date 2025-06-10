@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
       }
 
       const projectExists = await prisma.project.findUnique({
-        where: { id: Number(projectId) }, // Assurez-vous que projectId est bien un nombre ici
+        where: { id: Number(projectId) }, 
       });
 
       if (!projectExists) {

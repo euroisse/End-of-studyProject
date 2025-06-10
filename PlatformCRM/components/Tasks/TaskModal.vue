@@ -178,6 +178,8 @@ onMounted(async () => {
   employees.value = employeeStore.employees;
 
   projectId.value = route.params.id ? Number(route.params.id) : null;
+
+  submitTask;
 });
 
 async function submitTask() {
@@ -189,6 +191,7 @@ async function submitTask() {
     effort: effort.value ?? undefined,
     projectId: projectId.value as number,
     employeeId: employeeId.value as number,
+    employeeName: employees.value,
   };
 
   console.log("Task data:", taskData);

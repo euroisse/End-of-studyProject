@@ -12,7 +12,7 @@
           class="relative flex"
         >
           <div
-            :class="`w-10 h-10 rounded-full flex items-center justify-center z-10
+            :class="`w-10 h-10 rounded-full flex items-center justify-center
             ${
               step.status === 'TERMINE'
                 ? 'bg-green-500'
@@ -32,7 +32,9 @@
             class="ml-8 bg-gray-50 shadow-sm md:p-6 hover:shadow-md transition-shadow rounded-lg p-4 flex-1"
           >
             <div class="flex justify-between items-start mb-4">
-              <h1 class="font-medium text-[16px]">{{ step.title }}</h1>
+              <h1 class="font-medium text-[16px] capitalize">
+                {{ step.title }}
+              </h1>
               <span
                 :class="`px-3 py-1 rounded-full text-sm font-medium
                 ${
@@ -52,7 +54,7 @@
             </div>
 
             <div class="flex justify-between items-center">
-              <p class="text-gray-500">{{ step.description }}</p>
+              <p class="text-gray-500 capitalize">{{ step.description }}</p>
               <div v-if="isAdmin" class="flex space-x-2">
                 <i
                   class="ri-pencil-line text-gray-600 cursor-pointer hover:text-indigo-600"

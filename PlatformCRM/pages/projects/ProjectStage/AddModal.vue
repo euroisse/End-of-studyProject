@@ -136,7 +136,7 @@ const handleSubmit = async () => {
   }
 
   try {
-    const newStage = await $fetch("/api/Projects/projectStage", {
+    const newStage = await $fetch<ProjectStage>("/api/Projects/projectStage", {
       method: "POST",
       body: {
         projectId: projectId.value,
@@ -157,6 +157,9 @@ const handleSubmit = async () => {
     console.error("Erreur lors de la création de l'étape :", error);
   }
 };
+onMounted(() => {
+  handleSubmit;
+});
 </script>
 
 <style scoped>
