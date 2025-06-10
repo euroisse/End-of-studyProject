@@ -1,9 +1,11 @@
 import prisma from "~/server/database";
 
 export default defineEventHandler(async (event) => {
+  console.log('Requête reçue pour la gestion des tâches:', event.node.req.method);
   if (event.node.req.method === 'POST') {
     try {
       const body = await readBody(event);
+      console.log('Données reçues pour la création de la tâche:', body);
       const newTask = await prisma.tasks.create({
         data: {
           title: body.title,
@@ -13,6 +15,10 @@ export default defineEventHandler(async (event) => {
           priority: body.priority,
           status: body.status,
           effort:  Number(body.effort)
+        },
+        include: {
+          employee: true, 
+          project: true,  
         },
       });
       return newTask;

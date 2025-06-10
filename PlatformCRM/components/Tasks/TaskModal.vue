@@ -191,7 +191,6 @@ async function submitTask() {
     effort: effort.value ?? undefined,
     projectId: projectId.value as number,
     employeeId: employeeId.value as number,
-    employeeName: employees.value,
   };
 
   console.log("Task data:", taskData);
