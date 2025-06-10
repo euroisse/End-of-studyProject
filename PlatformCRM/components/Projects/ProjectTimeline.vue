@@ -148,6 +148,8 @@ const formatDate = (date?: Date): string => {
 };
 
 const editProjectStage = (stage: ProjectStage) => {
+  console.log("Édition de l'étape:", stage);
+  selectedProjectStage.value = stage;
   projectStore.setSelectedProjectStage(stage);
   showModal.value = true;
 };
