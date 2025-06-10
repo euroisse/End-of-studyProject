@@ -63,6 +63,21 @@
     </div>
 
     <div
+      v-if="isAdmin"
+      class="bg-white rounded-lg shadow-md p-6 flex items-center justify-between"
+    >
+      <div>
+        <h3 class="text-gray-500 text-sm font-medium">Total Devis</h3>
+        <p class="text-2xl font-bold text-gray-800">
+          {{ summaryData?.totalQuotes || 0 }}
+        </p>
+      </div>
+      <i
+        class="ri-file-text-line text-yellow-500 text-4xl w-16 h-16 justify-center text-center pt-3 rounded-full bg-yellow-50"
+      ></i>
+    </div>
+
+    <div
       v-if="isClient"
       class="bg-white rounded-lg shadow-md p-6 flex items-center justify-between"
     >
@@ -122,6 +137,7 @@ defineProps<{
     yourInvoicesCount?: number;
     yourQuotesCount?: number;
     assignedTasksCount?: number;
+    totalQuotes?: number;
   };
 }>();
 </script>

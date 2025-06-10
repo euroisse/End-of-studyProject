@@ -38,11 +38,17 @@
 
     <div>
       <div v-if="activeTab === 'Clients'">
-        <ClientTable :clients="clientDisplayData" />
+        <ClientTable
+          :clients="clientDisplayData"
+          @refresh-clients="fetchAndProcessUsers"
+        />
       </div>
 
       <div v-if="activeTab === 'Employees'">
-        <EmployeeTable :employees="employeeDisplayData" />
+        <EmployeeTable
+          :employees="employeeDisplayData"
+          @refresh-employee="fetchAndProcessUsers"
+        />
       </div>
     </div>
   </div>
@@ -64,9 +70,8 @@ const clientDisplayData = ref<ClientDisplayData[]>([]);
 const employeeDisplayData = ref<EmployeeDisplayData[]>([]);
 
 const isLoading = ref(true);
-
-const loading = ref(true);
 const error = ref<any>(null);
+
 const fetchAndProcessUsers = async () => {
   isLoading.value = true;
   error.value = null;
@@ -77,7 +82,7 @@ const fetchAndProcessUsers = async () => {
       error.value = {
         message: "Utilisateur non connecté. Veuillez vous connecter.",
       };
-      loading.value = false;
+      isLoading.value = false;
       return;
     }
 
@@ -91,6 +96,8 @@ const fetchAndProcessUsers = async () => {
 
     allUsers.value = data;
     console.log("All fetched users:", allUsers.value);
+
+    // Filter and map client data
     clientDisplayData.value = allUsers.value
       .filter((user) => user.UserRole.some((ur) => ur.role.name === "customer"))
       .map((user) => ({
@@ -101,6 +108,8 @@ const fetchAndProcessUsers = async () => {
         company: user.company || undefined,
       }));
     console.log("Client display data:", clientDisplayData.value);
+
+    // Filter and map employee data
     employeeDisplayData.value = allUsers.value
       .filter((user) => user.UserRole.some((ur) => ur.role.name === "employee"))
       .map((user) => ({
@@ -112,6 +121,9 @@ const fetchAndProcessUsers = async () => {
     console.log("Employee display data:", employeeDisplayData.value);
   } catch (err: any) {
     console.error("Erreur lors de la récupération des utilisateurs:", err);
+    error.value = err;
+  } finally {
+    isLoading.value = false;
   }
 };
 

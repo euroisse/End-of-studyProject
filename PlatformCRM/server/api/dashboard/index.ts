@@ -1,4 +1,3 @@
-
 import prisma from "~/server/database";
 import type { Project } from "~/generated/prisma";
 import { defineEventHandler, getQuery, createError } from 'h3';
@@ -23,14 +22,11 @@ export default defineEventHandler(async (event) => {
             role: true,
           },
         },
-        
         _count: {
           select: {
-      
             projects: true,
-          
-            clientInvoice: true, 
-            clientQuote: true,  
+            clientInvoice: true,
+            clientQuote: true,
           },
         },
       },
@@ -51,12 +47,13 @@ export default defineEventHandler(async (event) => {
 
     let dashboardData: any = {};
     let projects: Project[] = [];
-    let invoices: any[] = []; 
-    let quotes: any[] = [];   
+    let invoices: any[] = [];
+    let quotes: any[] = [];
 
     if (isAdmin) {
       const totalProjects = await prisma.project.count();
       const totalInvoices = await prisma.invoice.count();
+      const totalQuotes = await prisma.quote.count();
       const totalClients = await prisma.user.count({
         where: { UserRole: { some: { role: { name: "customer" } } } },
       });
@@ -64,13 +61,12 @@ export default defineEventHandler(async (event) => {
         where: { UserRole: { some: { role: { name: "employee" } } } },
       });
 
-     
       invoices = await prisma.invoice.findMany({
         orderBy: { createdAt: 'desc' },
-        take: 5, 
+        take: 5,
       });
       quotes = await prisma.quote.findMany({
-        orderBy:{createdAt:'desc'},
+        orderBy: { createdAt: 'desc' },
         take: 5,
       })
 
@@ -78,11 +74,12 @@ export default defineEventHandler(async (event) => {
         summary: {
           totalProjects,
           totalInvoices,
+          totalQuotes,
           totalClients,
           totalEmployees,
         },
-        invoices: invoices, 
-        quotes:quotes,
+        invoices: invoices,
+        quotes: quotes,
       };
     } else if (isEmploye) {
       projects = await prisma.project.findMany({
@@ -123,22 +120,21 @@ export default defineEventHandler(async (event) => {
       };
 
     } else if (isClient) {
-     
       invoices = await prisma.invoice.findMany({
         where: {
-          userId: userId, 
+          userId: userId,
         },
         include: {
           quote: true,
         },
         orderBy: { createdAt: 'desc' },
-        take: 5, 
+        take: 5,
       });
       console.log('Dashboard API - Factures trouvées pour client', userId, ':', invoices.length);
 
       projects = await prisma.project.findMany({
         where: {
-          customerId: userId, 
+          customerId: userId,
         },
         include: {
           customer: true,
@@ -149,30 +145,29 @@ export default defineEventHandler(async (event) => {
           },
           users: {
             include: {
-              employee: true, 
+              employee: true,
             },
           },
         },
-        take: 5, 
+        take: 5,
       });
 
-      
       quotes = await prisma.quote.findMany({
         where: {
-          customerId: userId, 
+          customerId: userId,
         },
         orderBy: { createdAt: 'desc' },
-        take: 5, 
+        take: 5,
       });
 
       dashboardData = {
         projects: projects,
-        invoices: invoices, 
-        quotes: quotes,    
+        invoices: invoices,
+        quotes: quotes,
         summary: {
           yourProjectsCount: projects.length,
-          yourInvoicesCount: invoices.length, 
-          yourQuotesCount: quotes.length,     
+          yourInvoicesCount: invoices.length,
+          yourQuotesCount: quotes.length,
         },
       };
     } else {
