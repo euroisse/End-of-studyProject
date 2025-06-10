@@ -177,7 +177,7 @@ import { useRouter } from "vue-router";
 
 const { isAdmin } = useIsRole();
 const showCreateProject = ref(false);
-const router = useRouter();
+const projectStore = useProjectStore();
 
 interface Client {
   value: string;
@@ -244,12 +244,10 @@ const soumettreFormulaire = async () => {
           endDate: projet.dateFin,
         },
       });
-
+      await projectStore.fetchProjects();
       console.log("Projet créé avec succès:", response);
       showCreateProject.value = false;
       resetForm();
-
-      router.push("/projects");
     } catch (error: any) {
       console.error("Erreur lors de la création du projet:", error);
 

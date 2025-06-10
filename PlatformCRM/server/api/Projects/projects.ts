@@ -25,7 +25,22 @@ export default defineEventHandler(async (event) => {
             });
             return newProject;
         } else if (event.node.req.method === 'GET') {
-            const projects: Project[] = await prisma.project.findMany();
+            const projects: Project[] = await prisma.project.findMany({
+                include: {
+                    customer: true,
+                    users: {
+                        include: {
+                            employee: true,
+                        },
+                    },
+                    projectStages: true,
+                    tasks: { 
+                        include: {
+                            employee: true
+                        }
+                    }
+                },
+            });
             return projects;
         } else {
              return createError({

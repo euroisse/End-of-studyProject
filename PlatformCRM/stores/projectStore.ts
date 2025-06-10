@@ -8,7 +8,7 @@ export const useProjectStore = defineStore('projects', {
   state: () => ({
     selectedProject: ref<ProjectWithProjectStages | null>(null),
     projectStages: ref<ProjectStage[]>([]),
-    projects: ref<Project[]>([]), 
+    projects: ref<ProjectWithProjectStages[]>([]), 
     projectToEdit: ref<ProjectWithProjectStages | null>(null),
     selectedProjectStage: ref<ProjectStage | null>(null),
   }),
@@ -22,8 +22,7 @@ export const useProjectStore = defineStore('projects', {
 
     async fetchProjects() {
       try {
-       
-        const response = await $fetch<Project[]>('/api/Projects/projects');
+        const response = await $fetch<ProjectWithProjectStages[]>('/api/Projects/projects');
         this.projects = response;
       } catch (error) {
         console.error("Erreur lors de la récupération de tous les projets:", error);
@@ -53,7 +52,7 @@ export const useProjectStore = defineStore('projects', {
     async fetchUserProjects(userId: number) {
       try {
      
-        const response = await $fetch<Project[]>(`/api/Projects/user/${userId}`);
+        const response = await $fetch<ProjectWithProjectStages[]>(`/api/Projects/user/${userId}`);
         this.projects = response; 
       } catch (error) {
         console.error(`Erreur lors de la récupération des projets de l'utilisateur ${userId}:`, error);

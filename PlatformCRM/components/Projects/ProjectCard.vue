@@ -12,7 +12,7 @@
     <div>
       <span class="flex items-center text-gray-500 text-sm mb-2">
         <i class="ri-user-2-line text-base text-gray-500 sm:text-sm mr-2"></i>
-        {{ project.customer?.name }}
+        {{ project.customer.name }}
       </span>
       <div class="flex justify-between text-xs text-gray-600 mb-3 md:mb-2">
         <span>Progression</span>
@@ -44,12 +44,12 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useRouter } from "vue-router";
 
-import type { Project } from "~/types";
-const { isEmploye } = useIsRole();
-const props = defineProps<{
-  project: Project;
-}>();
+import type { ProjectWithProjectStages } from "~/types";
 
+const props = defineProps<{
+  project: ProjectWithProjectStages;
+}>();
+const projectStore = useProjectStore();
 const { project } = props;
 const router = useRouter();
 
@@ -74,6 +74,7 @@ const calculateProgress = computed(() => {
 
 const goToProjectDetails = (id: number) => {
   console.log("Navigating to project ID:", id);
+  // projectStore.setSelectedProjectToEdit(project);
   router.push(`/projects/${id}`);
 };
 </script>
