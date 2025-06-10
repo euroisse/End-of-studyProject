@@ -1,95 +1,108 @@
 <template>
-  <div class="min-h-screen bg-white p-4 sm:p-6 lg:p-8">
-    <div>
-      <div class="mb-6">
+  <div class="min-h-screen bg-gray-50 py-8 px-2 sm:px-6 lg:px-12">
+    <div class="max-w-full w-full mx-auto">
+      <div class="mb-8">
         <NuxtLink
           to="/utilisateurs"
           class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
         >
-          <div class="text-lg">
-            <i class="ri-arrow-left-s-line mr-2"></i>
-          </div>
+          <i class="ri-arrow-left-s-line mr-2 text-xl"></i>
           Retour aux utilisateurs
         </NuxtLink>
       </div>
 
-      <div v-if="isLoading" class="text-center py-8 text-gray-600">
+      <div
+        v-if="isLoading"
+        class="text-center py-16 text-gray-600 bg-white rounded-xl shadow"
+      >
         Chargement des détails de l'employé...
       </div>
-      <div v-else-if="error" class="text-center py-8 text-red-600">
+      <div
+        v-else-if="error"
+        class="text-center py-16 text-red-600 bg-white rounded-xl shadow"
+      >
         Erreur lors du chargement des données de l'employé : {{ error.message }}
       </div>
-      <div v-else-if="!employeeData" class="text-center py-8 text-gray-600">
+      <div
+        v-else-if="!employeeData"
+        class="text-center py-16 text-gray-600 bg-white rounded-xl shadow"
+      >
         Employé introuvable.
       </div>
 
-      <div v-else>
+      <div v-else class="bg-white rounded-xl shadow p-8">
+        <!-- Profil -->
         <div
-          class="flex items-center justify-between mb-8 pb-4 border-b border-gray-200"
+          class="flex flex-col md:flex-row items-center md:items-start gap-8 mb-8"
         >
-          <h1 class="text-3xl font-bold text-gray-800">
-            {{ employeeData.name }}
-          </h1>
-          <span class="text-lg text-gray-600">{{ employeeData.email }}</span>
-        </div>
-
-        <div
-          class="flex flex-row gap-6 mb-8 p-4 bg-gray-50 rounded-lg shadow-sm"
-        >
-          <div>
-            <h2 class="text-xl font-semibold text-blue-700 mb-3">
-              Informations de l'employé
-            </h2>
-            <p class="text-gray-700 mb-1 tracking-wider capitalize">
-              <strong>Poste:</strong> {{ employeeData.poste || "N/A" }}
-            </p>
-            <p class="text-gray-700 tracking-wider capitalize">
-              <strong>Département:</strong>
-              {{ employeeData.department || "N/A" }}
-            </p>
-          </div>
-          <div
-            v-if="employeeData.profilePicture"
-            class="flex justify-center items-center"
-          >
+          <div class="flex-shrink-0">
             <img
+              v-if="employeeData.profilePicture"
               :src="employeeData.profilePicture"
               alt="Photo de profil"
-              class="w-32 h-32 rounded-full object-cover shadow-md border-2 border-blue-200"
+              class="w-32 h-32 rounded-full object-cover shadow-md border-4 border-blue-100"
             />
+            <div
+              v-else
+              class="w-32 h-32 rounded-full bg-blue-100 flex items-center justify-center text-4xl text-blue-400 font-bold"
+            >
+              <i class="ri-user-3-line"></i>
+            </div>
+          </div>
+          <div class="flex-1 w-full">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">
+              {{ employeeData.name }}
+            </h1>
+            <p class="text-lg text-gray-600 mb-1">
+              <i class="ri-mail-line mr-1"></i>{{ employeeData.email }}
+            </p>
+            <div class="flex flex-wrap gap-4 mt-2">
+              <span
+                class="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium"
+              >
+                <strong>Poste:</strong> {{ employeeData.poste || "N/A" }}
+              </span>
+              <span
+                class="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium"
+              >
+                <strong>Département:</strong>
+                {{ employeeData.department || "N/A" }}
+              </span>
+            </div>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-1 w-full gap-6">
-          <div class="bg-gray-50 p-5 rounded-lg shadow-sm h-full flex flex-col">
-            <h2
-              class="text-xl font-semibold text-blue-700 mb-4 flex items-center justify-between"
+        <!-- Tâches assignées -->
+        <div class="mt-8">
+          <h2
+            class="text-xl font-semibold text-blue-700 mb-4 flex items-center justify-between"
+          >
+            Tâches assignées
+            <span
+              class="text-sm font-normal text-blue-600 px-3 py-1 bg-blue-100 rounded-full"
             >
-              Tâches assignées
-              <span
-                class="text-sm font-normal text-blue-600 px-3 py-1 bg-blue-200 rounded-full"
-              >
-                {{ employeeData.tasks?.length || 0 }}
-              </span>
-            </h2>
+              {{ employeeData.tasks?.length || 0 }}
+            </span>
+          </h2>
+          <div
+            v-if="employeeData.tasks && employeeData.tasks.length > 0"
+            class="space-y-4"
+          >
             <div
-              v-if="employeeData.tasks && employeeData.tasks.length > 0"
-              class="flex-grow overflow-y-auto max-h-64 space-y-3 pr-2"
+              v-for="task in employeeData.tasks"
+              :key="task.id"
+              class="bg-gray-50 p-4 rounded-lg shadow flex flex-col md:flex-row md:items-center gap-2"
             >
-              <div
-                v-for="task in employeeData.tasks"
-                :key="task.id"
-                class="bg-white p-3 rounded-md shadow-xs flex items-center"
-              >
-                <i class="ri-task-line text-green-500 text-lg mr-3"></i>
+              <div class="flex items-center gap-3 flex-1">
+                <i class="ri-task-line text-green-500 text-2xl"></i>
                 <div>
                   <p
                     class="font-medium text-gray-800 tracking-wider capitalize"
                   >
                     {{ task.title }}
                   </p>
-                  <p class="text-sm text-gray-600 mb-2">
-                    Projet:
+                  <p class="text-sm text-gray-600 mb-1">
+                    Projet :
                     <NuxtLink
                       :to="`/projects/${task.project.id}`"
                       class="text-blue-500 hover:underline tracking-wider capitalize"
@@ -97,39 +110,37 @@
                       {{ task.project.title }}
                     </NuxtLink>
                   </p>
-                  <p class="text-sm text-gray-500 mr-2">
-                    Priorité:
-                    <span
-                      class="text-sm font-normal px-3 py-1 rounded-full"
-                      :class="{
-                        'text-red-500 bg-red-200': task.priority === 'HAUTE',
-                        'text-yellow-600 bg-yellow-200':
-                          task.priority === 'MOYENNE',
-                        'text-blue-500 bg-blue-200': task.priority === 'BASSE',
-                      }"
-                      >{{ task.priority }}</span
-                    >
-                    | Statut:
-                    <span
-                      class="text-sm font-normal px-2 py-1 rounded-full mb-1"
-                      :class="{
-                        'text-green-600 bg-green-200':
-                          task.status === 'TERMINE',
-                        'text-orange-500 bg-orange-100':
-                          task.status === 'EN_COURS',
-                        'text-gray-500 bg-gray-200': task.status === 'A_FAIRE',
-                        'text-red-500 bg-red-200': task.status === 'CANCELLED',
-                      }"
-                      >{{ task.status }}</span
-                    >
-                  </p>
                 </div>
               </div>
+              <div class="flex flex-wrap gap-2 md:justify-end">
+                <span
+                  class="text-xs font-normal px-3 py-1 rounded-full"
+                  :class="{
+                    'text-red-500 bg-red-100': task.priority === 'HAUTE',
+                    'text-yellow-700 bg-yellow-100':
+                      task.priority === 'MOYENNE',
+                    'text-blue-500 bg-blue-100': task.priority === 'BASSE',
+                  }"
+                >
+                  Priorité : {{ task.priority }}
+                </span>
+                <span
+                  class="text-xs font-normal px-3 py-1 rounded-full"
+                  :class="{
+                    'text-green-600 bg-green-100': task.status === 'TERMINE',
+                    'text-orange-500 bg-orange-100': task.status === 'EN_COURS',
+                    'text-gray-500 bg-gray-100': task.status === 'A_FAIRE',
+                    'text-red-500 bg-red-100': task.status === 'CANCELLED',
+                  }"
+                >
+                  Statut : {{ task.status }}
+                </span>
+              </div>
             </div>
-            <p v-else class="text-gray-500 text-sm italic">
-              Aucune tâche associée.
-            </p>
           </div>
+          <p v-else class="text-gray-500 text-sm italic mt-2">
+            Aucune tâche associée.
+          </p>
         </div>
       </div>
     </div>

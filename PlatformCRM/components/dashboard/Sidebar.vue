@@ -183,7 +183,24 @@ const toggleSubMenu = (label: string) => {
 };
 
 const isSubMenuOpen = (label: string) => activeSubMenu.value === label;
-const isActive = (path: string) => route.path === path;
+const isActive = (path: string) => {
+  // Active si le chemin correspond exactement OU si on est sur une sous-page
+  if (path === "/projects") {
+    return route.path === "/projects" || route.path.startsWith("/projects/");
+  }
+  if (path === "/utilisateurs") {
+    return (
+      route.path === "/utilisateurs" ||
+      route.path.startsWith("/employee/") ||
+      route.path.startsWith("/clients/")
+    );
+  }
+  if (path === "/devis") {
+    // Active sur /devis et toutes les pages de détail de devis
+    return route.path === "/devis" || route.path.startsWith("/quotes/");
+  }
+  return route.path === path;
+};
 const isChildActive = (item: MenuItem) =>
   item.children?.some((child: ChildMenuItem) => isActive(child.to));
 const getNotificationCount = (path: string) => (path === "/messages" ? 3 : 0);
