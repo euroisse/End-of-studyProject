@@ -100,9 +100,19 @@
         </div>
       </div>
       <div
-        v-if="pagination.totalPages > 0"
-        class="flex justify-center mt-6 space-x-2"
+        v-if="pagination.totalPages > 1"
+        class="flex justify-center mt-6 space-x-2 items-center"
       >
+        <!-- Flèche gauche -->
+        <button
+          :disabled="pagination.page === 1"
+          @click="goToPreviousPage"
+          class="px-3 py-1 rounded bg-gray-200 text-gray-700 disabled:opacity-50"
+          title="Page précédente"
+        >
+          <i class="ri-arrow-left-s-line"></i>
+        </button>
+
         <button
           v-for="p in pagination.totalPages"
           :key="p"
@@ -110,11 +120,21 @@
           :class="[
             'px-3 py-1 rounded',
             p === pagination.page
-              ? 'bg-indigo-600 text-white'
+              ? 'bg-blue-600 text-white'
               : 'bg-gray-200 text-gray-700',
           ]"
         >
           {{ p }}
+        </button>
+
+        <!-- Flèche droite -->
+        <button
+          :disabled="pagination.page === pagination.totalPages"
+          @click="goToNextPage"
+          class="px-3 py-1 rounded bg-gray-200 text-gray-700 disabled:opacity-50"
+          title="Page suivante"
+        >
+          <i class="ri-arrow-right-s-line"></i>
         </button>
       </div>
     </main>
@@ -253,6 +273,19 @@ const formatDate = (dateString: string | Date) => {
 const goToPage = (p: number) => {
   pagination.value.page = p;
   fetchInvoices(p, pagination.value.pageSize);
+};
+const goToPreviousPage = () => {
+  if (pagination.value.page > 1) {
+    pagination.value.page--;
+    fetchInvoices(pagination.value.page, pagination.value.pageSize);
+  }
+};
+
+const goToNextPage = () => {
+  if (pagination.value.page < pagination.value.totalPages) {
+    pagination.value.page++;
+    fetchInvoices(pagination.value.page, pagination.value.pageSize);
+  }
 };
 </script>
 

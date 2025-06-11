@@ -274,9 +274,10 @@ const getStageIcon = (index: number) => {
 };
 
 const downloadPDF = async () => {
-  if (quoteDetails.value) {
-    console.log("Télécharger PDF pour le devis :", quoteDetails.value.id);
-  }
+  if (!quoteDetails.value) return;
+  const id = quoteDetails.value.id;
+  const url = `/api/quotes/${id}/pdf`;
+  window.open(url, "_blank");
 };
 
 async function validateQuote() {
