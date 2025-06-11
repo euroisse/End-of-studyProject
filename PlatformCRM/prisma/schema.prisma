@@ -89,37 +89,32 @@ model EmployeeOnProjects {
 }
 
 model ProjectStage {
-  id          Int                @id @default(autoincrement())
-  project     Project            @relation(fields: [projectId], references: [id])
+  id          Int          @id @default(autoincrement())
+  project     Project      @relation(fields: [projectId], references: [id])
   projectId   Int
   title       String
   description String?
   stages      cout_stage[]
-  status      ProjectStageStatus @default(A_VENIR)
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
-}
-
-enum ProjectStageStatus {
-  EN_COURS
-  A_VENIR
-  TERMINE
-  EN_ATTENTE
+  tasks       Tasks[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
 
 model Tasks {
-  id          Int          @id @default(autoincrement())
-  employee    User         @relation("AssignedTasks", fields: [employeeId], references: [id])
-  project     Project      @relation("ProjectTasks", fields: [projectId], references: [id])
-  projectId   Int
-  employeeId  Int
-  title       String
-  description String
-  effort      Int?
-  priority    TaskPriority @default(BASSE)
-  status      TaskStatus   @default(A_FAIRE)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id             Int          @id @default(autoincrement())
+  employee       User         @relation("AssignedTasks", fields: [employeeId], references: [id])
+  project        Project      @relation("ProjectTasks", fields: [projectId], references: [id])
+  projectId      Int
+  employeeId     Int
+  title          String
+  description    String
+  effort         Int?
+  projectStage   ProjectStage @relation(fields: [projectStageId], references: [id])
+  projectStageId Int
+  priority       TaskPriority @default(BASSE)
+  status         TaskStatus   @default(A_FAIRE)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 }
 
 enum TaskStatus {

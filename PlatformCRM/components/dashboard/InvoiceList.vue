@@ -18,21 +18,25 @@
       >
         Aucune facture disponible pour le moment.
       </div>
-      <div v-else class="w-full">
+      <div v-else class="w-full grid grid-cols-1 sm:grid-cols-1 gap-4">
         <div
           v-for="invoice in invoices"
           :key="invoice.id"
-          class="flex items-center justify-between p-4 mb-2 bg-gray-50 rounded-lg"
+          class="flex items-center gap-4 p-4 bg-[#F9FAFB] rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-transparent hover:border-indigo-400 cursor-pointer"
         >
-          <div class="flex items-center">
-            <i
-              class="ri-bill-line text-indigo-600 mr-4 w-12 h-12 justify-center text-center rounded-full pt-3 bg-indigo-50"
-            ></i>
-            <div>
-              <h4 class="font-medium">{{ invoice.invoiceNumber }}</h4>
-              <p class="text-sm text-gray-500">
-                Date : {{ formatDate(invoice.invoiceDate) }}
-              </p>
+          <div
+            class="flex-shrink-0 flex items-center justify-center w-14 h-14 rounded-full bg-indigo-100"
+          >
+            <i class="ri-bill-line text-indigo-600 text-2xl"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between">
+              <h4 class="font-semibold text-gray-800 truncate">
+                {{ invoice.invoiceNumber }}
+              </h4>
+            </div>
+            <div class="text-xs text-gray-500 mt-1">
+              Date : {{ formatDate(invoice.invoiceDate) }}
             </div>
           </div>
         </div>

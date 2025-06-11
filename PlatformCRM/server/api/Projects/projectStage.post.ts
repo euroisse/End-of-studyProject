@@ -1,5 +1,5 @@
 import prisma from '~/server/database';
-import type { ProjectStage, ProjectStageStatus } from '~/generated/prisma';
+import type { ProjectStage } from '~/generated/prisma';
 
 
 export default defineEventHandler(async (event) => {
@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
 
     try {
       const body = await readBody(event);
-      const { projectId, title, description, status } = body;
+      const { projectId, title, description, tasks } = body;
 
       if (!projectId || !title) {
         throw createError({
@@ -28,13 +28,27 @@ export default defineEventHandler(async (event) => {
         });
       }
 
+      // Création de l'étape avec éventuellement des tâches associées
       const newProjectStage: ProjectStage = await prisma.projectStage.create({
         data: {
           projectId: Number(projectId),
             title: title as string,
             description: description as string | undefined,
-            status: status as ProjectStageStatus | undefined,
+            tasks: tasks && Array.isArray(tasks)
+            ? {
+                create: tasks.map((task: any) => ({
+                  title: task.title,
+                  description: task.description,
+                  employeeId: task.employeeId,
+                  projectId: Number(projectId),
+                  priority: task.priority ?? 'BASSE',
+                  status: task.status ?? 'A_FAIRE',
+                  effort: task.effort,
+                })),
+              }
+            : undefined,
         },
+        include: { tasks: true },
       });
 
       return newProjectStage;

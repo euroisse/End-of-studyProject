@@ -15,34 +15,43 @@
             {{ project.title }}
           </h3>
         </div>
-        <div class="flex justify-between mb-8 space-x-4">
-          <div
+        <div class="flex mb-8 space-x-0">
+          <template
             v-for="(stage, stageIndex) in project.projectStages"
             :key="stage.id"
-            class="relative flex items-center flex-shrink-0"
           >
-            <!-- Ligne de progression -->
-            <div
-              v-if="stageIndex !== 0"
-              class="absolute left-[-50%] top-1/2 w-[50%] h-1 z-0"
-              :class="getLineColor(project.projectStages[stageIndex - 1]?.status)"
-            ></div>
-            <!-- Cercle étape -->
-            <div
-              :class="[
-                'w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold relative z-10 transition-colors duration-300 shadow',
-                getStageColor(stage.status),
-              ]"
-            >
-              <i :class="getIconClass(stage.status)" class="text-xl"></i>
+            <div class="flex-1 flex flex-col items-center relative">
+              <!-- Ligne de progression à gauche (sauf pour la première étape) -->
+              <div
+                v-if="stageIndex !== 0"
+                class="absolute left-0 top-1/2 -translate-y-1/2 h-1 w-1/2 z-0"
+                :class="
+                  getLineColor(project.projectStages[stageIndex - 1]?.status)
+                "
+              ></div>
+              <!-- Ligne de progression à droite (sauf pour la dernière étape) -->
+              <div
+                v-if="stageIndex !== project.projectStages.length - 1"
+                class="absolute right-0 top-1/2 -translate-y-1/2 h-1 w-1/2 z-0"
+                :class="getLineColor(stage.status)"
+              ></div>
+              <!-- Cercle étape -->
+              <div
+                :class="[
+                  'w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold relative z-10 transition-colors duration-300 shadow',
+                  getStageColor(stage.status),
+                ]"
+              >
+                <i :class="getIconClass(stage.status)" class="text-xl"></i>
+              </div>
+              <!-- Titre étape -->
+              <div
+                class="mt-2 w-full text-center text-xs text-gray-600 font-medium"
+              >
+                {{ stage.title }}
+              </div>
             </div>
-            <!-- Titre étape -->
-            <div
-              class="absolute items-center top-14 w-20 text-center text-xs text-gray-600 font-medium"
-            >
-              {{ stage.title }}
-            </div>
-          </div>
+          </template>
         </div>
       </div>
     </div>
@@ -98,5 +107,8 @@ const getLineColor = (previousStageStatus: ProjectStageStatus) => {
 </script>
 
 <style scoped>
+.flex-1 {
+  flex: 1 1 0%;
+}
 /* You can add specific styles here if needed */
 </style>

@@ -1,63 +1,71 @@
-import prisma from '~/server/database'
+import { hash } from 'bcryptjs';
+import prisma from '~/server/database'; 
 
 export default defineEventHandler(async (event) => {
-  
-  const sessionCookie = getCookie(event, 'auth_session')
-  
-  if (!sessionCookie) {
-    return createError({
-      statusCode: 401,
-      message: 'Non authentifié'
-    })
-  }
-  
-  try {
+    try {
+        const body = await readBody(event);
+        const { nom, email, password, adresse, contact } = body;
 
-    const session = JSON.parse(sessionCookie)
-    const userId = session.userId
-    
-
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      include: {
-        UserRole: {
-          include: {
-            role: true
-          }
+        // Vérifier si toutes les informations nécessaires sont présentes
+        if (!nom || !email || !password) {
+            throw createError({
+                statusCode: 400,
+                message: 'Veuillez fournir le nom, l\'email et le mot de passe.',
+            });
         }
-      }
-    })
-    
-    if (!user) {
-      deleteCookie(event, 'auth_session')
-      return createError({
-        statusCode: 401,
-        message: 'Utilisateur non trouvé'
-      })
-    }
-    
-    // Retourner les informations de l'utilisateur
-    return {
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        roles: user.UserRole.map(ur => ur.role.name),
 
-        ...(user.poste && { poste: user.poste }),
-        ...(user.department && { department: user.department }),
-        ...(user.adresse && { adresse: user.adresse }),
-        ...(user.company && { company: user.company }),
-        ...(user.industry && { industry: user.industry }),
-         ...(user.contacts && { contacts: user.contacts })
-      }
-    }
-  } catch (error) {
-    console.error('Erreur lors de la récupération du profil:', error)
-    return createError({
-      statusCode: 500,
-      message: 'Erreur interne du serveur'
-    })
-  }
-})
+        // 1. Rechercher l'ID du rôle "customer"
+        const adminRole = await prisma.role.findUnique({
+            where: { name: 'admin' },
+        });
 
+        if (!adminRole) {
+            
+            throw createError({
+                statusCode: 500,
+                message: 'Le rôle "admin" est introuvable.',
+            });
+        }
+
+        // 2. Hacher le mot de passe pour la sécurité
+        const hashedPassword = await hash(password, 10); 
+
+        // 3. Créer l'utilisateur et l'associer au rôle "customer"
+        const newUser = await prisma.user.create({
+            data: {
+                name: nom,
+                email,
+                password: hashedPassword,
+                UserRole: {
+                    create: {
+                        roleId: adminRole.id, 
+                    },
+                },
+            },
+
+            include: {
+                UserRole: {
+                    include: {
+                        role: true,
+                    },
+                },
+            },
+        });
+
+        // Retourner les informations du nouvel utilisateur (sans le mot de passe haché)
+        return {
+            statusCode: 201, 
+            message: 'Utilisateur client créé avec succès !',
+            user: {
+                id: newUser.id,
+                name: newUser.name,
+                email: newUser.email,
+                roles: newUser.UserRole.map(ur => ur.role.name),
+            },
+        };
+
+    } catch (error) {
+        console.error('Erreur lors de la création de l\'utilisateur admin:', error);
+
+    }
+});

@@ -157,6 +157,8 @@ const login = async () => {
         router.push("/dashboard");
       } else if (userRole === "employee") {
         router.push("/dashboard");
+      } else if (userRole === "admin") {
+        router.push("/dashboard");
       } else {
         console.warn(
           "User role not recognized or missing. Redirecting to a default dashboard."

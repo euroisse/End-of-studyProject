@@ -12,6 +12,7 @@ export default defineEventHandler(async (event) => {
           description: body.description,
           projectId: Number(body.projectId),
           employeeId: Number(body.employeeId),
+          projectStageId: Number(body.projectStageId), 
           priority: body.priority,
           status: body.status,
           effort:  Number(body.effort)

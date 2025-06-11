@@ -103,7 +103,7 @@ export const useQuoteStore = defineStore('devis', () => {
     setLoading(true);
     clearError();
     try {
-      const updatedQuote = await $fetch<quote>(`api/quotes/${quoteId}`, {
+      const updatedQuote = await $fetch<quote>(`/api/quotes/${quoteId}`, {
         method: 'PUT',
         body: { status }
       });
