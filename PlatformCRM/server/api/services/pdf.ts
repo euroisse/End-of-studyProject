@@ -202,7 +202,7 @@ export default async function generateInvoicePdf(invoice: InvoiceWithQuote) {
       .text(
         "OpenIntech Vous remercie pour votre confiance. Au plaisir de vous revoir !",
         leftMargin,
-        760,
+        700,
         { align: "center" }
       );
 
