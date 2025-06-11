@@ -6,6 +6,29 @@ export default defineEventHandler(async (event) => {
     try {
       const body = await readBody(event);
       console.log('Données reçues pour la création de la tâche:', body);
+       const projectStage = await prisma.projectStage.findUnique({
+        where: { id: Number(body.projectStageId) },
+        select: { endDate: true }, // Ne sélectionne que la date de fin
+      });
+
+      if (!projectStage) {
+        throw createError({
+          statusCode: 404,
+          statusMessage: `L'étape de projet avec l'ID ${body.projectStageId} n'existe pas.`,
+        });
+      }
+
+      // 2. Valider la date de fin de la tâche par rapport à celle de l'étape
+      if (body.endDate) {
+        const taskEndDate = new Date(body.endDate);
+        // Assurez-vous que projectStage.endDate est une Date et non null
+        if (projectStage.endDate && taskEndDate > projectStage.endDate) {
+          throw createError({
+            statusCode: 400,
+            statusMessage: "La date de fin de la tâche ne peut pas être postérieure à la date de fin de l'étape du projet.",
+          });
+        }
+      }
       const newTask = await prisma.tasks.create({
         data: {
           title: body.title,
@@ -15,11 +38,13 @@ export default defineEventHandler(async (event) => {
           projectStageId: Number(body.projectStageId), 
           priority: body.priority,
           status: body.status,
-          effort:  Number(body.effort)
+          effort:  Number(body.effort),
+            endDate: body.endDate ? new Date(body.endDate) : null,
         },
         include: {
           employee: true, 
-          project: true,  
+          project: true,
+           projectStage: true,  
         },
       });
       return newTask;
@@ -33,6 +58,7 @@ export default defineEventHandler(async (event) => {
         include: {
           employee: true,
           project: true,
+           projectStage: true,
         },
       });
       return tasks;

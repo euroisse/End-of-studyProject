@@ -108,6 +108,25 @@
             </select>
           </div>
         </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Étape du projet</label>
+          <div class="mb-4">
+            <select
+              v-model="projectStageId"
+              class="w-full border rounded-xl p-2 focus:outline-none bg-white text-gray-900 border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 text-sm"
+              required
+            >
+              <option disabled value="">-- Choisir une étape --</option>
+              <option
+                v-for="stage in projectStages"
+                :key="stage.value"
+                :value="stage.value"
+              >
+                {{ stage.label }}
+              </option>
+            </select>
+          </div>
+        </div>
         <div class="mb-4">
           <input
             type="number"
@@ -147,9 +166,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useEmployeeStore } from "~/stores/employeeStore";
 import { useRoute } from "vue-router";
+import { useProjectStore } from "~/stores/projectStore"; // <-- utilise ton store
 
 import type { SelectOptions, Task } from "~/types";
 
@@ -157,6 +177,8 @@ const emit = defineEmits(["close"]);
 const route = useRoute();
 const taskStore = useTaskStore();
 const employeeStore = useEmployeeStore();
+const projectStore = useProjectStore();
+
 defineProps({
   isOpen: {
     type: Boolean,
@@ -170,16 +192,31 @@ const status = ref<Task["status"]>("A_FAIRE");
 const effort = ref<number | null>(null);
 const projectId = ref<number | null>(null);
 const employeeId = ref<number | null>(null);
+const projectStageId = ref<number | null>(null);
 
 const employees = ref<SelectOptions[]>([]);
+
+// Récupère dynamiquement les étapes du projet sélectionné
+const projectStages = computed(() => {
+  return (
+    projectStore.selectedProject?.projectStages?.map((stage) => ({
+      value: stage.id,
+      label: stage.title,
+    })) || []
+  );
+});
 
 onMounted(async () => {
   await employeeStore.fetchEmployees();
   employees.value = employeeStore.employees;
 
+  // Récupère l'id du projet depuis la route
   projectId.value = route.params.id ? Number(route.params.id) : null;
 
-  submitTask;
+  // Si le projet n'est pas déjà chargé, va le chercher
+  if (projectId.value && !projectStore.selectedProject) {
+    await projectStore.fetchProject(projectId.value);
+  }
 });
 
 async function submitTask() {
@@ -191,18 +228,24 @@ async function submitTask() {
     effort: effort.value ?? undefined,
     projectId: projectId.value as number,
     employeeId: employeeId.value as number,
+    projectStageId: projectStageId.value as number,
   };
 
-  console.log("Task data:", taskData);
-
   await taskStore.createTask(taskData);
-  //Reinitialiser les champs du formulaire
+
+  // Rafraîchir le projet pour mettre à jour les étapes et leurs statuts
+  if (projectId.value) {
+    await projectStore.fetchProject(projectId.value);
+  }
+
+  // Réinitialisation
   title.value = "";
   description.value = "";
   priority.value = "MOYENNE";
   status.value = "A_FAIRE";
   effort.value = null;
   employeeId.value = null;
+  projectStageId.value = null;
 
   emit("close");
 }

@@ -161,12 +161,14 @@ const closeModal = () => {
 
 const handleSaveProjectStage = async (updatedStage: ProjectStageWithTasks) => {
   try {
-    // La mise à jour de l'étape ne concerne que les champs directs de ProjectStage (titre, description)
-    // Le statut est géré par les tâches
     await projectStore.updateProjectStage(updatedStage.id!, {
       title: updatedStage.title,
       description: updatedStage.description,
     });
+    // Rafraîchir le projet pour mettre à jour les étapes et leurs statuts
+    if (projectStore.selectedProject) {
+      await projectStore.fetchProject(projectStore.selectedProject.id);
+    }
     closeModal();
   } catch (error) {
     console.error("Erreur lors de la mise à jour de l'étape:", error);
@@ -177,6 +179,10 @@ const deleteProjectStage = async (id: number) => {
   if (window.confirm("Êtes-vous sûr de vouloir supprimer cette étape ?")) {
     try {
       await projectStore.deleteProjectStage(id);
+      // Rafraîchir le projet pour mettre à jour les étapes et leurs statuts
+      if (projectStore.selectedProject) {
+        await projectStore.fetchProject(projectStore.selectedProject.id);
+      }
     } catch (error: any) {
       console.error(
         `Erreur lors de la suppression de l'étape: ${error.message}`
@@ -185,40 +191,34 @@ const deleteProjectStage = async (id: number) => {
   }
 };
 
-const stageAdded = (newStage: ProjectStageWithTasks) => {
-  if (projectStore.selectedProject && newStage) {
-    console.log("Nouvelle étape ajoutée:", newStage);
-    console.log(
-      "Project avant ajout de l'étape:",
-      projectStore.selectedProject
-    );
-    if (!projectStore.selectedProject.projectStages) {
-      projectStore.selectedProject.projectStages = [];
-    }
-
-    projectStore.selectedProject.projectStages.push(newStage);
+const stageAdded = async (newStage: ProjectStageWithTasks) => {
+  if (projectStore.selectedProject) {
+    // Recharge le projet pour avoir les étapes et tâches à jour
+    await projectStore.fetchProject(projectStore.selectedProject.id);
   }
   showCreateStageProject.value = false;
 };
 
 // La logique de statut de l'étape basée sur les tâches
 function getProjectStageStatus(tasks: Tasks[] = []): ProjectStageStatus {
+  console.log("Vérif statut étape, tâches reçues:", tasks);
   if (!tasks || tasks.length === 0) {
+    console.log("=> A_VENIR (aucune tâche)");
     return "A_VENIR";
   }
   if (tasks.every((task) => task.status === "TERMINE")) {
+    console.log("=> TERMINE (toutes terminées)");
     return "TERMINE";
   }
-  // Si au moins une tâche est en cours, ou s'il y a des tâches à faire mais aucune en cours
   if (tasks.some((task) => task.status === "EN_COURS")) {
+    console.log("=> EN_COURS (au moins une en cours)");
     return "EN_COURS";
   }
-  // Si toutes les tâches ne sont pas terminées, et aucune n'est en cours, mais il reste des tâches à faire
   if (tasks.some((task) => task.status === "A_FAIRE")) {
+    console.log("=> EN_COURS (au moins une à faire)");
     return "EN_COURS";
   }
-
-  // Par défaut, si aucune condition n'est remplie, on considère que l'étape est en cours
+  console.log("=> EN_COURS (par défaut)");
   return "EN_COURS";
 }
 </script>

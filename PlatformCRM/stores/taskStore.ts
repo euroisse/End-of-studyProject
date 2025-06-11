@@ -1,4 +1,3 @@
-
 import { defineStore } from 'pinia';
 import type { Task, State, TaskUpdatePayload } from '~/types/'; 
 
@@ -53,7 +52,7 @@ export const useTaskStore = defineStore('task', {
       this.taskToEditId = taskId;
       this.taskBeingEdited = this.tasks.find(task => task.id === taskId) || null;
     },
-    async createTask(taskData: Omit<Task, 'id' | 'employee' | 'project'> & { projectId?: number; employeeId?: number }) {
+    async createTask(taskData: Omit<Task, 'id' | 'employee' | 'project'> & { projectId?: number; employeeId?: number; projectStageId?: number }) {
       const response = await $fetch<Task>('/api/Tasks/tasks', {
         method: 'POST',
         body: taskData,
