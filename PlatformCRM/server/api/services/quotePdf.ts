@@ -84,7 +84,7 @@ export default async function generateQuotePdf(quote: QuoteWithDetails) {
     .text("ÉTAPE", colX[0], tableTop + 8)
     
     .text("DESCRIPTION", colX[1], tableTop + 8)
-    .font("Helvetica.Bold")
+    .font("Helvetica-Bold")
     .text("MONTANT", colX[2], tableTop + 8, { width: 100, align: "right" });
   doc.font("Helvetica-Bold")
 
