@@ -109,7 +109,7 @@ const emit = defineEmits(["close", "stageAdded"]);
 const formData = ref({
   title: "",
   description: null,
-  endDate: undefined, // Initialisez endDate
+  endDate: null,
 });
 
 const handleSubmit = async () => {
@@ -127,7 +127,7 @@ const handleSubmit = async () => {
         description: formData.value.description || undefined,
         endDate: formData.value.endDate
           ? new Date(formData.value.endDate)
-          : null, // Convertit la chaîne en objet Date ou null
+          : null,
       },
     });
 
@@ -137,7 +137,7 @@ const handleSubmit = async () => {
     // Reset form
     formData.value.title = "";
     formData.value.description = null;
-    formData.value.endDate = undefined;
+    formData.value.endDate = null;
   } catch (error) {
     console.error("Erreur lors de la création de l'étape :", error);
   }

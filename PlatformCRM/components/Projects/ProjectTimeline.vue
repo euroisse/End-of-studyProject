@@ -64,7 +64,7 @@
             </div>
 
             <p class="text-sm text-gray-500 mt-2">
-              Date de livraison estimée: {{ formatDate(step.updatedAt) }}
+              Date de livraison estimée: {{ formatDate(step.endDate) }}
             </p>
           </div>
         </div>

@@ -5,7 +5,7 @@ export default defineEventHandler(async (event) => {
   if (event.node.req.method === 'POST') {
     try {
       const body = await readBody(event);
-      const { projectId, title, description, tasks } = body;
+      const { projectId, title, description, tasks,endDate  } = body;
 
       if (!projectId || !title) {
         throw createError({
@@ -30,6 +30,7 @@ export default defineEventHandler(async (event) => {
           projectId: Number(projectId),
           title: title as string,
           description: description as string | undefined,
+           endDate: endDate ? new Date(endDate) : null,
           tasks: tasks && Array.isArray(tasks) && tasks.length > 0
             ? {
                 create: tasks.map((task: any) => ({
