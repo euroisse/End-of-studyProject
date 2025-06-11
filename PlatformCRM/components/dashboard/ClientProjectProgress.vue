@@ -20,29 +20,42 @@
             v-for="(stage, stageIndex) in project.projectStages"
             :key="stage.id"
           >
-            <div class="flex-1 flex flex-col items-center relative">
+            <div
+              v-for="(stage, stageIndex) in project.projectStages"
+              :key="stage.id"
+              class="flex-1 flex flex-col items-center relative"
+            >
               <!-- Ligne de progression à gauche (sauf pour la première étape) -->
               <div
                 v-if="stageIndex !== 0"
                 class="absolute left-0 top-1/2 -translate-y-1/2 h-1 w-1/2 z-0"
                 :class="
-                  getLineColor(project.projectStages[stageIndex - 1]?.status)
+                  getLineColor(
+                    getProjectStageStatus(
+                      project.projectStages[stageIndex - 1]?.tasks || []
+                    )
+                  )
                 "
               ></div>
               <!-- Ligne de progression à droite (sauf pour la dernière étape) -->
               <div
                 v-if="stageIndex !== project.projectStages.length - 1"
                 class="absolute right-0 top-1/2 -translate-y-1/2 h-1 w-1/2 z-0"
-                :class="getLineColor(stage.status)"
+                :class="getLineColor(getProjectStageStatus(stage.tasks || []))"
               ></div>
               <!-- Cercle étape -->
               <div
                 :class="[
                   'w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold relative z-10 transition-colors duration-300 shadow',
-                  getStageColor(stage.status),
+                  getStageColor(getProjectStageStatus(stage.tasks || [])),
                 ]"
               >
-                <i :class="getIconClass(stage.status)" class="text-xl"></i>
+                <i
+                  :class="
+                    getIconClass(getProjectStageStatus(stage.tasks || []))
+                  "
+                  class="text-xl"
+                ></i>
               </div>
               <!-- Titre étape -->
               <div
@@ -59,14 +72,17 @@
 </template>
 
 <script setup lang="ts">
-import type { Project, ProjectStageStatus } from "~/generated/prisma";
+import type { Project, Tasks } from "~/generated/prisma";
+
+// Ajoute ce type si besoin
+type ProjectStageStatus = "A_VENIR" | "EN_COURS" | "TERMINE" | "EN_ATTENTE";
 
 interface ProjectStage {
   id: number;
   projectId: number;
   title: string;
   description: string;
-  status: ProjectStageStatus;
+  tasks?: Tasks[];
   createdAt: string;
   updatedAt: string;
 }
@@ -78,6 +94,14 @@ interface ExtendedProject extends Project {
 defineProps<{
   projects: ExtendedProject[];
 }>();
+
+function getProjectStageStatus(tasks: Tasks[] = []): ProjectStageStatus {
+  if (!tasks || tasks.length === 0) return "A_VENIR";
+  if (tasks.every((task) => task.status === "TERMINE")) return "TERMINE";
+  if (tasks.some((task) => task.status === "EN_COURS")) return "EN_COURS";
+  if (tasks.some((task) => task.status === "A_FAIRE")) return "EN_COURS";
+  return "EN_COURS";
+}
 
 const getIconClass = (status: ProjectStageStatus) => {
   return (
@@ -110,5 +134,4 @@ const getLineColor = (previousStageStatus: ProjectStageStatus) => {
 .flex-1 {
   flex: 1 1 0%;
 }
-/* You can add specific styles here if needed */
 </style>

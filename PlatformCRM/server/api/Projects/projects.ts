@@ -33,8 +33,12 @@ export default defineEventHandler(async (event) => {
                             employee: true,
                         },
                     },
-                    projectStages: true,
-                    tasks: { 
+                    projectStages: {
+                        include: {
+                            tasks: true
+                        }
+                    },
+                    tasks: {
                         include: {
                             employee: true
                         }

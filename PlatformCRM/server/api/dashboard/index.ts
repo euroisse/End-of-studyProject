@@ -94,7 +94,7 @@ export default defineEventHandler(async (event) => {
           customer: true,
           projectStages: {
             include: {
-              stages: true,
+              tasks: true,
             },
           },
           tasks: {

@@ -49,7 +49,7 @@ import type { ProjectWithProjectStages } from "~/types";
 const props = defineProps<{
   project: ProjectWithProjectStages;
 }>();
-const projectStore = useProjectStore();
+
 const { project } = props;
 const router = useRouter();
 
@@ -62,14 +62,39 @@ const formattedLastUpdate = computed(() => {
   return format(date, "dd MMMM yyyy", { locale: fr });
 });
 
+const isStageCompleted = (stage: any) => {
+  // Une étape sans tâche n'est pas prise en compte dans la progression
+  if (!stage.tasks || stage.tasks.length === 0) return false;
+  // Toutes les tâches doivent être terminées
+  return stage.tasks.every((task: any) => task.status === "TERMINE");
+};
+
 const calculateProgress = computed(() => {
   if (!project.projectStages || project.projectStages.length === 0) {
     return 0;
   }
-  const completedStages = project.projectStages.filter(
-    (stage) => stage.status === "TERMINE"
-  ).length;
-  return Math.round((completedStages / project.projectStages.length) * 100);
+  // On ne prend en compte que les étapes qui ont des tâches
+  const stagesWithTasks = project.projectStages.filter(
+    (stage: any) => stage.tasks && stage.tasks.length > 0
+  );
+  const totalStages = stagesWithTasks.length;
+  if (totalStages === 0) return 0;
+
+  const completedStages = stagesWithTasks.filter(isStageCompleted).length;
+
+  // Si au moins une étape est terminée, commence à remplir la barre (minimum 10%)
+  if (completedStages > 0 && completedStages < totalStages) {
+    const percent = Math.round((completedStages / totalStages) * 100);
+    return Math.max(percent, 10);
+  }
+
+  // Si toutes les étapes sont terminées, 100%
+  if (completedStages === totalStages) {
+    return 100;
+  }
+
+  // Sinon, 0%
+  return 0;
 });
 
 const goToProjectDetails = (id: number) => {

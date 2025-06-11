@@ -1,42 +1,48 @@
 <template>
   <div
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto backdrop-blur-sm"
   >
     <div
-      class="max-w-5xl w-[500px] mx-auto p-6 bg-white rounded-2xl shadow-md space-y-6 max-h-[90vh]"
+      class="rounded-2xl shadow-2xl max-w-xl w-full p-0 transform transition-all bg-white"
     >
-      <div class="p-6">
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="text-xl font-bold text-gray-800">
-            Créer un nouveau devis
-          </h2>
+      <div class="p-6 rounded-t-2xl bg-blue-600">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center gap-3">
+            <h2 class="text-xl font-semibold text-white">
+              Créer un nouveau devis
+            </h2>
+          </div>
+
           <button
             @click="$emit('close')"
-            class="text-gray-400 hover:text-gray-600"
+            class="text-blue-100 hover:text-white transition-colors duration-200"
           >
-            <i class="ri-close-line text-xl"></i>
+            <i class="ri-close-line text-2xl"></i>
           </button>
         </div>
-
-        <form @submit.prevent="handleSubmit" class="space-y-4">
+      </div>
+      <form @submit.prevent="handleSubmit" class="p-6">
+        <div class="space-y-6">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2"
+            <label class="block text-sm font-medium text-gray-700"
               >Projet</label
             >
-            <select
-              v-model="selectedProjectId"
-              @change="fetchProjectStages"
-              class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-500 bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
-            >
-              <option disabled value="">Sélectionner un projet</option>
-              <option
-                v-for="project in projects"
-                :key="project.id"
-                :value="project.id"
+            <div class="mb-4">
+              <select
+                v-model="selectedProjectId"
+                @change="fetchProjectStages"
+                class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-500 bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
               >
-                {{ project.title }}
-              </option>
-            </select>
+                <option disabled value="">Sélectionner un projet</option>
+                <option
+                  v-for="project in projects"
+                  :key="project.id"
+                  :value="project.id"
+                >
+                  {{ project.title }}
+                </option>
+              </select>
+            </div>
           </div>
 
           <div v-if="selectedProjectId">
@@ -111,38 +117,32 @@
               class="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-500 bg-white"
             >
               <option value="EN_ATTENTE">En attente</option>
-              <option value="ACCEPTE">Accepté</option>
-              <option value="REFUSE">Refusé</option>
-              <option value="ANNULE">Annulé</option>
-              <option value="BROUILLON">Brouillon</option>
             </select>
           </div>
-
-          <div class="flex justify-end space-x-4 mt-6">
-            <button
-              type="button"
-              @click="saveAsDraft"
-              v-if="!isEditing"
-              class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              Enregistrer comme brouillon
-            </button>
-            <button
-              type="submit"
-              :disabled="devisStore.loading"
-              class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <span v-if="devisStore.loading">Sauvegarde en cours...</span>
-              <span v-else>{{
-                isEditing ? "Mettre à jour" : "Créer et envoyer"
-              }}</span>
-            </button>
-          </div>
-          <div v-if="devisStore.error" class="text-red-600 text-sm mt-2">
-            Erreur: {{ devisStore.error }}
-          </div>
-        </form>
-      </div>
+        </div>
+        <div class="flex justify-end space-x-4 mt-6">
+          <button
+            type="button"
+            class="rounded-md font-medium transition-all focus:outline-none focus:ring-0 focus:ring-offset-0 disabled:opacity-75 disabled:cursor-not-allowed bg-gray-200 text-gray-700 hover:bg-gray-300 focus:ring-gray-500 disabled:bg-gray-300 px-4 py-2 text-base"
+            @click="$emit('close')"
+          >
+            Annuler
+          </button>
+          <button
+            type="submit"
+            :disabled="devisStore.loading"
+            class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span v-if="devisStore.loading">Sauvegarde en cours...</span>
+            <span v-else>{{
+              isEditing ? "Mettre à jour" : "Créer et envoyer"
+            }}</span>
+          </button>
+        </div>
+        <div v-if="devisStore.error" class="text-red-600 text-sm mt-2">
+          Erreur: {{ devisStore.error }}
+        </div>
+      </form>
     </div>
   </div>
 </template>

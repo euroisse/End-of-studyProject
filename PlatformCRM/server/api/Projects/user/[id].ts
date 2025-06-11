@@ -86,7 +86,10 @@ export default defineEventHandler(async (event) => {
                 },
                 include: {
                     customer: true,
-                    projectStages: true,
+                    projectStages: {
+                        include: {
+                            tasks: true,
+                    },},
                     tasks: {
                         where: { employeeId: userId }, 
                         include: {          

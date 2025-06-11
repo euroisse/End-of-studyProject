@@ -272,6 +272,9 @@ const prepareDeleteTask = (taskId: number) => {
 const updateTaskStatus = async (taskId: number, newStatus: Task["status"]) => {
   try {
     await taskStore.updateTaskStatus(taskId, newStatus);
+    if (project.value && project.value.id) {
+      await projectStore.fetchProject(project.value.id);
+    }
   } catch (error) {
     console.error(
       "Erreur lors de la mise à jour du statut de la tâche:",
