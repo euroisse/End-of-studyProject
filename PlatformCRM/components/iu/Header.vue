@@ -36,7 +36,7 @@
               @click="$emit('open-login')"
             />
             <Button
-              v-if="isAdmin"
+              v-if="isAdmin && !isLoggedIn"
               content=" Créer un compte"
               customClass="bg-indigo-500 hover:bg-indigo-800 text-white px-4 py-2 rounded-lg shadow-md transition-all whitespace-nowrap cursor-pointer !rounded-button"
               @click="$emit('open-register')"
