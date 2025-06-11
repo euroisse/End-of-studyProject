@@ -98,6 +98,7 @@ model ProjectStage {
   tasks       Tasks[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+  endDate     DateTime?    @map("end_date")
 }
 
 model Tasks {
@@ -115,6 +116,7 @@ model Tasks {
   status         TaskStatus   @default(A_FAIRE)
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
+  endDate        DateTime?    @map("end_date")
 }
 
 enum TaskStatus {

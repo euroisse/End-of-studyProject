@@ -16,7 +16,11 @@ try{
         where: { id: projectId },
         include:{
           customer:true,
-            projectStages:{}
+            projectStages:{
+              include: {
+                tasks: true, // Inclure les tâches associées à chaque étape du projet
+            },
+          }
         }
     }) as ProjectWithProjectStages
     if (!project) {

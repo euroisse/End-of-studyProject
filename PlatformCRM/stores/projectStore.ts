@@ -1,19 +1,18 @@
 // stores/projects.ts
 import { defineStore, } from "pinia";
-import type { ProjectStage, Project } from "~/generated/prisma"; 
-import type { ProjectWithProjectStages } from "~/types"; 
+import type { ProjectStage, Project , Tasks} from "~/generated/prisma"; 
 import { ref } from 'vue'; 
-
+import type { ProjectStageWithTasks, ProjectWithProjectStages } from "~/types";
 export const useProjectStore = defineStore('projects', {
   state: () => ({
     selectedProject: ref<ProjectWithProjectStages | null>(null),
     projectStages: ref<ProjectStage[]>([]),
     projects: ref<ProjectWithProjectStages[]>([]), 
     projectToEdit: ref<ProjectWithProjectStages | null>(null),
-    selectedProjectStage: ref<ProjectStage | null>(null),
+   selectedProjectStage: ref<ProjectStageWithTasks | null>(null),
   }),
   actions: {
-    setSelectedProjectStage(stage: ProjectStage | null) {
+    setSelectedProjectStage(stage: ProjectStageWithTasks | null) {
       this.selectedProjectStage = stage;
     },
     setSelectedProjectToEdit(project: ProjectWithProjectStages | null) {
@@ -31,14 +30,17 @@ export const useProjectStore = defineStore('projects', {
     },
 
     async fetchProject(id: number) {
-      const response = await $fetch<ProjectWithProjectStages>(`/api/Projects/${id}`);
+      const response = await $fetch<ProjectWithProjectStages>(`/api/Projects/${id}`,{
+         query: { include: 'projectStages.tasks' } 
+      });
       this.selectedProject = response;
     },
 
     async updateProjectStage(stageId: number, stageData: Partial<ProjectStage>) {
-      const response = await $fetch<ProjectStage>(`/api/projectStage/${stageId}`, {
+      const response = await $fetch<ProjectStageWithTasks>(`/api/projectStage/${stageId}`, {
         method: 'PUT',
         body: stageData,
+         query: { include: 'tasks' }
       });
       const updatedStage = response;
       if (this.selectedProject && this.selectedProject.projectStages) {
@@ -71,6 +73,7 @@ export const useProjectStore = defineStore('projects', {
       const response = await $fetch<ProjectWithProjectStages>(`/api/Projects/${projectId}`, {
         method: 'PUT',
         body: projectData,
+         query: { include: 'projectStages.tasks' } 
       });
       const updatedProject = response;
       this.selectedProject = updatedProject;

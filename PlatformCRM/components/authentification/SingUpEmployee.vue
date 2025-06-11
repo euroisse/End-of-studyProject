@@ -211,10 +211,10 @@
     <button
       @click="register"
       class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition whitespace-nowrap cursor-pointer"
-      :disabled="!acceptTerms || isLoading || !customerRoleId"
+      :disabled="!acceptTerms || isLoading || !employeeRoleId"
       :class="{
         'opacity-50 cursor-not-allowed':
-          !acceptTerms || isLoading || !customerRoleId,
+          !acceptTerms || isLoading || !employeeRoleId,
       }"
     >
       {{ isLoading ? "Création du compte..." : "Créer un compte" }}
@@ -237,7 +237,7 @@ const email = ref("");
 const password = ref("");
 const confirmPassword = ref("");
 
-const customerRoleId = ref<number | null>(null);
+const employeeRoleId = ref<number | null>(null);
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 const acceptTerms = ref(false);
@@ -281,31 +281,23 @@ const passwordStrength = computed(() => {
 // Récupération de l'ID du rôle 'customer' au montage du composant
 onMounted(async () => {
   try {
-    const { data, error } = await useFetch("/api/roles/customer", {
+    const { data, error } = await useFetch("/api/roles/employee", {
       method: "GET",
     });
 
     if (error.value) {
-      console.error(
-        "Erreur lors de la récupération du rôle customer:",
-        error.value
-      );
       errorMessage.value =
         "Impossible de charger les informations de rôle. Veuillez réessayer ou contacter le support.";
     } else if (data.value) {
-      customerRoleId.value = data.value.id;
-      console.log("ID du rôle customer récupéré:", customerRoleId.value);
+      employeeRoleId.value = data.value.id;
+      console.log("ID du rôle employee récupéré:", employeeRoleId.value);
     } else {
       errorMessage.value =
-        "Le rôle 'customer' n'a pas été trouvé via l'API. Veuillez vérifier la configuration côté serveur.";
+        "Le rôle 'employee' n'a pas été trouvé via l'API. Veuillez vérifier la configuration côté serveur.";
     }
   } catch (err) {
-    console.error(
-      "Erreur réseau lors de la récupération du rôle customer:",
-      err
-    );
     errorMessage.value =
-      "Erreur réseau. Impossible de communiquer avec le serveur pour récupérer le rôle client.";
+      "Erreur réseau. Impossible de communiquer avec le serveur pour récupérer le rôle employé.";
   }
 });
 
@@ -333,19 +325,17 @@ const register = async () => {
     return;
   }
   // S'assurer que l'ID du rôle customer a bien été récupéré
-  if (customerRoleId.value === null) {
+  if (employeeRoleId.value === null) {
     errorMessage.value =
       "Le rôle client n'a pas pu être déterminé. Veuillez patienter ou rafraîchir la page.";
     isLoading.value = false;
     return;
   }
-
-  // Préparation des données pour l'API
   const userData = {
     nom: fullName.value,
     email: email.value,
     password: password.value,
-    roleId: customerRoleId.value,
+    roleId: employeeRoleId.value,
     poste: employeeDetails.value.poste || null,
     department: employeeDetails.value.department || null,
   };

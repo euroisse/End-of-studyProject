@@ -13,19 +13,17 @@
         >
           <div
             :class="`w-10 h-10 rounded-full flex items-center justify-center
-            ${
-              step.status === 'TERMINE'
-                ? 'bg-green-500'
-                : step.status === 'EN_COURS'
-                ? 'bg-indigo-500'
-                : step.status === 'A_VENIR'
-                ? 'bg-gray-200'
-                : step.status === 'EN_ATTENTE'
-                ? 'bg-yellow-300'
-                : 'bg-gray-200'
-            } text-white font-medium text-[14px] font-Roboto`"
+              ${
+                getProjectStageStatus(step.tasks) === 'TERMINE'
+                  ? 'bg-green-500'
+                  : getProjectStageStatus(step.tasks) === 'EN_COURS'
+                  ? 'bg-indigo-500'
+                  : getProjectStageStatus(step.tasks) === 'A_VENIR'
+                  ? 'bg-gray-200'
+                  : 'bg-gray-200'
+              } text-white font-medium text-[14px] font-Roboto`"
           >
-            <i :class="getIconClass(step.status)"></i>
+            <i :class="getIconClass(getProjectStageStatus(step.tasks))"></i>
           </div>
 
           <div
@@ -37,19 +35,17 @@
               </h1>
               <span
                 :class="`px-3 py-1 rounded-full text-sm font-medium
-                ${
-                  step.status === 'TERMINE'
-                    ? 'bg-green-100 text-green-600'
-                    : step.status === 'EN_COURS'
-                    ? 'bg-indigo-100 text-indigo-600'
-                    : step.status === 'A_VENIR'
-                    ? 'bg-gray-100 text-gray-600'
-                    : step.status === 'EN_ATTENTE'
-                    ? 'bg-yellow-100 text-yellow-600'
-                    : 'bg-gray-100 text-gray-600'
-                }`"
+                  ${
+                    getProjectStageStatus(step.tasks) === 'TERMINE'
+                      ? 'bg-green-100 text-green-600'
+                      : getProjectStageStatus(step.tasks) === 'EN_COURS'
+                      ? 'bg-indigo-100 text-indigo-600'
+                      : getProjectStageStatus(step.tasks) === 'A_VENIR'
+                      ? 'bg-gray-100 text-gray-600'
+                      : 'bg-gray-100 text-gray-600'
+                  }`"
               >
-                {{ getStatusText(step.status) }}
+                {{ getStatusText(getProjectStageStatus(step.tasks)) }}
               </span>
             </div>
 
@@ -101,25 +97,30 @@
 
 <script setup lang="ts">
 import { ref, defineEmits } from "vue";
-import type { ProjectStage, ProjectStageStatus } from "~/generated/prisma";
+import type { Tasks } from "~/generated/prisma";
 import ProjectStageModal from "./ProjectStageModal.vue";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useProjectStore } from "~/stores/projectStore";
 import AddModal from "~/pages/projects/ProjectStage/AddModal.vue";
+import type { ProjectStageWithTasks } from "~/types";
+
 const { isAdmin } = useIsRole();
 const emit = defineEmits(["refreshStages"]);
 const projectStore = useProjectStore();
 const showModal = ref(false);
-const selectedProjectStage = ref<ProjectStage | null>(null);
+const selectedProjectStage = ref<ProjectStageWithTasks | null>(null);
 const showCreateStageProject = ref(false);
+
+// Définit un type pour les statuts d'étape utilisés dans l'interface
+type ProjectStageStatus = "TERMINE" | "EN_COURS" | "A_VENIR";
+
 const getStatusText = (status: ProjectStageStatus) => {
   return (
     {
       TERMINE: "Terminé",
       EN_COURS: "En cours",
       A_VENIR: "À venir",
-      EN_ATTENTE: "En attente",
     }[status] || "Inconnu"
   );
 };
@@ -130,12 +131,11 @@ const getIconClass = (status: ProjectStageStatus) => {
       TERMINE: "ri-checkbox-circle-fill",
       EN_COURS: "ri-code-fill",
       A_VENIR: "ri-time-line",
-      EN_ATTENTE: "ri-pause-circle-line",
     }[status] || "ri-question-line"
   );
 };
 
-const formatDate = (date?: Date): string => {
+const formatDate = (date?: Date | null): string => {
   if (date) {
     try {
       return format(new Date(date), "dd/MM/yyyy", { locale: fr });
@@ -147,7 +147,7 @@ const formatDate = (date?: Date): string => {
   return "";
 };
 
-const editProjectStage = (stage: ProjectStage) => {
+const editProjectStage = (stage: ProjectStageWithTasks) => {
   console.log("Édition de l'étape:", stage);
   selectedProjectStage.value = stage;
   projectStore.setSelectedProjectStage(stage);
@@ -159,9 +159,14 @@ const closeModal = () => {
   showModal.value = false;
 };
 
-const handleSaveProjectStage = async (updatedStage: ProjectStage) => {
+const handleSaveProjectStage = async (updatedStage: ProjectStageWithTasks) => {
   try {
-    await projectStore.updateProjectStage(updatedStage.id!, updatedStage);
+    // La mise à jour de l'étape ne concerne que les champs directs de ProjectStage (titre, description)
+    // Le statut est géré par les tâches
+    await projectStore.updateProjectStage(updatedStage.id!, {
+      title: updatedStage.title,
+      description: updatedStage.description,
+    });
     closeModal();
   } catch (error) {
     console.error("Erreur lors de la mise à jour de l'étape:", error);
@@ -179,7 +184,8 @@ const deleteProjectStage = async (id: number) => {
     }
   }
 };
-const stageAdded = (newStage: ProjectStage) => {
+
+const stageAdded = (newStage: ProjectStageWithTasks) => {
   if (projectStore.selectedProject && newStage) {
     console.log("Nouvelle étape ajoutée:", newStage);
     console.log(
@@ -194,9 +200,31 @@ const stageAdded = (newStage: ProjectStage) => {
   }
   showCreateStageProject.value = false;
 };
+
+// La logique de statut de l'étape basée sur les tâches
+function getProjectStageStatus(tasks: Tasks[] = []): ProjectStageStatus {
+  if (!tasks || tasks.length === 0) {
+    return "A_VENIR";
+  }
+  if (tasks.every((task) => task.status === "TERMINE")) {
+    return "TERMINE";
+  }
+  // Si au moins une tâche est en cours, ou s'il y a des tâches à faire mais aucune en cours
+  if (tasks.some((task) => task.status === "EN_COURS")) {
+    return "EN_COURS";
+  }
+  // Si toutes les tâches ne sont pas terminées, et aucune n'est en cours, mais il reste des tâches à faire
+  if (tasks.some((task) => task.status === "A_FAIRE")) {
+    return "EN_COURS";
+  }
+
+  // Par défaut, si aucune condition n'est remplie, on considère que l'étape est en cours
+  return "EN_COURS";
+}
 </script>
 
 <style scoped>
+/* Les styles restent les mêmes */
 .bg-a-venir {
   background-color: #e5e7eb;
   color: #4b5563;

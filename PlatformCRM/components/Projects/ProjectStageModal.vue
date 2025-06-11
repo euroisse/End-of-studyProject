@@ -8,7 +8,7 @@
       <div class="p-6 rounded-t-2xl bg-blue-600">
         <div class="flex justify-between items-center">
           <div class="flex items-center gap-3">
-            <h2 class="text-xl font-semibold text-white">Modifier une etape</h2>
+            <h2 class="text-xl font-semibold text-white">Modifier une étape</h2>
           </div>
 
           <button
@@ -52,29 +52,6 @@
             class="w-full px-3 py-2 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-300 focus:border-blue-500"
           ></textarea>
         </div>
-        <div>
-          <label
-            for="status"
-            class="block text-sm font-medium mb-2 text-gray-700"
-            >Statut</label
-          >
-          <div class="mb-4">
-            <select
-              v-model="form.status"
-              id="status"
-              name="status"
-              class="w-full px-3 py-2 z-10 border rounded-xl shadow-sm focus:outline-none focus:ring-2 bg-white text-gray-900 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option
-                v-for="(status, key) in statusOptions"
-                :key="key"
-                :value="key"
-              >
-                {{ status }}
-              </option>
-            </select>
-          </div>
-        </div>
         <div class="flex justify-end gap-3 mt-8">
           <button
             type="button"
@@ -96,9 +73,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from "vue"; // Ensure computed is imported
-import type { ProjectStage } from "~/generated/prisma";
-import { useProjectStore } from "~/stores/projectStore"; // Ensure correct path if changed
+import { ref, watch, computed } from "vue";
+import type { ProjectStage } from "~/generated/prisma"; // Import ProjectStage
+import { useProjectStore } from "~/stores/projectStore"; // Importe ProjectStageWithTasks
 
 const projectStore = useProjectStore();
 const emit = defineEmits(["close", "save"]);
@@ -108,15 +85,7 @@ const editingStage = computed(() => projectStore.selectedProjectStage);
 const form = ref<Partial<ProjectStage>>({
   title: "",
   description: "",
-  status: "A_VENIR",
 });
-
-const statusOptions = {
-  A_VENIR: "À venir",
-  EN_COURS: "En cours",
-  TERMINE: "Terminé",
-  EN_ATTENTE: "En attente",
-};
 
 watch(
   () => projectStore.selectedProjectStage,
@@ -126,10 +95,9 @@ watch(
         id: newStage.id,
         title: newStage.title,
         description: newStage.description,
-        status: newStage.status,
       };
     } else {
-      form.value = { title: "", description: "", status: "A_VENIR" };
+      form.value = { title: "", description: "" }; // Pas de statut par défaut
     }
   },
   { immediate: true, deep: true }
@@ -144,13 +112,13 @@ const saveProjectStage = async () => {
   try {
     console.log("Enregistrement de l'étape:", form.value);
     await projectStore.updateProjectStage(editingStage.value.id, {
-      ...form.value,
+      title: form.value.title,
+      description: form.value.description,
     });
     emit("close");
     console.log("Étape mise à jour avec succès");
   } catch (error: any) {
     console.error(`Erreur lors de la mise à jour de l'étape: ${error.message}`);
-    // Afficher une alerte ou un message d'erreur à l'utilisateur
     alert(
       `Erreur lors de la mise à jour: ${error.message || "Erreur inconnue"}`
     );

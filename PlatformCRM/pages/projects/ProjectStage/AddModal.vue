@@ -55,31 +55,21 @@
               name="description"
               rows="6"
               class="w-full px-3 py-2 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-300 focus:border-blue-500"
-              placeholder="Decrivez votre etape en quelques mots..."
+              placeholder="Décrivez votre étape en quelques mots..."
             ></textarea>
           </div>
           <div>
             <label
-              for="status"
+              for="endDate"
               class="block text-sm font-medium mb-2 text-gray-700"
-              >Statut</label
+              >Date de livraison estimée</label
             >
-            <div class="mb-4">
-              <select
-                v-model="formData.status"
-                id="status"
-                name="status"
-                class="w-full px-3 py-2 z-10 border rounded-xl shadow-sm focus:outline-none focus:ring-2 bg-white text-gray-900 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option
-                  v-for="(status, key) in statusOptions"
-                  :key="key"
-                  :value="key"
-                >
-                  {{ status }}
-                </option>
-              </select>
-            </div>
+            <input
+              v-model="formData.endDate"
+              type="date"
+              id="endDate"
+              class="w-full px-3 py-2 rounded-xl shadow-sm focus:outline-none focus:ring-2 bg-white text-gray-900 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+            />
           </div>
         </div>
         <div class="flex justify-end gap-3 mt-8">
@@ -119,15 +109,8 @@ const emit = defineEmits(["close", "stageAdded"]);
 const formData = ref({
   title: "",
   description: null,
-  status: "A_VENIR",
+  endDate: undefined, // Initialisez endDate
 });
-
-const statusOptions = {
-  A_VENIR: "À venir",
-  EN_COURS: "En cours",
-  TERMINE: "Terminé",
-  EN_ATTENTE: "En attente",
-};
 
 const handleSubmit = async () => {
   if (!projectId.value) {
@@ -142,7 +125,9 @@ const handleSubmit = async () => {
         projectId: projectId.value,
         title: formData.value.title,
         description: formData.value.description || undefined,
-        status: formData.value.status,
+        endDate: formData.value.endDate
+          ? new Date(formData.value.endDate)
+          : null, // Convertit la chaîne en objet Date ou null
       },
     });
 
@@ -152,14 +137,11 @@ const handleSubmit = async () => {
     // Reset form
     formData.value.title = "";
     formData.value.description = null;
-    formData.value.status = "A_VENIR";
+    formData.value.endDate = undefined;
   } catch (error) {
     console.error("Erreur lors de la création de l'étape :", error);
   }
 };
-onMounted(() => {
-  handleSubmit;
-});
 </script>
 
 <style scoped>
