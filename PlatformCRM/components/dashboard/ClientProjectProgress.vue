@@ -16,55 +16,48 @@
           </h3>
         </div>
         <div class="flex mb-8 space-x-0">
-          <template
+          <div
             v-for="(stage, stageIndex) in project.projectStages"
             :key="stage.id"
+            class="flex-1 flex flex-col items-center relative"
           >
+            <!-- Ligne de progression à gauche (sauf pour la première étape) -->
             <div
-              v-for="(stage, stageIndex) in project.projectStages"
-              :key="stage.id"
-              class="flex-1 flex flex-col items-center relative"
-            >
-              <!-- Ligne de progression à gauche (sauf pour la première étape) -->
-              <div
-                v-if="stageIndex !== 0"
-                class="absolute left-0 top-1/2 -translate-y-1/2 h-1 w-1/2 z-0"
-                :class="
-                  getLineColor(
-                    getProjectStageStatus(
-                      project.projectStages[stageIndex - 1]?.tasks || []
-                    )
+              v-if="stageIndex !== 0"
+              class="absolute left-0 top-1/2 -translate-y-1/2 h-1 w-1/2 z-0"
+              :class="
+                getLineColor(
+                  getProjectStageStatus(
+                    project.projectStages[stageIndex - 1]?.tasks || []
                   )
-                "
-              ></div>
-              <!-- Ligne de progression à droite (sauf pour la dernière étape) -->
-              <div
-                v-if="stageIndex !== project.projectStages.length - 1"
-                class="absolute right-0 top-1/2 -translate-y-1/2 h-1 w-1/2 z-0"
-                :class="getLineColor(getProjectStageStatus(stage.tasks || []))"
-              ></div>
-              <!-- Cercle étape -->
-              <div
-                :class="[
-                  'w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold relative z-10 transition-colors duration-300 shadow',
-                  getStageColor(getProjectStageStatus(stage.tasks || [])),
-                ]"
-              >
-                <i
-                  :class="
-                    getIconClass(getProjectStageStatus(stage.tasks || []))
-                  "
-                  class="text-xl"
-                ></i>
-              </div>
-              <!-- Titre étape -->
-              <div
-                class="mt-2 w-full text-center text-xs text-gray-600 font-medium"
-              >
-                {{ stage.title }}
-              </div>
+                )
+              "
+            ></div>
+            <!-- Ligne de progression à droite (sauf pour la dernière étape) -->
+            <div
+              v-if="stageIndex !== project.projectStages.length - 1"
+              class="absolute right-0 top-1/2 -translate-y-1/2 h-1 w-1/2 z-0"
+              :class="getLineColor(getProjectStageStatus(stage.tasks || []))"
+            ></div>
+            <!-- Cercle étape -->
+            <div
+              :class="[
+                'w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold relative z-10 transition-colors duration-300 shadow',
+                getStageColor(getProjectStageStatus(stage.tasks || [])),
+              ]"
+            >
+              <i
+                :class="getIconClass(getProjectStageStatus(stage.tasks || []))"
+                class="text-xl"
+              ></i>
             </div>
-          </template>
+            <!-- Titre étape -->
+            <div
+              class="mt-2 w-full text-center text-xs text-gray-600 font-medium"
+            >
+              {{ stage.title }}
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -147,6 +147,7 @@
     <InvoiceTable
       v-if="quoteDetails && isAdmin && quoteDetails.status !== 'EN_ATTENTE'"
       :quoteId="quoteDetails.id"
+      :key="quoteDetails.id"
     />
 
     <div

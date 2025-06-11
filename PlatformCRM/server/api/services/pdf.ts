@@ -163,7 +163,7 @@ export default async function generateInvoicePdf(invoice: InvoiceWithQuote) {
 
     lineY += 18;
     const total = calculatedSubtotal + taxAmount;
-    const balanceDue = total - (invoice.amountPaid || 0);
+    const balanceDue = invoice.balanceDue ?? (total - (invoice.amountPaid || 0));
     doc
       .font(fontBold)
       .fillColor(accentColor)

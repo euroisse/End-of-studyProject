@@ -173,8 +173,8 @@ onMounted(() => {
 
 watch(
   () => props.quoteId,
-  (newId) => {
-    if (newId) fetchInvoicesPaginated();
+  async (newId) => {
+    if (newId) await fetchInvoicesPaginated();
   },
   { immediate: true }
 );
