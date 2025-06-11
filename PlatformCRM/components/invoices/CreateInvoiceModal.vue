@@ -1,6 +1,6 @@
 <template>
-  <div class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm">
-    <div class="fixed inset-0 overflow-y-auto">
+  <div class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50">
+    <div class="fixed inset-0">
       <div class="flex min-h-full items-center justify-center p-4">
         <div
           class="rounded-2xl shadow-2xl max-w-lg w-full p-0 transform transition-all bg-white"
@@ -17,15 +17,18 @@
                 @click="$emit('close')"
                 class="text-blue-100 hover:text-white transition-colors duration-200"
               >
-                <i class="ri-close-line"></i>
+                <i class="ri-close-line text-2xl"></i>
               </button>
             </div>
+          </div>
+          <div class="p-6">
             <div v-if="quoteId">
               <p class="text-gray-700 mb-4">
                 Création de facture pour le devis #{{ quoteId }}.
               </p>
               <p class="text-gray-700 mb-4 font-bold">
-                Montant total du devis: {{ quoteTotalPrice }} FCFA
+                Montant total du devis:
+                <span class="text-red-600">{{ quoteTotalPrice }} FCFA</span>
               </p>
 
               <form @submit.prevent="submitInvoice">

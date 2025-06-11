@@ -7,17 +7,6 @@
         <div class="flex items-center space-x-4 relative">
           <div class="flex items-center space-x-3">
             <div
-              v-if="user?.photoURL"
-              class="w-10 h-10 rounded-full overflow-hidden"
-            >
-              <img
-                :src="user.photoURL"
-                alt="Photo de profil"
-                class="w-full h-full object-cover"
-              />
-            </div>
-            <div
-              v-else
               class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center"
             >
               <i class="ri-user-line text-indigo-600 text-xl"></i>

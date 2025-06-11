@@ -99,17 +99,33 @@
           </table>
         </div>
       </div>
+      <div
+        v-if="pagination.totalPages > 0"
+        class="flex justify-center mt-6 space-x-2"
+      >
+        <button
+          v-for="p in pagination.totalPages"
+          :key="p"
+          @click="goToPage(p)"
+          :class="[
+            'px-3 py-1 rounded',
+            p === pagination.page
+              ? 'bg-indigo-600 text-white'
+              : 'bg-gray-200 text-gray-700',
+          ]"
+        >
+          {{ p }}
+        </button>
+      </div>
     </main>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, computed, onMounted } from "vue";
-import CreateInvoiceModal from "~/components/invoices/CreateInvoiceModal.vue";
-import type { Invoice } from "~/generated/prisma";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-const { isAdmin, isClient } = useIsRole();
+const { isAdmin } = useIsRole();
 definePageMeta({ layout: "admin" });
 const error = ref<any>(null);
 interface SimplifiedInvoice {
@@ -120,7 +136,12 @@ interface SimplifiedInvoice {
 }
 const invoices = ref<SimplifiedInvoice[]>([]);
 const loading = ref(false);
-
+const pagination = ref({
+  total: 0,
+  page: 1,
+  pageSize: 10,
+  totalPages: 1,
+});
 const showCreateInvoiceModal = ref(false);
 const selectedQuoteIdForInvoice = ref<number | null>(null);
 
@@ -128,7 +149,7 @@ const searchTerm = ref("");
 const sortField = ref("invoiceDate");
 const sortDirection = ref("desc");
 
-const fetchInvoices = async () => {
+const fetchInvoices = async (page = 1, pageSize = 10) => {
   loading.value = true;
   error.value = null;
   const userString = localStorage.getItem("user");
@@ -142,11 +163,12 @@ const fetchInvoices = async () => {
   try {
     const user = JSON.parse(userString);
     const userId = user.id;
-    const userRole = user.roles;
-    const data = await $fetch<any>(
-      userRole === "ADMIN" ? "/api/invoices" : `/api/invoices/user/${userId}`
-    );
-    invoices.value = data.data || [];
+    // Utilise l'API de pagination
+    const res = await $fetch<any>("/api/invoices/pagination", {
+      params: { page, pageSize, id: userId },
+    });
+    invoices.value = res.data || [];
+    pagination.value = res.pagination;
   } catch (err: any) {
     error.value = err.data?.statusMessage || err.message;
   } finally {
@@ -206,11 +228,6 @@ const openCreateInvoiceModal = (quoteId: number | null) => {
   showCreateInvoiceModal.value = true;
 };
 
-const handleInvoiceCreated = (newInvoice: Invoice) => {
-  fetchInvoices();
-  showCreateInvoiceModal.value = false;
-};
-
 const downloadInvoice = async (invoiceNumber: string) => {
   const response = await $fetch<Blob>(`/api/file?id=${invoiceNumber}`);
   console.log(response);
@@ -232,6 +249,10 @@ const formatDate = (dateString: string | Date) => {
     console.error("Erreur de formatage de date:", e);
     return "Date invalide";
   }
+};
+const goToPage = (p: number) => {
+  pagination.value.page = p;
+  fetchInvoices(p, pagination.value.pageSize);
 };
 </script>
 

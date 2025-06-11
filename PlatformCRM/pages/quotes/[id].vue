@@ -99,7 +99,7 @@
           class="relative mb-8 last:mb-0"
         >
           <div
-            class="absolute -left-1 top-0 flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 text-white shadow-lg z-10"
+            class="absolute -left-1 top-0 flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 text-white shadow-lg"
           >
             <i :class="getStageIcon(index)"></i>
           </div>

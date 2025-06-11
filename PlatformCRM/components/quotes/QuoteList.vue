@@ -134,9 +134,8 @@
             :disabled="quoteStore.pagination.page <= 1"
             :class="[
               'px-3 py-1 rounded',
-              quoteStore.pagination.page <= 1
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-blue-500 text-white hover:bg-blue-600',
+              quoteStore.pagination.page <= 1,
+              'bg-gray-200 text-gray-700 disabled:opacity-50',
             ]"
           >
             <i class="ri-arrow-left-s-line"></i>
@@ -149,8 +148,8 @@
             :class="[
               'px-3 py-1 rounded',
               p === quoteStore.pagination.page
-                ? 'bg-blue-400 text-white'
-                : 'bg-gray-200 hover:bg-gray-300',
+                ? 'bg-blue-500 text-white'
+                : 'bg-gray-300 hover:bg-gray-300',
             ]"
           >
             {{ p }}
@@ -163,9 +162,8 @@
             "
             :class="[
               'px-3 py-1 rounded',
-              quoteStore.pagination.page >= quoteStore.pagination.totalPages
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-blue-500 text-white hover:bg-blue-600',
+              quoteStore.pagination.page >= quoteStore.pagination.totalPages,
+              'bg-gray-200  text-gray-700 disabled:opacity-50',
             ]"
           >
             <i class="ri-arrow-right-s-line"></i>

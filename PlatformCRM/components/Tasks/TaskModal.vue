@@ -196,13 +196,12 @@ async function submitTask() {
   console.log("Task data:", taskData);
 
   await taskStore.createTask(taskData);
-
+  //Reinitialiser les champs du formulaire
   title.value = "";
   description.value = "";
   priority.value = "MOYENNE";
   status.value = "A_FAIRE";
   effort.value = null;
-  projectId.value = null;
   employeeId.value = null;
 
   emit("close");
