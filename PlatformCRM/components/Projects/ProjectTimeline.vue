@@ -1,6 +1,17 @@
 <template>
   <div class="mb-8 bg-white w-full rounded-sm flex-1 p-8 pt-4">
     <h2 class="text-xl font-bold font-Roboto mb-6 ml-3">Étapes du projet</h2>
+    <div class="w-full mb-6">
+      <div class="h-4 bg-gray-200 rounded-full overflow-hidden">
+        <div
+          class="h-4 bg-indigo-500 transition-all duration-500"
+          :style="{ width: progressPercent + '%' }"
+        ></div>
+      </div>
+      <div class="text-right text-xs text-gray-600 mt-1">
+        {{ progressPercent }}% complété
+      </div>
+    </div>
     <div class="relative">
       <div
         class="absolute top-5 left-5 h-[calc(100%-40px)] w-0.5 bg-gray-200"
@@ -48,9 +59,10 @@
                 {{ getStatusText(getProjectStageStatus(step.tasks)) }}
               </span>
             </div>
-
+            <div></div>
             <div class="flex justify-between items-center">
               <p class="text-gray-500 capitalize">{{ step.description }}</p>
+              <!-- Ajoute la barre ici -->
               <div v-if="isAdmin" class="flex space-x-2">
                 <i
                   class="ri-pencil-line text-gray-600 cursor-pointer hover:text-indigo-600"
@@ -66,6 +78,19 @@
             <p class="text-sm text-gray-500 mt-2">
               Date de livraison estimée: {{ formatDate(step.endDate) }}
             </p>
+
+            <!-- Ajout du bloc de progression des tâches -->
+            <div class="mt-3">
+              <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  class="h-2 bg-indigo-500 transition-all duration-500"
+                  :style="{ width: getStepProgress(step.tasks) + '%' }"
+                ></div>
+              </div>
+              <div class="text-xs text-gray-500 mt-1 text-right">
+                {{ getStepProgress(step.tasks) }}% des tâches terminées
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -96,7 +121,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineEmits } from "vue";
+import { ref, defineEmits, computed } from "vue";
 import type { Tasks } from "~/generated/prisma";
 import ProjectStageModal from "./ProjectStageModal.vue";
 import { format } from "date-fns";
@@ -201,26 +226,45 @@ const stageAdded = async (newStage: ProjectStageWithTasks) => {
 
 // La logique de statut de l'étape basée sur les tâches
 function getProjectStageStatus(tasks: Tasks[] = []): ProjectStageStatus {
-  console.log("Vérif statut étape, tâches reçues:", tasks);
-  if (!tasks || tasks.length === 0) {
-    console.log("=> A_VENIR (aucune tâche)");
-    return "A_VENIR";
-  }
-  if (tasks.every((task) => task.status === "TERMINE")) {
-    console.log("=> TERMINE (toutes terminées)");
-    return "TERMINE";
-  }
-  if (tasks.some((task) => task.status === "EN_COURS")) {
-    console.log("=> EN_COURS (au moins une en cours)");
-    return "EN_COURS";
-  }
-  if (tasks.some((task) => task.status === "A_FAIRE")) {
-    console.log("=> EN_COURS (au moins une à faire)");
-    return "EN_COURS";
-  }
-  console.log("=> EN_COURS (par défaut)");
+  if (!tasks || tasks.length === 0) return "A_VENIR";
+  if (tasks.every((task) => task.status === "TERMINE")) return "TERMINE";
+  if (tasks.some((task) => task.status === "EN_COURS")) return "EN_COURS";
+  if (tasks.some((task) => task.status === "A_FAIRE")) return "EN_COURS";
   return "EN_COURS";
 }
+
+function getStepProgress(tasks: Tasks[] = []): number {
+  if (!tasks || tasks.length === 0) return 0;
+  const total = tasks.length;
+  const done = tasks.filter((t) => t.status === "TERMINE").length;
+  return Math.round((done / total) * 100);
+}
+
+const progressPercent = computed(() => {
+  const stages = projectStore.selectedProject?.projectStages || [];
+  // On ne prend en compte que les étapes qui ont des tâches
+  const stagesWithTasks = stages.filter(
+    (stage) => stage.tasks && stage.tasks.length > 0
+  );
+  const totalStages = stagesWithTasks.length;
+  if (totalStages === 0) return 0;
+
+  const completedStages = stagesWithTasks.filter((stage) =>
+    stage.tasks.every((task) => task.status === "TERMINE")
+  ).length;
+
+  // Si au moins une étape est terminée, commence à remplir la barre (minimum 10%)
+  if (completedStages > 0 && completedStages < totalStages) {
+    const percent = Math.round((completedStages / totalStages) * 100);
+    return Math.max(percent, 10);
+  }
+  // Si toutes les étapes sont terminées, 100%
+  if (completedStages === totalStages) {
+    return 100;
+  }
+  // Sinon, 0%
+  return 0;
+});
 </script>
 
 <style scoped>
