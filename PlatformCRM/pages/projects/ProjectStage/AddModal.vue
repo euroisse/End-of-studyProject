@@ -38,10 +38,15 @@
                 id="title"
                 name="title"
                 class="w-full px-3 py-2 z-10 border rounded-xl shadow-sm focus:outline-none focus:ring-2 bg-white text-gray-900 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                :class="{ 'border-red-500': errors.title }"
                 required
                 placeholder="EX: Conception des maquettes"
+                @focus="errors.title = ''"
               />
             </div>
+            <p v-if="errors.title" class="mt-1 text-sm text-red-600">
+              {{ errors.title }}
+            </p>
           </div>
           <div>
             <label
@@ -69,7 +74,12 @@
               type="date"
               id="endDate"
               class="w-full px-3 py-2 rounded-xl shadow-sm focus:outline-none focus:ring-2 bg-white text-gray-900 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+              :class="{ 'border-red-500': errors.endDate }"
+              @focus="errors.endDate = ''"
             />
+            <p v-if="errors.endDate" class="mt-1 text-sm text-red-600">
+              {{ errors.endDate }}
+            </p>
           </div>
         </div>
         <div class="flex justify-end gap-3 mt-8">
@@ -93,14 +103,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, reactive } from "vue";
 import type { ProjectStage } from "~/generated/prisma";
-defineProps({
+
+const props = defineProps({
   isOpen: {
     type: Boolean,
     required: true,
   },
+  projectStartDate: {
+    type: String,
+    default: undefined,
+  },
+  projectEndDate: {
+    type: String,
+    default: undefined,
+  },
 });
+
 const route = useRoute();
 const projectId = computed(() => Number(route.params.id) ?? null);
 
@@ -108,13 +128,60 @@ const emit = defineEmits(["close", "stageAdded"]);
 
 const formData = ref({
   title: "",
-  description: null,
-  endDate: null,
+  description: null as string | null,
+  endDate: null as string | null,
 });
+
+const errors = reactive({
+  title: "",
+  endDate: "",
+});
+
+const validateForm = (): boolean => {
+  let valid = true;
+  errors.title = "";
+  errors.endDate = "";
+
+  if (!formData.value.title.trim()) {
+    errors.title = "Le titre de l'étape est obligatoire.";
+    valid = false;
+  }
+
+  if (formData.value.endDate) {
+    const stageEndDate = new Date(formData.value.endDate);
+    stageEndDate.setHours(0, 0, 0, 0);
+
+    if (props.projectStartDate) {
+      const projectStartDate = new Date(props.projectStartDate);
+      projectStartDate.setHours(0, 0, 0, 0);
+      if (stageEndDate < projectStartDate) {
+        errors.endDate =
+          "La date de livraison de l'étape ne peut pas être antérieure à la date de début du projet.";
+        valid = false;
+      }
+    }
+
+    if (props.projectEndDate) {
+      const projectEndDate = new Date(props.projectEndDate);
+      projectEndDate.setHours(0, 0, 0, 0);
+      if (stageEndDate > projectEndDate) {
+        errors.endDate =
+          "La date de livraison de l'étape ne peut pas être postérieure à la date de fin du projet.";
+        valid = false;
+      }
+    }
+  }
+
+  return valid;
+};
 
 const handleSubmit = async () => {
   if (!projectId.value) {
     console.error("ID du projet manquant");
+    return;
+  }
+
+  if (!validateForm()) {
     return;
   }
 
@@ -140,6 +207,7 @@ const handleSubmit = async () => {
     formData.value.endDate = null;
   } catch (error) {
     console.error("Erreur lors de la création de l'étape :", error);
+    // You might want to display a more generic error if the API returns one
   }
 };
 </script>

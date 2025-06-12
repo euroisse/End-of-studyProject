@@ -62,7 +62,6 @@
             <div></div>
             <div class="flex justify-between items-center">
               <p class="text-gray-500 capitalize">{{ step.description }}</p>
-              <!-- Ajoute la barre ici -->
               <div v-if="isAdmin" class="flex space-x-2">
                 <i
                   class="ri-pencil-line text-gray-600 cursor-pointer hover:text-indigo-600"
@@ -79,7 +78,6 @@
               Date de livraison estimée: {{ formatDate(step.endDate) }}
             </p>
 
-            <!-- Ajout du bloc de progression des tâches -->
             <div class="mt-3">
               <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
                 <div
@@ -117,6 +115,8 @@
     :is-open="showCreateStageProject"
     @close="showCreateStageProject = false"
     @stageAdded="stageAdded"
+    :project-start-date="formattedProjectStartDate"
+    :project-end-date="formattedProjectEndDate"
   />
 </template>
 
@@ -140,6 +140,7 @@ const showCreateStageProject = ref(false);
 // Définit un type pour les statuts d'étape utilisés dans l'interface
 type ProjectStageStatus = "TERMINE" | "EN_COURS" | "A_VENIR";
 
+// Fonction pour obtenir le texte du statut de l'étape
 const getStatusText = (status: ProjectStageStatus) => {
   return (
     {
@@ -150,6 +151,7 @@ const getStatusText = (status: ProjectStageStatus) => {
   );
 };
 
+// Fonction pour obtenir la classe d'icône en fonction du statut de l'étape
 const getIconClass = (status: ProjectStageStatus) => {
   return (
     {
@@ -160,6 +162,7 @@ const getIconClass = (status: ProjectStageStatus) => {
   );
 };
 
+// Fonction pour formater les dates
 const formatDate = (date?: Date | null): string => {
   if (date) {
     try {
@@ -171,7 +174,26 @@ const formatDate = (date?: Date | null): string => {
   }
   return "";
 };
+// Propriétés calculées pour formater les dates de début du projet
+const formattedProjectStartDate = computed(() => {
+  if (projectStore.selectedProject?.startDate) {
+    return format(
+      new Date(projectStore.selectedProject.startDate),
+      "yyyy-MM-dd"
+    );
+  }
+  return undefined;
+});
 
+// Propriété calculée pour formater la date de fin du projet
+const formattedProjectEndDate = computed(() => {
+  if (projectStore.selectedProject?.endDate) {
+    return format(new Date(projectStore.selectedProject.endDate), "yyyy-MM-dd");
+  }
+  return undefined;
+});
+
+// Fonction pour éditer une étape de projet
 const editProjectStage = (stage: ProjectStageWithTasks) => {
   console.log("Édition de l'étape:", stage);
   selectedProjectStage.value = stage;
@@ -179,11 +201,13 @@ const editProjectStage = (stage: ProjectStageWithTasks) => {
   showModal.value = true;
 };
 
+// Fonction pour fermer le modal
 const closeModal = () => {
   selectedProjectStage.value = null;
   showModal.value = false;
 };
 
+// Fonction pour sauvegarder les modifications d'une étape de projet
 const handleSaveProjectStage = async (updatedStage: ProjectStageWithTasks) => {
   try {
     await projectStore.updateProjectStage(updatedStage.id!, {
@@ -200,6 +224,7 @@ const handleSaveProjectStage = async (updatedStage: ProjectStageWithTasks) => {
   }
 };
 
+// Fonction pour supprimer une étape de projet
 const deleteProjectStage = async (id: number) => {
   if (window.confirm("Êtes-vous sûr de vouloir supprimer cette étape ?")) {
     try {
@@ -216,6 +241,7 @@ const deleteProjectStage = async (id: number) => {
   }
 };
 
+// Fonction appelée lorsque l'utilisateur ajoute une nouvelle étape
 const stageAdded = async (newStage: ProjectStageWithTasks) => {
   if (projectStore.selectedProject) {
     // Recharge le projet pour avoir les étapes et tâches à jour
@@ -233,6 +259,7 @@ function getProjectStageStatus(tasks: Tasks[] = []): ProjectStageStatus {
   return "EN_COURS";
 }
 
+// Fonction pour calculer le pourcentage de progression des tâches d'une étape
 function getStepProgress(tasks: Tasks[] = []): number {
   if (!tasks || tasks.length === 0) return 0;
   const total = tasks.length;

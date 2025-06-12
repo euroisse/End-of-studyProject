@@ -130,7 +130,7 @@
             </label>
             <input
               id="date_debut"
-              v-model="projet.dateDebut"
+              v-model="projet.startDate"
               type="date"
               class="w-full px-3 py-2 z-10 border rounded-xl shadow-sm focus:outline-none focus:ring-2 bg-white text-gray-900 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
             />
@@ -144,7 +144,7 @@
             </label>
             <input
               id="date_fin"
-              v-model="projet.dateFin"
+              v-model="projet.endDate"
               type="date"
               class="w-full px-3 py-2 z-10 border rounded-xl shadow-sm focus:outline-none focus:ring-2 bg-white text-gray-900 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
             />
@@ -189,8 +189,8 @@ const clients = ref<Client[]>([]);
 const projet = reactive({
   title: "",
   customerId: "",
-  dateDebut: "",
-  dateFin: "",
+  startDate: "",
+  endDate: "",
   description: "",
 });
 
@@ -224,8 +224,8 @@ const validerFormulaire = (): boolean => {
 const resetForm = () => {
   projet.title = "";
   projet.customerId = "";
-  projet.dateDebut = "";
-  projet.dateFin = "";
+  projet.startDate = "";
+  projet.endDate = "";
   projet.description = "";
   erreurs.nom = "";
   erreurs.client = "";
@@ -240,8 +240,8 @@ const soumettreFormulaire = async () => {
           customerId: projet.customerId,
           title: projet.title,
           description: projet.description,
-          startDate: projet.dateDebut,
-          endDate: projet.dateFin,
+          startDate: projet.startDate,
+          endDate: projet.endDate,
         },
       });
       await projectStore.fetchProjects();
