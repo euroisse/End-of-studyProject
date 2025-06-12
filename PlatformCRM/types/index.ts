@@ -72,6 +72,7 @@ export interface Project {
     };
   }[];
   startDate: Date;
+  endDate?: Date | null;
 }
 
 
@@ -170,13 +171,13 @@ export type stageStatus =
 export interface ProjectStageRaw {
   id: number;
   title: string;
-  description?: string;
+  description: string | null;
 }
 
 export interface CreateUpdateQuotePayload {
   projectId: number;
   stagesWithPrices: QuoteStageInput[];
-  dateLivraison?: string | null;
+  createdAt?: string | null;
   status?: string;
 }
 

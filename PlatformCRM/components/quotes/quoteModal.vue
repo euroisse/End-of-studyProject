@@ -99,10 +99,10 @@
 
           <div>
             <label class="block mb-2 font-semibold text-gray-700"
-              >Date estimée de livraison</label
+              >Date de création</label
             >
             <input
-              v-model="dateLivraison"
+              v-model="createdAt"
               type="date"
               class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500"
             />
@@ -161,7 +161,7 @@ const emit = defineEmits(["close", "success"]);
 const devisStore = useQuoteStore();
 const projectStore = useProjectStore();
 const selectedProjectId = ref<number | null>(null);
-const dateLivraison = ref<string>("");
+const createdAt = ref<string>("");
 const stagePrices = ref<Record<number, number>>({});
 const quoteStatus = ref<string>("EN_ATTENTE");
 const projectStagesForQuote = ref<ProjectStageRaw[]>([]);
@@ -258,7 +258,7 @@ const handleSubmit = async () => {
         projectId: selectedProjectId.value,
         stagesWithPrices: stagesWithPrices,
         status: quoteStatus.value,
-        dateLivraison: dateLivraison.value || null,
+        createdAt: createdAt.value || null,
       };
       await devisStore.updatequote(props.quoteId, payload);
       alert("Devis mis à jour avec succès !");
@@ -266,7 +266,7 @@ const handleSubmit = async () => {
       const payload: CreateUpdateQuotePayload = {
         projectId: selectedProjectId.value,
         stagesWithPrices: stagesWithPrices,
-        dateLivraison: dateLivraison.value || undefined,
+        createdAt: createdAt.value || null,
       };
       await devisStore.createQuote(payload);
       alert("Devis créé et envoyé avec succès !");
@@ -291,7 +291,7 @@ const saveAsDraft = async () => {
   const payload: CreateUpdateQuotePayload = {
     projectId: selectedProjectId.value,
     stagesWithPrices: stagesWithPrices,
-    dateLivraison: dateLivraison.value || undefined,
+    createdAt: createdAt.value || undefined,
     status: "BROUILLON",
   };
 
@@ -324,7 +324,7 @@ watch(
   (newDetails) => {
     if (isEditing.value && newDetails) {
       selectedProjectId.value = newDetails.projectId;
-      dateLivraison.value = newDetails.dateLivraison || "";
+      createdAt.value = newDetails.createdAt || "";
       quoteStatus.value = newDetails.status;
 
       const prices: Record<number, number> = {};
@@ -336,7 +336,7 @@ watch(
       fetchProjectStages();
     } else if (!isEditing.value) {
       selectedProjectId.value = null;
-      dateLivraison.value = "";
+      createdAt.value = "";
       stagePrices.value = {};
       quoteStatus.value = "EN_ATTENTE";
       projectStagesForQuote.value = [];
