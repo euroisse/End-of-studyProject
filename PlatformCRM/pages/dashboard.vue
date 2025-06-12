@@ -110,7 +110,6 @@ onMounted(async () => {
   } finally {
     loading.value = false;
   }
-  console.log("dashboardData.projects :", dashboardData.value?.projects);
 });
 </script>
 

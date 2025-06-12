@@ -50,23 +50,30 @@
             </div>
           </div>
           <div class="flex-1 w-full">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 capitalize">
               {{ employeeData.name }}
             </h1>
             <p class="text-lg text-gray-600 mb-1">
               <i class="ri-mail-line mr-1"></i>{{ employeeData.email }}
             </p>
             <div class="flex flex-wrap gap-4 mt-2">
-              <span
-                class="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium"
-              >
-                <strong>Poste:</strong> {{ employeeData.poste || "N/A" }}
+              <span class="text-md font-normal text-gray-700">
+                Poste :
+                <span
+                  class="ml-1 font-semibold bg-blue-50 text-blue-700 border border-blue-200 capitalize"
+                  style="padding: 0 0.5em; border-radius: 0.5em"
+                >
+                  {{ employeeData.poste || "N/A" }}
+                </span>
               </span>
-              <span
-                class="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium"
-              >
-                <strong>Département:</strong>
-                {{ employeeData.department || "N/A" }}
+              <span class="text-md font-normal text-gray-700">
+                Département :
+                <span
+                  class="ml-1 font-semibold bg-blue-50 text-blue-700 border border-blue-200 capitalize"
+                  style="padding: 0 0.5em; border-radius: 0.5em"
+                >
+                  {{ employeeData.department || "N/A" }}
+                </span>
               </span>
             </div>
           </div>
@@ -113,27 +120,41 @@
                 </div>
               </div>
               <div class="flex flex-wrap gap-2 md:justify-end">
-                <span
-                  class="text-xs font-normal px-3 py-1 rounded-full"
-                  :class="{
-                    'text-red-500 bg-red-100': task.priority === 'HAUTE',
-                    'text-yellow-700 bg-yellow-100':
-                      task.priority === 'MOYENNE',
-                    'text-blue-500 bg-blue-100': task.priority === 'BASSE',
-                  }"
-                >
-                  Priorité : {{ task.priority }}
+                <span class="text-xs font-normal text-gray-700">
+                  Priorité :
+                  <span
+                    class="ml-1 font-semibold"
+                    :class="{
+                      'text-red-500 bg-red-100 border border-red-200':
+                        task.priority === 'HAUTE',
+                      'text-yellow-700 bg-yellow-100 border border-yellow-200':
+                        task.priority === 'MOYENNE',
+                      'text-blue-500 bg-blue-100 border border-blue-200':
+                        task.priority === 'BASSE',
+                    }"
+                    style="padding: 0 0.5em; border-radius: 0.5em"
+                  >
+                    {{ task.priority }}
+                  </span>
                 </span>
-                <span
-                  class="text-xs font-normal px-3 py-1 rounded-full"
-                  :class="{
-                    'text-green-600 bg-green-100': task.status === 'TERMINE',
-                    'text-orange-500 bg-orange-100': task.status === 'EN_COURS',
-                    'text-gray-500 bg-gray-100': task.status === 'A_FAIRE',
-                    'text-red-500 bg-red-100': task.status === 'CANCELLED',
-                  }"
-                >
-                  Statut : {{ task.status }}
+                <span class="text-xs font-normal text-gray-700">
+                  Statut :
+                  <span
+                    class="ml-1 font-semibold"
+                    :class="{
+                      'text-green-600 bg-green-100 border border-green-200':
+                        task.status === 'TERMINE',
+                      'text-yellow-500 bg-yellow-100 border border-yellow-200':
+                        task.status === 'EN_COURS',
+                      'text-gray-500 bg-gray-100 border border-gray-200':
+                        task.status === 'A_FAIRE',
+                      'text-red-500 bg-red-100 border border-red-200':
+                        task.status === 'CANCELLED',
+                    }"
+                    style="padding: 0 0.5em; border-radius: 0.5em"
+                  >
+                    {{ task.status }}
+                  </span>
                 </span>
               </div>
             </div>

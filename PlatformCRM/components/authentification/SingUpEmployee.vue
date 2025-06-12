@@ -7,7 +7,7 @@
     <div>
       <label
         for="register-name"
-        class="block text-sm font-medium text-gray-700 mb-1"
+        class="block text-sm font-medium text-gray-700 mb-1 capitalize"
         >Nom complet</label
       >
       <div class="relative">
@@ -148,7 +148,7 @@
       <div>
         <label
           for="register-poste"
-          class="block text-sm font-medium text-gray-700 mb-1"
+          class="block text-sm font-medium text-gray-700 mb-1 capitalize"
           >Poste</label
         >
         <div class="relative">
@@ -169,7 +169,7 @@
       <div>
         <label
           for="register-department"
-          class="block text-sm font-medium text-gray-700 mb-1"
+          class="block text-sm font-medium text-gray-700 mb-1 capitalize"
           >Departement</label
         >
         <div class="relative">
