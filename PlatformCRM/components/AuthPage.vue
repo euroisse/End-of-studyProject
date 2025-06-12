@@ -23,37 +23,8 @@
         </div>
       </div>
 
-      <div class="md:w-1/2 p-6 md:p-8">
-        <div class="flex mb-8 border-b border-gray-200">
-          <button
-            @click="activeTabLocal = 'login'"
-            :class="[
-              'px-4 py-3 font-medium whitespace-nowrap cursor-pointer',
-              activeTabLocal === 'login'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-500 hover:text-blue-500',
-            ]"
-          >
-            Connexion
-          </button>
-          <button
-            @click="activeTabLocal = 'register'"
-            :class="[
-              'px-4 py-3 font-medium whitespace-nowrap cursor-pointer',
-              activeTabLocal === 'register'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-500 hover:text-blue-500',
-            ]"
-          >
-            Créer un compte
-          </button>
-        </div>
-
-        <Login v-if="activeTabLocal === 'login'" @login="handleLogin" />
-        <SingUp
-          v-if="activeTabLocal === 'register'"
-          @register="handleRegister"
-        />
+      <div class="md:w-1/2 p-6 md:p-8 flex items-center">
+        <Login @login="handleLogin" />
       </div>
     </div>
   </div>
@@ -61,33 +32,13 @@
 
 <script lang="ts" setup>
 import { ref } from "vue";
-
 import image1 from "~/assets/Images/image1.jpg";
 import Login from "./authentification/Login.vue";
-import SingUp from "./authentification/SingUp.vue";
+
 const heroImage = image1;
-
-const props = defineProps({
-  activeTab: {
-    type: String,
-    default: "login",
-  },
-});
-
-const activeTabLocal = ref(props.activeTab);
-
-watch(
-  () => props.activeTab,
-  (newTab) => {
-    activeTabLocal.value = newTab;
-  }
-);
 
 const handleLogin = (loginData: any) => {
   console.log("Login data received in AuthPage:", loginData);
-};
-const handleRegister = (registerData: any) => {
-  console.log("Register data received in AuthPage:", registerData);
 };
 </script>
 
