@@ -30,6 +30,16 @@ export default async function generateInvoicePdf(invoice: InvoiceWithQuote) {
     const leftMargin = 50;
     const rightMargin = doc.page.width - 50;
 
+    // --- IMAGE EN-TÊTE ---
+    const logoPath = "assets/images/logo.jpg";
+    if (fs.existsSync(logoPath)) {
+
+      // Watermark centré
+      doc.opacity(0.08);
+      doc.image(logoPath, doc.page.width / 2 - 180, doc.page.height / 2 - 180, { width: 360 });
+      doc.opacity(1);
+    }
+
     // --- HEADER ---
     // Titre et numéro
     doc
@@ -49,12 +59,12 @@ export default async function generateInvoicePdf(invoice: InvoiceWithQuote) {
       .fontSize(10)
       .fillColor(darkBlue)
       .font(fontBold)
-      .text("OPENINTECH", rightMargin - 200, infoY)
+      .text("OPENINTECH", rightMargin - 120, infoY)
       .font(fontBase)
       .fillColor(textColor)
-      .text("YDE-SIMBOCK", rightMargin - 200, infoY + 16)
-      .text("000-000-000", rightMargin - 200, infoY + 32)
-      .text("contact@gmail.com", rightMargin - 200, infoY + 48);
+      .text("YDE-SIMBOCK", rightMargin - 120, infoY + 16)
+      .text("000-000-000", rightMargin - 120, infoY + 32)
+      .text("contact@gmail.com", rightMargin - 120, infoY + 48);
 
     // --- INFOS CLIENT ---
     const clientName = invoice.quote?.customer?.name || invoice.User?.name || "Client Inconnu";
@@ -202,9 +212,14 @@ export default async function generateInvoicePdf(invoice: InvoiceWithQuote) {
       .text(
         "OpenIntech Vous remercie pour votre confiance. Au plaisir de vous revoir !",
         leftMargin,
-        700,
+        720,
         { align: "center" }
       );
+
+    // Footer logo en bas à droite
+    if (fs.existsSync(logoPath)) {
+      doc.image(logoPath, doc.page.width - 80 - 40, doc.page.height - 80 - 30, { width: 80 });
+    }
 
     doc.end();
     console.log(`Facture ${invoice.invoiceNumber}.pdf générée avec succès à ${outputPath}`);

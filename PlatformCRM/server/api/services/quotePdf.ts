@@ -154,16 +154,32 @@ const leftMargin = 50;
     .fillColor("#004080")
     .text("Total", colX[1], y + 18, { width: colX[2] - colX[1] - 10 })
     .text(`${total} CFA`, colX[2], y + 18, { width: 100, align: "right" });
-// --- FOOTER ---
+
+    // --- LOGO EN TÊTE ET FILIGRANE ---
+    const logoPath = "assets/images/logo.jpg";
+    if (fs.existsSync(logoPath)) {
+      // Watermark centré
+      doc.opacity(0.08);
+      doc.image(logoPath, doc.page.width / 2 - 180, doc.page.height / 2 - 180, { width: 360 });
+      doc.opacity(1);
+    }
+
+  // --- FOOTER ---
     doc
       .fontSize(10)
       .fillColor(darkBlue)
       .text(
         "OpenIntech Vous remercie pour votre confiance. Au plaisir de vous revoir !",
         leftMargin,
-        700,
+        720,
         { align: "center" }
       );
+
+  // Footer logo en bas à droite
+  if (fs.existsSync(logoPath)) {
+    doc.image(logoPath, doc.page.width - 80 - 40, doc.page.height - 80 - 30, { width: 80 });
+  }
+
   doc.end();
   return outputPath;
 }
