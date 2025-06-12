@@ -38,15 +38,31 @@ export default defineEventHandler(async (event) => {
           projectStageId: Number(body.projectStageId), 
           priority: body.priority,
           status: body.status,
-          effort:  Number(body.effort),
-            endDate: body.endDate ? new Date(body.endDate) : null,
+          effort: Number(body.effort),
+          endDate: body.endDate ? new Date(body.endDate) : null,
         },
         include: {
           employee: true, 
           project: true,
-           projectStage: true,  
+          projectStage: true,  
         },
       });
+
+      // Ajoute ou met à jour la relation dans EmployeeOnProjects
+      await prisma.employeeOnProjects.upsert({
+        where: {
+          projectId_employeeId: {
+            projectId: Number(body.projectId),
+            employeeId: Number(body.employeeId)
+          }
+        },
+        update: {},
+        create: {
+          projectId: Number(body.projectId),
+          employeeId: Number(body.employeeId)
+        }
+      });
+
       return newTask;
     } catch (error) {
       console.error('Erreur lors de la création de la tâche:', error);
