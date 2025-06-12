@@ -19,7 +19,10 @@ export default async function generateQuotePdf(quote: QuoteWithDetails) {
   if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
   const outputPath = path.join(outputDir, `devis_${quote.number}.pdf`);
   doc.pipe(fs.createWriteStream(outputPath));
-
+  // --- COULEURS ET STYLES ---
+  const lightBlue = "#e3f0fc";
+const darkBlue = "#004080";
+const leftMargin = 50;
   // En-tête bleu sombre
   doc
     .rect(0, 0, doc.page.width, 70)
@@ -151,7 +154,16 @@ export default async function generateQuotePdf(quote: QuoteWithDetails) {
     .fillColor("#004080")
     .text("Total", colX[1], y + 18, { width: colX[2] - colX[1] - 10 })
     .text(`${total} CFA`, colX[2], y + 18, { width: 100, align: "right" });
-
+// --- FOOTER ---
+    doc
+      .fontSize(10)
+      .fillColor(darkBlue)
+      .text(
+        "OpenIntech Vous remercie pour votre confiance. Au plaisir de vous revoir !",
+        leftMargin,
+        700,
+        { align: "center" }
+      );
   doc.end();
   return outputPath;
 }
