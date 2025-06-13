@@ -25,9 +25,9 @@
           class="flex items-center gap-4 p-4 bg-[#F9FAFB] rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-transparent hover:border-[#22C55E] cursor-pointer"
         >
           <div
-            class="flex-shrink-0 flex items-center justify-center w-14 h-14 rounded-full bg-[#DCFCE7]"
+            class="flex-shrink-0 flex items-center justify-center w-14 h-14 rounded-full bg-gray-100"
           >
-            <i class="ri-file-text-line text-[#22C55E] text-2xl"></i>
+            <i class="ri-file-text-line text-gray-600 text-2xl"></i>
           </div>
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between">

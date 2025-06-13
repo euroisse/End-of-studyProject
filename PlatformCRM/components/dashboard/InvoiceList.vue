@@ -25,9 +25,9 @@
           class="flex items-center gap-4 p-4 bg-[#F9FAFB] rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-transparent hover:border-indigo-400 cursor-pointer"
         >
           <div
-            class="flex-shrink-0 flex items-center justify-center w-14 h-14 rounded-full bg-indigo-100"
+            class="flex-shrink-0 flex items-center justify-center w-14 h-14 rounded-full bg-gray-100"
           >
-            <i class="ri-bill-line text-indigo-600 text-2xl"></i>
+            <i class="ri-bill-line text-gray-600 text-2xl"></i>
           </div>
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between">
