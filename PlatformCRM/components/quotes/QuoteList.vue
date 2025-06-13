@@ -108,7 +108,7 @@
                       ></span>
                     </router-link>
                     <button
-                      v-if="isAdmin"
+                      v-if="isAdmin && quoteItem.status !== 'ACCEPTE'"
                       @click="openEditPricesModal(quoteItem)"
                       class="text-indigo-600 hover:text-indigo-900 cursor-pointer"
                     >
@@ -116,7 +116,7 @@
                     </button>
 
                     <button
-                      v-if="isAdmin"
+                      v-if="isAdmin && quoteItem.status !== 'ACCEPTE'"
                       @click="openDeleteModal(quoteItem)"
                       class="text-red-600 hover:text-red-900 cursor-pointer"
                     >
