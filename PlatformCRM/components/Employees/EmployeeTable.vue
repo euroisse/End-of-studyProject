@@ -28,6 +28,12 @@
               scope="col"
               class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
+              Email
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
               Poste
             </th>
             <th
@@ -52,6 +58,9 @@
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               {{ employee.name }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ employee.email || "N/A" }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               {{ employee.post || "N/A" }}
@@ -92,25 +101,67 @@
         </button>
       </template>
     </BaseModal>
+    <BaseModal :show="showEditModal" @close="showEditModal = false">
+      <template #body>
+        <EditEmployeeModal
+          :show="showEditModal"
+          :employee="selectedEmployee"
+          @close="showEditModal = false"
+          @updated="handleUpdated"
+        />
+      </template>
+      <template #footer>
+        <button
+          class="text-blue-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+          type="button"
+          @click="showEditModal = false"
+        >
+          Fermer
+        </button>
+      </template>
+    </BaseModal>
   </div>
+  <EditEmployeeModal
+    :show="showEditModal"
+    :employee="selectedEmployee"
+    @close="showEditModal = false"
+    @updated="handleUpdated"
+  />
 </template>
 
 <script setup lang="ts">
 import type { EmployeeDisplayData } from "~/types";
 import SingUpEmployee from "../authentification/SingUpEmployee.vue";
 import BaseModal from "../Clients/BaseModal.vue";
+import EditEmployeeModal from "./editEmployeeModal.vue";
 
-defineProps<{
+const props = defineProps<{
   employees: EmployeeDisplayData[];
 }>();
 const showRegisterModal = ref(false);
+const showEditModal = ref(false);
+const selectedEmployee = ref<{ id: number; name: string; post: string } | null>(
+  null
+);
+
 const viewEmployee = (id: number) => {
   console.log("Voir l'employé avec l'ID :", id);
   navigateTo(`/employee/${id}`);
 };
 
 const editEmployee = (id: number) => {
-  console.log("Modifier l'employé avec l'ID :", id);
+  const emp = props.employees.find((e) => e.id === id);
+  if (emp) {
+    selectedEmployee.value = {
+      id: emp.id,
+      name: emp.name,
+      post: emp.post || "",
+    };
+    showEditModal.value = true;
+  }
+};
+const handleUpdated = () => {
+  emit("refresh-employee");
 };
 const handleEmployeeRegistered = () => {
   showRegisterModal.value = false;

@@ -220,6 +220,7 @@ export interface ClientDisplayData {
 export interface EmployeeDisplayData {
   id: number;
   name: string;
+  email: string;
   post?: string;
   project?: string;
 }
