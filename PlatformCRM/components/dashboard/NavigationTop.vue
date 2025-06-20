@@ -33,9 +33,15 @@
                 v-for="notification in filteredNotifications"
                 :key="notification.id"
                 href="#"
-                class="block px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 transition rounded-md"
-                @click="markAndRedirect(notification)"
+                class="block px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 transition rounded-md relative"
               >
+                <button
+                  class="absolute top-2 right-2 text-gray-400 hover:text-red-500"
+                  @click.stop="closeNotification(notification.id)"
+                  title="Fermer"
+                >
+                  <i class="ri-close-line"></i>
+                </button>
                 <div class="flex items-start space-x-3">
                   <!-- Icône selon le type -->
                   <div>
@@ -50,6 +56,10 @@
                     <i
                       v-else-if="notification.type === 'projet_cree'"
                       class="ri-folder-add-line text-yellow-500 text-xl"
+                    ></i>
+                    <i
+                      v-else-if="notification.type === 'tache_assignee'"
+                      class="ri-task-line text-blue-500 text-xl"
                     ></i>
                     <i
                       v-else
@@ -67,18 +77,29 @@
                       {{ formatDate(notification.createdAt) }}
                     </div>
                   </div>
+                  <!-- Indicateur de notification non lue -->
+                  <div
+                    v-if="!notification.read"
+                    class="w-2 h-2 bg-red-500 rounded-full mt-2"
+                  ></div>
                 </div>
               </a>
               <div
                 v-if="filteredNotifications.length > 0"
-                class="border-t border-gray-200"
+                class="border-t border-gray-200 flex justify-between items-center px-4 py-2"
               >
-                <a
-                  href="#"
-                  class="block px-4 py-2 text-sm text-indigo-600 hover:bg-gray-100 text-center"
-                  @click="viewAllNotifications"
-                  >Voir toutes les notifications</a
+                <button
+                  class="text-sm text-indigo-600 hover:bg-gray-100 px-2 py-1 rounded transition"
+                  @click="markAllAsRead"
                 >
+                  Tout marquer comme lu
+                </button>
+                <button
+                  class="text-sm text-gray-500 hover:bg-gray-100 px-2 py-1 rounded transition"
+                  @click="showNotifications = false"
+                >
+                  Quitter
+                </button>
               </div>
             </div>
           </div>
@@ -98,15 +119,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { useIsRole } from "~/composables/useIsRole";
 import { useRouter } from "vue-router";
-import type { Notification } from "~/types"; // Assurez-vous du chemin correct
+import type { Notification } from "~/types";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { ca, fr } from "date-fns/locale";
 
 const router = useRouter();
-
 const { userName, isEmploye, isClient, isAdmin } = useIsRole();
 
 // Type pour l'objet utilisateur stocké dans localStorage
@@ -114,31 +134,23 @@ interface UserData {
   id?: number;
   name?: string;
   roles?: string[];
-  // Ajoutez d'autres propriétés si votre objet user en contient
 }
 
-// `user` doit être un ref pour être réactif et mis à jour après la lecture de localStorage
 const user = ref<UserData | null>(null);
+const notifications = ref<Notification[]>([]);
+const showNotifications = ref(false);
+const isLoading = ref(false);
 
 // Computed property pour déterminer le rôle de l'utilisateur
 const userRole = computed(() => {
-  if (isAdmin.value) {
-    return "admin";
-  }
-  if (isEmploye.value) {
-    return "employee";
-  }
-  if (isClient.value) {
-    return "customer";
-  }
+  if (isAdmin.value) return "admin";
+  if (isEmploye.value) return "employee";
+  if (isClient.value) return "customer";
   return null;
 });
 
-const notifications = ref<Notification[]>([]); // Contient toutes les notifications brutes
-const showNotifications = ref(false);
-
 const notificationCount = computed(
-  () => filteredNotifications.value.filter((n) => !n.read).length // Compte les notifications non lues APRES filtrage
+  () => filteredNotifications.value.filter((n) => !n.read).length
 );
 
 // Cette computed property filtre les notifications selon le rôle
@@ -150,19 +162,23 @@ const filteredNotifications = computed(() => {
     case "admin":
       return notifications.value;
     case "customer":
-      return notifications.value.filter(
-        (n) =>
-          [
-            "projet_cree",
-            "devis_envoye",
-            "facture_generee",
-            "devis_a_valider",
-          ].includes(n.type) // Assurez-vous des types corrects
+      return notifications.value.filter((n) =>
+        [
+          "projet_cree",
+          "devis_envoye",
+          "facture_generee",
+          "facture_cree",
+          "devis_valide",
+          "devis_a_valider",
+        ].includes(n.type)
       );
     case "employee":
-      return notifications.value.filter(
-        (n) =>
-          ["tache_assignee", "statut_tache_mis_a_jour_employe"].includes(n.type) // Assurez-vous des types corrects
+      return notifications.value.filter((n) =>
+        [
+          "tache_assignee",
+          "statut_tache_mis_a_jour_employe",
+          "nouveau_projet_disponible",
+        ].includes(n.type)
       );
     default:
       return [];
@@ -170,7 +186,11 @@ const filteredNotifications = computed(() => {
 });
 
 onMounted(() => {
-  // Lisez localStorage pour initialiser `user.value`
+  // Initialiser l'utilisateur depuis localStorage
+  initializeUser();
+});
+
+const initializeUser = () => {
   const userString = localStorage.getItem("user");
   try {
     const parsedUser: UserData | null = userString
@@ -186,40 +206,56 @@ onMounted(() => {
     }
   } catch (error) {
     console.error(
-      "Erreur lors de la récupération ou de la conversion des informations utilisateur depuis localStorage:",
+      "Erreur lors de la récupération des informations utilisateur:",
       error
     );
     user.value = null;
   }
-});
+};
 
-const toggleNotifications = () => {
+const toggleNotifications = async () => {
   showNotifications.value = !showNotifications.value;
-  if (showNotifications.value && notificationCount.value > 0) {
-    // Marquer comme lues les notifications actuellement affichées dans le dropdown
-    const unreadNotificationIds = filteredNotifications.value
-      .filter((n) => !n.read)
-      .map((n) => n.id);
-    markNotificationsAsRead(unreadNotificationIds);
+
+  if (showNotifications.value) {
+    // Rafraîchir les notifications à l'ouverture
+    await fetchNotifications();
+
+    // Marquer comme lues les notifications non lues
+    if (notificationCount.value > 0) {
+      const unreadNotificationIds = filteredNotifications.value
+        .filter((n) => !n.read)
+        .map((n) => n.id);
+      await markNotificationsAsRead(unreadNotificationIds);
+    }
   }
 };
 
 const fetchNotifications = async () => {
-  // Assurez-vous que user.value.id et userRole.value ne sont pas null avant de l'utiliser
-  if (!user.value?.id || !userRole.value) {
-    notifications.value = []; // Réinitialise si les conditions ne sont pas remplies
+  if (!user.value?.id || !userRole.value || isLoading.value) {
+    notifications.value = [];
     return;
   }
 
+  isLoading.value = true;
   try {
-    // Utilisation de $fetch de Nuxt
     const data: Notification[] = await $fetch(
       `/api/notifications?role=${userRole.value}&userId=${user.value.id}`
     );
-    notifications.value = data; // Assurez-vous que les données sont assignées ici
+
+    // Trier les notifications par date de création (plus récentes en premier)
+    notifications.value = data.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+
+    console.log(
+      `${data.length} notifications récupérées pour le rôle ${userRole.value}`
+    );
   } catch (error) {
     console.error("Erreur lors de la récupération des notifications:", error);
-    notifications.value = []; // En cas d'erreur, vide le tableau
+    notifications.value = [];
+  } finally {
+    isLoading.value = false;
   }
 };
 
@@ -240,7 +276,8 @@ const markNotificationsAsRead = async (ids: number[]) => {
       },
       body: JSON.stringify({ notificationIds: ids, userId: user.value.id }),
     });
-    // Mettre à jour l'état local pour refléter que les notifications sont lues
+
+    // Mettre à jour l'état local
     notifications.value.forEach((n) => {
       if (ids.includes(n.id)) {
         n.read = true;
@@ -254,81 +291,41 @@ const markNotificationsAsRead = async (ids: number[]) => {
   }
 };
 
-const markAndRedirect = async (notification: Notification) => {
-  if (!notification.read) {
-    await markNotificationsAsRead([notification.id]);
-  }
-  showNotifications.value = false; // Fermer le menu après le clic
-
-  // Redirige toujours vers la liste des devis
-  if (
-    [
-      "devis_a_valider",
-      "devis_valide",
-      "devis_refuse",
-      "devis_cree_admin",
-    ].includes(notification.type)
-  ) {
-    router.push("/devis");
-    return;
-  }
-
-  // Logique de redirection basée sur le type de notification
-  switch (notification.type) {
-    case "projet_cree":
-    case "nouveau_projet_admin":
-      if (notification.projectId) {
-        router.push(`/projects/${notification.projectId}`);
-      }
-      break;
-    case "facture_generee":
-    case "facture_generee_admin":
-      if (notification.invoiceId) {
-        router.push(`/invoices/${notification.invoiceId}`);
-      }
-      break;
-    case "tache_assignee":
-    case "statut_tache_mis_a_jour_employe":
-    case "changement_statut_tache_termine":
-      if (notification.taskId) {
-        router.push(`/tasks/${notification.taskId}`); // Ou une page détaillée de tâche
-      }
-      break;
-    default:
-      console.warn(
-        "Type de notification inconnu ou aucune redirection définie:",
-        notification.type
-      );
-      break;
-  }
+const markAllAsRead = async () => {
+  const unreadIds = filteredNotifications.value
+    .filter((n) => !n.read)
+    .map((n) => n.id);
+  await markNotificationsAsRead(unreadIds);
+  filteredNotifications.value.forEach((n) => (n.read = true));
 };
 
-const viewAllNotifications = () => {
-  router.push("/notifications"); // Créez cette page si elle n'existe pas
-  showNotifications.value = false;
+// Méthode pour rafraîchir manuellement les notifications
+const refreshNotifications = async () => {
+  await fetchNotifications();
 };
+
+// Exposer la méthode pour pouvoir l'appeler depuis l'extérieur
+defineExpose({
+  refreshNotifications,
+});
 
 // Utiliser une dépendance réactive pour déclencher fetchNotifications
 watch(
-  [() => user.value?.id, userRole], // Watch user.value.id (car user est un ref) and userRole (computed)
+  [() => user.value?.id, userRole],
   ([newUserId, newRole], [oldUserId, oldRole]) => {
-    // Ne pas appeler si userId ou role sont null ou n'ont pas changé significativement
-    // Ou si c'est la première exécution et que les valeurs sont valides
     if (newUserId && newRole) {
-      // Si les deux sont définis
       if (
         newUserId !== oldUserId ||
         newRole !== oldRole ||
         (oldUserId === undefined && oldRole === undefined)
       ) {
-        // Déclenche si les valeurs ont changé OU si c'est la première exécution (oldUserId/oldRole sont undefined)
         fetchNotifications();
       }
     } else if (!newUserId || !newRole) {
-      notifications.value = []; // Vider les notifications si l'utilisateur ou le rôle n'est plus valide
+      notifications.value = [];
     }
   },
-  { immediate: true } // Exécute immédiatement au montage si les valeurs sont déjà présentes
+  { immediate: true }
 );
 
 function notificationTitle(type: string) {
@@ -336,27 +333,25 @@ function notificationTitle(type: string) {
     case "devis_a_valider":
       return "Devis à valider";
     case "facture_generee":
+    case "facture_generee_admin":
       return "Nouvelle facture";
     case "projet_cree":
+    case "nouveau_projet_admin":
       return "Nouveau projet";
     case "devis_valide":
       return "Devis validé";
     case "devis_refuse":
       return "Devis refusé";
     case "devis_cree_admin":
-      return "Nouveau devis créé"; // Nouveau
-    case "nouveau_projet_admin":
-      return "Nouveau projet créé"; // Nouveau
-    case "facture_generee_admin":
-      return "Nouvelle facture générée"; // Nouveau
+      return "Nouveau devis créé";
     case "projet_affecte":
-      return "Projet affecté"; // Nouveau
+      return "Projet affecté";
     case "tache_assignee":
-      return "Tâche assignée"; // Nouveau
+      return "Tâche assignée";
     case "statut_tache_mis_a_jour_employe":
-      return "Statut de tâche mis à jour"; // Nouveau
+      return "Statut de tâche mis à jour";
     case "changement_statut_tache_termine":
-      return "Tâche terminée"; // Nouveau
+      return "Tâche terminée";
     default:
       return "Notification";
   }
@@ -370,6 +365,14 @@ function formatDate(dateStr: string) {
     return dateStr;
   }
 }
+
+const closeNotification = async (id: number) => {
+  await markNotificationsAsRead([id]);
+  // On ne retire plus la notification du tableau, elle reste affichée mais marquée comme lue
+  notifications.value.forEach((n) => {
+    if (n.id === id) n.read = true;
+  });
+};
 </script>
 
 <style scoped>

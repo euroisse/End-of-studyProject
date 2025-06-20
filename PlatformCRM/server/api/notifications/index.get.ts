@@ -1,4 +1,3 @@
-
 import prisma from "~/server/database";
 
 export default defineEventHandler(async (event) => {
@@ -7,6 +6,9 @@ export default defineEventHandler(async (event) => {
     const userId = parseInt(query.userId as string);
     const userRoleNameRaw = query.role as string;
 
+    console.log("--- Début Requête Notifications ---");
+    console.log(`[GET /api/notifications] Reçu -> userId: ${userId}, roleRaw: "${userRoleNameRaw}"`);
+    
     let userRoleNameNormalized: string | null = null;
     if (userRoleNameRaw) {
       const lowerCaseRole = userRoleNameRaw.toLowerCase();
@@ -18,7 +20,9 @@ export default defineEventHandler(async (event) => {
         userRoleNameNormalized = "Admin";
       }
     }
-
+    
+    console.log(`[GET /api/notifications] Rôle normalisé: "${userRoleNameNormalized}"`);
+    
     if (isNaN(userId) || !userRoleNameNormalized) {
       throw createError({
         statusCode: 400,
@@ -27,25 +31,20 @@ export default defineEventHandler(async (event) => {
     }
 
     let notifications = [];
-    // Condition de base: non lues.
-    // userId est appliqué dans le where de chaque case si pertinent.
-    const baseWhereConditions: any = {
-        read: false, 
-    };
 
     switch (userRoleNameNormalized) {
       case "Client":
         notifications = await prisma.notification.findMany({
           where: {
-            ...baseWhereConditions,
+            read: false,
             userId: userId, // Les notifications client sont toujours spécifiques à l'utilisateur
             type: {
               in: [
                 "devis_a_valider",
                 "projet_cree",
                 "facture_generee",
-                "devis_valide", // Ex: notification quand un devis envoyé au client est validé par l'admin
-                "devis_refuse", // Ex: notification quand un devis envoyé au client est refusé par l'admin
+                "devis_valide",
+                "devis_refuse",
               ],
             },
           },
@@ -58,18 +57,20 @@ export default defineEventHandler(async (event) => {
             invoice: { select: { id: true, invoiceNumber: true } },
           },
         });
+        console.log(`[GET /api/notifications] Client - ${notifications.length} notifications trouvées.`);
         break;
 
       case "Employee":
         notifications = await prisma.notification.findMany({
           where: {
-            ...baseWhereConditions,
+            read: false,
             userId: userId, // Les notifications employé sont toujours spécifiques à l'utilisateur
             type: {
               in: [
-                "projet_affecte", // Quand un employé est affecté à un projet
-                "tache_assignee", // Quand une tâche lui est assignée
-                "statut_tache_mis_a_jour_employe", // Ex: notification quand le statut d'une tâche de cet employé est mise à jour (par lui-même ou par admin)
+                "projet_affecte",
+                "tache_assignee",
+                "statut_tache_mis_a_jour_employe",
+                 "nouveau_projet_disponible",
               ],
             },
           },
@@ -81,27 +82,25 @@ export default defineEventHandler(async (event) => {
             task: { select: { id: true, title: true, status: true } },
           },
         });
+        console.log(`[GET /api/notifications] Employee - ${notifications.length} notifications trouvées.`);
         break;
 
       case "Admin":
-        
+        // CORRECTION PRINCIPALE : L'admin doit voir TOUTES les notifications admin, pas seulement celles avec son userId
         notifications = await prisma.notification.findMany({
           where: {
-            read: false, // L'admin aussi ne veut voir que les non lues
-            OR: [
-              // Notifications spécifiques à cet admin (ex: si des messages directs lui sont envoyés)
-              { userId: userId }, 
-              
-            ],
+            read: false,
+            userId: userId,
             type: {
               in: [
-                "devis_cree_admin", // Nouveau devis créé (pour l'admin à vérifier)
-                "devis_valide", // Un client a validé un devis
-                "devis_refuse", // Un client a refusé un devis
-                "nouveau_projet_admin", // Un nouveau projet a été créé (pour l'admin à assigner)
-                "facture_generee_admin", // Une facture a été générée
-                "changement_statut_tache_termine", // Une tâche a été marquée comme terminée
-                // Ajoutez ici tous les autres types de notifications que l'admin doit voir
+                "devis_cree_admin",
+                "devis_valide",
+                "devis_refuse", 
+                "nouveau_projet_admin",
+                "facture_generee_admin",
+                 "nouvelle_tache_admin", 
+                "changement_statut_tache_termine",
+                "devis_supprime", // Ajouté si vous l'utilisez
               ],
             },
           },
@@ -113,9 +112,10 @@ export default defineEventHandler(async (event) => {
             project: { select: { id: true, title: true } },
             invoice: { select: { id: true, invoiceNumber: true } },
             task: { select: { id: true, title: true, status: true } },
-            user: { select: { id: true, name: true, email: true } }, // Pour identifier l'utilisateur lié à la notification (client/employé)
+            user: { select: { id: true, name: true, email: true } },
           },
         });
+        console.log(`[GET /api/notifications] Admin - ${notifications.length} notifications trouvées.`);
         break;
 
       default:
@@ -124,11 +124,14 @@ export default defineEventHandler(async (event) => {
           statusMessage: "Rôle utilisateur non reconnu ou non autorisé.",
         });
     }
-
+    
+    console.log("--- Fin Requête Notifications ---");
     return notifications;
   } catch (error: any) {
     console.error("Erreur lors de la récupération des notifications:", error);
-    
-
+    throw createError({
+      statusCode: error.statusCode || 500,
+      statusMessage: error.statusMessage || "Erreur lors de la récupération des notifications",
+    });
   }
 });
