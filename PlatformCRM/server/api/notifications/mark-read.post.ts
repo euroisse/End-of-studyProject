@@ -1,4 +1,4 @@
-// server/api/notifications/mark-read.post.ts
+
 import prisma from "~/server/database";
 import { defineEventHandler, readBody, createError } from "h3"; // Assurez-vous d'importer ces fonctions
 

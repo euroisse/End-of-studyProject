@@ -124,7 +124,7 @@ import { useIsRole } from "~/composables/useIsRole";
 import { useRouter } from "vue-router";
 import type { Notification } from "~/types";
 import { format } from "date-fns";
-import { ca, fr } from "date-fns/locale";
+import { fr } from "date-fns/locale";
 
 const router = useRouter();
 const { userName, isEmploye, isClient, isAdmin } = useIsRole();
@@ -219,14 +219,7 @@ const toggleNotifications = async () => {
   if (showNotifications.value) {
     // Rafraîchir les notifications à l'ouverture
     await fetchNotifications();
-
-    // Marquer comme lues les notifications non lues
-    if (notificationCount.value > 0) {
-      const unreadNotificationIds = filteredNotifications.value
-        .filter((n) => !n.read)
-        .map((n) => n.id);
-      await markNotificationsAsRead(unreadNotificationIds);
-    }
+    // NE MARQUE PLUS TOUT COMME LU ICI
   }
 };
 
