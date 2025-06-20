@@ -90,8 +90,38 @@ export default defineEventHandler(async (event) => {
         },
       },
     });
+// Notifier le client qu'un devis a été créé et est en attente
+    await prisma.notification.create({
+      data: {
+        message: `Un nouveau devis (${newQuote.number}) pour votre projet "${newQuote.project.title}" a été créé et est en attente de votre validation.`,
+        type: "devis_a_valider", // Type de notification pour le client
+        userId: newQuote.customerId, // L'ID du client concerné
+        quoteId: newQuote.id, // Lier à l'ID du devis
+      },
+    });
+ const admins = await prisma.user.findMany({
+      where: {
+        UserRole: {
+          some: {
+            role: {
+              name: "admin", // Assurez-vous que le nom du rôle est 'Admin' dans votre DB
+            },
+          },
+        },
+      },
+      select: { id: true },
+    });
 
-
+    for (const admin of admins) {
+      await prisma.notification.create({
+        data: {
+          message: `Le devis (${newQuote.number}) pour le projet "${newQuote.project.title}" a été créé pour le client ${newQuote.customer.name}.`,
+          type: "devis_cree_admin", // Un type spécifique pour l'admin
+          userId: admin.id, // L'ID de l'admin
+          quoteId: newQuote.id, // Lier à l'ID du devis
+        },
+      });
+    }
     const createdQuoteWithStages = await prisma.quote.findUnique({
         where: { id: newQuote.id },
         include: { stages: true }

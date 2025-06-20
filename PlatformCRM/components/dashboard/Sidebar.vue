@@ -1,5 +1,5 @@
 <template>
-  <aside class="w-64 bg-white shadow-lg fixed h-screen">
+  <aside class="w-64 bg-white shadow-lg fixed h-screen z-20">
     <div class="p-6">
       <h1 class="text-2xl font-bold text-indigo-600">OpenCRM</h1>
     </div>
@@ -7,7 +7,7 @@
       <template v-for="item in currentMenuItems" :key="item.label">
         <template v-if="item.children">
           <div
-            class="flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 cursor-pointer"
+            class="relative flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 cursor-pointer"
             @click="toggleSubMenu(item.label)"
             :class="{
               'bg-indigo-50 text-indigo-600 border-r-4 border-indigo-600 font-semibold':
@@ -24,6 +24,7 @@
           <div
             v-if="isSubMenuOpen(item.label)"
             class="bg-white absolute left-full shadow-md rounded-md w-48 p-3"
+            @click.stop
           >
             <NuxtLink
               v-for="child in item.children"
@@ -87,6 +88,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from "vue";
 import { useRoute } from "vue-router";
+import { useIsRole } from "~/composables/useIsRole"; // Make sure this import is correct
 
 const route = useRoute();
 const emit = defineEmits(["logout"]);
@@ -162,7 +164,7 @@ const adminMenu: MenuItem[] = [
 ];
 
 const currentMenuItems = computed<MenuItem[]>(() => {
-  console.log(isEmploye.value, isClient.value, isAdmin.value);
+  // console.log(isEmploye.value, isClient.value, isAdmin.value); // Keep for debugging if needed
   if (isEmploye.value) {
     return employeMenu;
   } else if (isClient.value) {
@@ -183,8 +185,8 @@ const toggleSubMenu = (label: string) => {
 };
 
 const isSubMenuOpen = (label: string) => activeSubMenu.value === label;
+
 const isActive = (path: string) => {
-  // Active si le chemin correspond exactement OU si on est sur une sous-page
   if (path === "/projects") {
     return route.path === "/projects" || route.path.startsWith("/projects/");
   }
@@ -196,29 +198,44 @@ const isActive = (path: string) => {
     );
   }
   if (path === "/devis") {
-    // Active sur /devis et toutes les pages de détail de devis
-    return route.path === "/devis" || route.path.startsWith("/quotes/");
+    return route.path === "/devis" || route.path.startsWith("/devis/"); // Changed /quotes/ to /devis/ based on your routes
   }
   return route.path === path;
 };
+
 const isChildActive = (item: MenuItem) =>
   item.children?.some((child: ChildMenuItem) => isActive(child.to));
-const getNotificationCount = (path: string) => (path === "/messages" ? 3 : 0);
+
+// Placeholder for notification count for menu items (like Messages)
+// You'll need to fetch real notification counts for these from your API
+const getNotificationCount = (path: string) => {
+  // Example: If path is '/messages', return a hardcoded count for now
+  // In a real app, this would query your notifications data based on 'type' or 'target'
+  if (path === "/messages") {
+    return 3; // Placeholder count
+  }
+  // For other paths or general badge, return 0 if no specific count
+  return 0;
+};
 
 watch(() => route.path, closeSubMenus);
 
 onMounted(() => {
+  // This listener will close submenus if you click outside the sidebar.
+  // This is generally a good UX practice.
   document.addEventListener("click", (event) => {
-    if (
-      document.querySelector("aside")?.contains(event.target as Node) === false
-    ) {
+    const sidebar = document.querySelector("aside");
+    if (sidebar && !sidebar.contains(event.target as Node)) {
       closeSubMenus();
     }
   });
 
+  // This part ensures submenus are open if their children are active on page load
   const currentPath = route.path;
-  for (const item of [...clientMenu]) {
-    if (item.children?.some((child) => child.to === currentPath)) {
+  const allMenuItems = [...employeMenu, ...clientMenu, ...adminMenu]; // Combine all menus
+  for (const item of allMenuItems) {
+    if (item.children?.some((child) => isActive(child.to))) {
+      // Use isActive for child matching
       activeSubMenu.value = item.label;
       break;
     }

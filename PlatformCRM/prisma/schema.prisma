@@ -104,21 +104,22 @@ model ProjectStage {
 }
 
 model Tasks {
-  id             Int          @id @default(autoincrement())
-  employee       User         @relation("AssignedTasks", fields: [employeeId], references: [id])
-  project        Project      @relation("ProjectTasks", fields: [projectId], references: [id])
+  id             Int            @id @default(autoincrement())
+  employee       User           @relation("AssignedTasks", fields: [employeeId], references: [id])
+  project        Project        @relation("ProjectTasks", fields: [projectId], references: [id])
   projectId      Int
   employeeId     Int
   title          String
   description    String
   effort         Int?
-  projectStage   ProjectStage @relation(fields: [projectStageId], references: [id])
+  projectStage   ProjectStage   @relation(fields: [projectStageId], references: [id])
   projectStageId Int
-  priority       TaskPriority @default(BASSE)
-  status         TaskStatus   @default(A_FAIRE)
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  endDate        DateTime?    @map("end_date")
+  notification   Notification[] @relation("TaskNotifications")
+  priority       TaskPriority   @default(BASSE)
+  status         TaskStatus     @default(A_FAIRE)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  endDate        DateTime?      @map("end_date")
 }
 
 enum TaskStatus {
@@ -199,7 +200,7 @@ model Notification {
 
   // L'utilisateur concerné (client, admin ou employé)
   user   User? @relation("UserNotifications", fields: [userId], references: [id])
-  userId Int?
+  userId Int
 
   // Lien optionnel vers un devis, projet ou facture
   quote     Quote?   @relation("QuoteNotifications", fields: [quoteId], references: [id])
@@ -208,6 +209,8 @@ model Notification {
   projectId Int?
   invoice   Invoice? @relation("InvoiceNotifications", fields: [invoiceId], references: [id])
   invoiceId Int?
+  task      Tasks?   @relation("TaskNotifications", fields: [taskId], references: [id]) // Nouvelle relation pour les tâches
+  taskId    Int?
 
   @@index([userId])
 }
