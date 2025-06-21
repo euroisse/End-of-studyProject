@@ -64,18 +64,31 @@ export default defineEventHandler(async (event) => {
         if (updatedTask.status === "TERMINE") {
           const adminIds = await getAdminUserIds();
           for (const adminId of adminIds) {
-            await prisma.notification.create({
+            const notif = await prisma.notification.create({
               data: {
                 message: `La tâche "${updatedTask.title}" du projet "${updatedTask.project.title}" a été TERMINÉE par ${updatedTask.employee.name}.`,
-                type: "changement_statut_tache_termine", // Type spécifique pour l'admin
+                type: "changement_statut_tache_termine",
                 userId: adminId,
                 taskId: updatedTask.id,
               },
             });
+            console.log("Notification admin créée:", notif);
           }
         }
       }
       // --- Fin Notifications ---
+
+      // Après avoir notifié les admins
+      if (updatedTask.employeeId) {
+        await prisma.notification.create({
+          data: {
+            message: `Le statut de la tâche "${updatedTask.title}" a été mis à jour à "${updatedTask.status}".`,
+            type: "statut_tache_mis_a_jour_employe",
+            userId: updatedTask.employeeId,
+            taskId: updatedTask.id,
+          },
+        });
+      }
 
       return updatedTask;
     } catch (error: any) {
