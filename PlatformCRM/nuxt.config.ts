@@ -5,7 +5,12 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   css: ['~/assets/css/main.css',  'swiper/css',
     'swiper/css/pagination',],
-  modules: ['@nuxtjs/tailwindcss', '@pinia/nuxt'],
+  modules: ['@nuxtjs/tailwindcss', '@pinia/nuxt', 'nuxt-security', '@prisma/nuxt'],
+  nitro: {
+    externals: {
+      inline: ['@prisma/client', '.prisma/client', 'prisma']
+    }
+  },
   postcss: {
     plugins: {
       tailwindcss: {},
