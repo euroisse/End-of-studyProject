@@ -55,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Project, Tasks } from "~/generated/prisma";
+import type { Project, Tasks } from "~/types/prismaFrontend/prisma";
 
 type ProjectStageStatus = "A_VENIR" | "EN_COURS" | "TERMINE" | "EN_ATTENTE";
 

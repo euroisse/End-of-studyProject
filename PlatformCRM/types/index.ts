@@ -1,5 +1,5 @@
 // ~/types.ts
-import type { Prisma, User, ProjectStage as PrismaProjectStage, Tasks as PrismaTasks } from "~/generated/prisma"; // Import Prisma types explicitly
+import type { User, ProjectStage , Tasks  } from "~/types/prismaFrontend/prisma"; // Import Prisma types explicitly
 
 export interface Conversation {
   id: number;
@@ -76,14 +76,22 @@ export interface Project {
 }
 
 
-export interface ProjectStageWithTasks extends PrismaProjectStage {
-  tasks: PrismaTasks[]; 
-}
+export type ProjectStageWithTasks = ProjectStage & { tasks: Tasks[] };
 
 
-export type ProjectWithProjectStages = Prisma.ProjectGetPayload<{
-  include: { customer: true; projectStages: { include: { tasks: true } } }; 
-}>;
+export type ProjectWithProjectStages = Project & {
+  customer?: { name: string };
+  projectStages: ProjectStageWithTasks[];
+  users: {
+    employee: {
+      id: number;
+      name: string;
+      email: string;
+    };
+  }[];
+  startDate: Date;
+  endDate?: Date | null;
+};
 
 
 export type Task = {

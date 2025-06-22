@@ -74,14 +74,15 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from "vue";
-import type { ProjectStage } from "~/generated/prisma"; // Import ProjectStage
-import { useProjectStore } from "~/stores/projectStore"; // Importe ProjectStageWithTasks
-
+import type { ProjectStage } from "~/types/prismaFrontend/prisma";
+import { useProjectStore } from "~/stores/projectStore";
+import type { ProjectStageWithTasks } from "~/types";
 const projectStore = useProjectStore();
 const emit = defineEmits(["close", "save"]);
 
-const editingStage = computed(() => projectStore.selectedProjectStage);
-
+const editingStage = computed<ProjectStageWithTasks | null>(
+  () => projectStore.selectedProjectStage
+);
 const form = ref<Partial<ProjectStage>>({
   title: "",
   description: "",
@@ -97,7 +98,7 @@ watch(
         description: newStage.description,
       };
     } else {
-      form.value = { title: "", description: "" }; // Pas de statut par défaut
+      form.value = { title: "", description: "" };
     }
   },
   { immediate: true, deep: true }

@@ -1,7 +1,7 @@
 // stores/quoteStore.ts
 import { defineStore } from 'pinia';
 import { ref, type Ref } from 'vue';
-import type { quoteStatus } from '~/generated/prisma';
+import type { quoteStatus } from '~/types/prismaFrontend/prisma';
 import type { quote, CreateUpdateQuotePayload } from '~/types';
 
 export const useQuoteStore = defineStore('devis', () => {

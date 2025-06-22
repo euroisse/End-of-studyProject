@@ -1,8 +1,9 @@
 // stores/projects.ts
 import { defineStore, } from "pinia";
-import type { ProjectStage, Project , Tasks} from "~/generated/prisma"; 
+import type { ProjectStage, Project , Tasks} from "~/types/prismaFrontend/prisma"; 
 import { ref } from 'vue'; 
 import type { ProjectStageWithTasks, ProjectWithProjectStages } from "~/types";
+
 export const useProjectStore = defineStore('projects', {
   state: () => ({
     selectedProject: ref<ProjectWithProjectStages | null>(null),

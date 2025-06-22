@@ -104,7 +104,7 @@
 
 <script setup lang="ts">
 import { ref, computed, reactive } from "vue";
-import type { ProjectStage } from "~/generated/prisma";
+import type { ProjectStage } from "~/types/prismaFrontend/prisma";
 
 const props = defineProps({
   isOpen: {

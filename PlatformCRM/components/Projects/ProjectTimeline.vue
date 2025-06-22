@@ -122,8 +122,9 @@
 
 <script setup lang="ts">
 import { ref, defineEmits, computed } from "vue";
-import type { Tasks } from "~/generated/prisma";
+import type { Tasks } from "~/types/prismaFrontend/prisma";
 import ProjectStageModal from "./ProjectStageModal.vue";
+
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useProjectStore } from "~/stores/projectStore";
@@ -268,7 +269,7 @@ function getStepProgress(tasks: Tasks[] = []): number {
 }
 
 const progressPercent = computed(() => {
-  const stages = projectStore.selectedProject?.projectStages || [];
+  const stages = (projectStore.selectedProject?.projectStages || []) as ProjectStageWithTasks[];
   // On ne prend en compte que les étapes qui ont des tâches
   const stagesWithTasks = stages.filter(
     (stage) => stage.tasks && stage.tasks.length > 0
