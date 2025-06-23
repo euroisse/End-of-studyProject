@@ -1,5 +1,5 @@
 // ~/types.ts
-import type { User, ProjectStage , Tasks  } from "~/types/prismaFrontend/prisma"; // Import Prisma types explicitly
+import type { User, ProjectStage , Tasks  } from "~/types/prismaFrontend/prisma"; 
 
 export interface Conversation {
   id: number;

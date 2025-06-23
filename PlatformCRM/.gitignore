@@ -25,6 +25,8 @@ logs
 
 generated_/prisma
 
+generated/prisma
+
 prisma/dev*
 
 invoices/
