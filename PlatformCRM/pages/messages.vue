@@ -1,6 +1,6 @@
 <template>
   <div class="max-w-3xl mx-auto py-10">
-    <h1 class="text-2xl font-bold mb-6">Messagerie</h1>
+    <h1 class="text-2xl font-bold mb-6">Messagerie de Contact</h1>
     <div v-if="messages.length === 0" class="text-gray-500">
       Aucun message pour le moment.
     </div>
@@ -32,15 +32,14 @@
 import { ref, onMounted } from "vue";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import type { ContactMessage } from "~/types";
 definePageMeta({ layout: "admin" });
-const messages = ref<any[]>([]);
+const messages = ref<ContactMessage[]>([]);
 
 onMounted(async () => {
-  messages.value = await $fetch("/api/messages", { method: "GET" });
-  // Marquer tous les messages comme lus
-  if (messages.value.length > 0) {
-    await $fetch("/api/messages/mark-read", { method: "POST" });
-  }
+  messages.value = await $fetch<ContactMessage[]>("/api/messages", {
+    method: "GET",
+  });
 });
 </script>
 

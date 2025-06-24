@@ -55,6 +55,7 @@
               'bg-indigo-50 text-indigo-600 border-r-4 border-indigo-600 font-semibold':
                 isActive(item.to),
             }"
+            @click="handleMenuClick(item)"
           >
             <i :class="`${item.icon} w-5`"></i>
             <span class="mx-4">{{ item.label }}</span>
@@ -208,14 +209,12 @@ const isActive = (path: string) => {
 const isChildActive = (item: MenuItem) =>
   item.children?.some((child: ChildMenuItem) => isActive(child.to));
 
-const unreadMessages = ref(0);
-
 onMounted(async () => {
   try {
     const res = await $fetch<{ count: number }>("/api/messages/unread-count");
-    unreadMessages.value = res.count;
+    notificationStore.setUnreadMessages(res.count);
   } catch {
-    unreadMessages.value = 0;
+    notificationStore.setUnreadMessages(0);
   }
 });
 
@@ -244,6 +243,14 @@ onMounted(() => {
     }
   }
 });
+
+function handleMenuClick(item: MenuItem) {
+  if (item.to === "/messages") {
+    // Marquer comme lu côté backend et mettre le compteur à 0
+    notificationStore.setUnreadMessages(0);
+    $fetch("/api/messages/mark-read", { method: "POST" });
+  }
+}
 </script>
 
 <style scoped>
