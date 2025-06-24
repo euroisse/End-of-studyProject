@@ -1,6 +1,6 @@
 <template>
   <div class="max-w-3xl mx-auto py-10">
-    <h1 class="text-2xl font-bold mb-6">Messagerie de Contact</h1>
+    <h1 class="text-2xl font-bold mb-6">Messagerie de Contacts</h1>
     <div v-if="messages.length === 0" class="text-gray-500">
       Aucun message pour le moment.
     </div>
