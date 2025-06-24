@@ -88,11 +88,13 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from "vue";
 import { useRoute } from "vue-router";
-import { useIsRole } from "~/composables/useIsRole"; // Make sure this import is correct
+import { useIsRole } from "~/composables/useIsRole";
+import { useNotificationStore } from "~/stores/notificationMessage";
 
 const route = useRoute();
 const emit = defineEmits(["logout"]);
 const activeSubMenu = ref<string | null>(null);
+const notificationStore = useNotificationStore();
 
 const { isEmploye, isClient, isAdmin } = useIsRole();
 
@@ -141,12 +143,6 @@ const clientMenu: MenuItem[] = [
       { label: "Devis", to: "/devis" },
     ],
   },
-  {
-    label: "Messages",
-    to: "/messages",
-    icon: "ri-chat-3-line",
-    badge: true,
-  },
   { label: "Profil", to: "/profil", icon: "ri-user-line" },
   { label: "Déconnexion", icon: "ri-logout-box-line" },
 ];
@@ -159,6 +155,12 @@ const adminMenu: MenuItem[] = [
   },
   { label: "Projets", to: "/projects", icon: "ri-projector-2-line" },
   { label: "Devis", to: "/devis", icon: "ri-file-line" },
+  {
+    label: "Messages",
+    to: "/messages",
+    icon: "ri-chat-3-line",
+    badge: true,
+  },
   { label: "Utilisateurs", to: "/utilisateurs", icon: "ri-group-line" },
   { label: "Déconnexion", icon: "ri-logout-box-line" },
 ];
@@ -198,7 +200,7 @@ const isActive = (path: string) => {
     );
   }
   if (path === "/devis") {
-    return route.path === "/devis" || route.path.startsWith("/devis/"); // Changed /quotes/ to /devis/ based on your routes
+    return route.path === "/devis" || route.path.startsWith("/devis/");
   }
   return route.path === path;
 };
@@ -206,23 +208,27 @@ const isActive = (path: string) => {
 const isChildActive = (item: MenuItem) =>
   item.children?.some((child: ChildMenuItem) => isActive(child.to));
 
-// Placeholder for notification count for menu items (like Messages)
-// You'll need to fetch real notification counts for these from your API
-const getNotificationCount = (path: string) => {
-  // Example: If path is '/messages', return a hardcoded count for now
-  // In a real app, this would query your notifications data based on 'type' or 'target'
-  if (path === "/messages") {
-    return 3; // Placeholder count
+const unreadMessages = ref(0);
+
+onMounted(async () => {
+  try {
+    const res = await $fetch<{ count: number }>("/api/messages/unread-count");
+    unreadMessages.value = res.count;
+  } catch {
+    unreadMessages.value = 0;
   }
-  // For other paths or general badge, return 0 if no specific count
+});
+
+const getNotificationCount = (path: string) => {
+  if (path === "/messages") {
+    return notificationStore.unreadMessages;
+  }
   return 0;
 };
 
 watch(() => route.path, closeSubMenus);
 
 onMounted(() => {
-  // This listener will close submenus if you click outside the sidebar.
-  // This is generally a good UX practice.
   document.addEventListener("click", (event) => {
     const sidebar = document.querySelector("aside");
     if (sidebar && !sidebar.contains(event.target as Node)) {
@@ -230,12 +236,9 @@ onMounted(() => {
     }
   });
 
-  // This part ensures submenus are open if their children are active on page load
-  const currentPath = route.path;
-  const allMenuItems = [...employeMenu, ...clientMenu, ...adminMenu]; // Combine all menus
+  const allMenuItems = [...employeMenu, ...clientMenu, ...adminMenu];
   for (const item of allMenuItems) {
     if (item.children?.some((child) => isActive(child.to))) {
-      // Use isActive for child matching
       activeSubMenu.value = item.label;
       break;
     }
