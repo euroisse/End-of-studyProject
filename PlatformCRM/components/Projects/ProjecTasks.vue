@@ -10,7 +10,7 @@
         Ajouter une Tâche
       </button>
     </div>
-    <div class="flex gap-6 overflow-x-auto pb-4">
+    <div class="grid xl:flex gap-6 overflow-x-auto pb-4">
       <div
         v-for="col in columns"
         :key="col.status"
@@ -26,7 +26,7 @@
             >{{ filteredTasks(col.status).length }} tâche(s)</span
           >
         </div>
-        <div class="space-y-4 min-h-[40px]">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div
             v-for="task in filteredTasks(col.status)"
             :key="task.id"
