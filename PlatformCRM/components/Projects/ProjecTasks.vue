@@ -1,20 +1,27 @@
 <template>
-  <div class="min-h-screen transition-colors duration-300 bg-gray-50">
-    <div class="p-4 flex justify-between items-center mb-8">
-      <h2 class="text-2xl font-bold text-indigo-700">Tableau Kanban</h2>
+  <div
+    class="min-h-screen transition-colors duration-300 bg-gray-50 p-4 sm:p-6"
+  >
+    <div
+      class="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8"
+    >
+      <h2 class="text-xl sm:text-2xl font-bold text-indigo-700 mb-4 sm:mb-0">
+        Tableau Kanban
+      </h2>
       <button
         v-if="isAdmin"
         @click="isModalOpen = true"
-        class="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+        class="w-full sm:w-auto bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded focus:outline-none focus:shadow-outline text-sm sm:text-base"
       >
         Ajouter une Tâche
       </button>
     </div>
-    <div class="grid xl:flex gap-6 overflow-x-auto pb-4">
+
+    <div class="grid xl:flex gap-4 sm:gap-6 overflow-x-auto pb-4">
       <div
         v-for="col in columns"
         :key="col.status"
-        class="flex-1 min-w-[300px] bg-white rounded-xl shadow-md p-4 border border-gray-200"
+        class="flex-1 min-w-[280px] sm:min-w-[300px] bg-gray-50 rounded-xl shadow-md p-4 border border-gray-200"
         @dragover.prevent
         @drop="onDrop(col.status)"
       >
@@ -26,19 +33,23 @@
             >{{ filteredTasks(col.status).length }} tâche(s)</span
           >
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+        <div class="flex flex-col gap-3">
           <div
             v-for="task in filteredTasks(col.status)"
             :key="task.id"
-            class="bg-gray-50 border rounded-lg p-3 shadow-sm cursor-grab"
+            class="bg-white border rounded-lg p-3 shadow-sm cursor-grab"
             draggable="true"
             @dragstart="onDragStart(task)"
           >
-            <div class="flex justify-between items-center">
-              <h4 class="text-base font-semibold text-gray-800">
+            <div class="flex justify-between items-center mb-2">
+              <h4
+                class="text-base font-semibold text-gray-800 capitalize-first-lette"
+              >
                 {{ task.title }}
               </h4>
               <span
+                v-if="isAdmin || isClient"
                 class="text-xs font-bold px-2 py-1 rounded-xl"
                 :class="{
                   'bg-gray-200 text-gray-700': task.status === 'A_FAIRE',
@@ -49,10 +60,15 @@
                 {{ task.status }}
               </span>
             </div>
-            <p class="text-sm text-gray-600 mb-4">{{ task.description }}</p>
-            <div class="flex flex-wrap gap-2 text-xs text-gray-500">
+            <p class="text-sm text-gray-600 mb-3 capitalize-first-lette">
+              {{ task.description }}
+            </p>
+
+            <div
+              class="flex flex-wrap items-center gap-x-3 gap-y-3 text-xs text-gray-500 mb-3"
+            >
               <span
-                class="font-bold text-xs px-2 py-1 rounded flex items-center gap-1"
+                class="font-bold text-xs py-1 rounded flex items-center gap-1"
               >
                 Priorité:
                 <span
@@ -66,42 +82,75 @@
                   {{ task.priority }}
                 </span>
               </span>
-              <span v-if="task.employee" class="mt-1"
-                >👤 {{ task.employee.name }}</span
-              >
-              <span v-if="task.effort !== null" class="mt-1 ml-2"
+              <span v-if="task.employee">👤 {{ task.employee.name }}</span>
+              <span v-if="task.effort !== null" class="ml-1"
                 >Effort: {{ task.effort }} h</span
               >
             </div>
 
-            <div class="relative">
-              <button
-                class="text-gray-400 hover:text-gray-700"
-                @click.stop="toggleMenu(task.id)"
-                type="button"
-              >
-                <i class="ri-more-2-fill text-lg"></i>
-              </button>
-              <div
-                v-if="openedMenuId === task.id"
-                class="absolute right-0 z-10 w-44 origin-top-right rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none bg-white"
-                @click.stop
-              >
-                <div class="py-1">
+            <div
+              class="flex justify-between items-center text-xs text-gray-500"
+            >
+              <span>ID du Projet : {{ task.projectId }}</span>
+              <div class="relative flex items-center" v-if="isEmploye">
+                <span
+                  class="inline-flex items-center justify-center px-3 py-2 text-xs font-bold rounded-full mr-2"
+                  :class="[
+                    task.status === 'A_FAIRE'
+                      ? 'bg-gray-200 text-gray-700'
+                      : '',
+                    task.status === 'EN_COURS'
+                      ? 'bg-yellow-200 text-yellow-700'
+                      : '',
+                    task.status === 'TERMINE'
+                      ? 'bg-green-200 text-green-700'
+                      : '',
+                  ]"
+                >
+                  {{ task.status }}
+                </span>
+                <select
+                  v-if="isEmploye"
+                  v-model="task.status"
+                  @change="updateTaskStatus(task.id, task.status)"
+                  class="text-sm rounded-md border-gray-300 bg-white px-2 py-1 shadow-md focus:border-indigo-500 focus:ring-indigo-500"
+                >
+                  <option value="A_FAIRE">À Faire</option>
+                  <option value="EN_COURS">En Cours</option>
+                  <option value="TERMINE">Terminé</option>
+                </select>
+
+                <div class="ml-3">
                   <button
                     v-if="isAdmin"
-                    class="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    @click="editTask(task.id)"
+                    class="text-gray-400 hover:text-gray-700"
+                    @click.stop="toggleMenu(task.id)"
+                    type="button"
                   >
-                    <i class="ri-pencil-line mr-2"></i> Éditer
+                    <i class="ri-more-2-fill text-lg"></i>
                   </button>
-                  <button
-                    v-if="isAdmin"
-                    class="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-gray-100"
-                    @click="prepareDeleteTask(task.id)"
+                  <div
+                    v-if="openedMenuId === task.id"
+                    class="absolute right-0 top-full mt-1 z-20 w-44 origin-top-right rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none bg-white"
+                    @click.stop
                   >
-                    <i class="ri-delete-bin-line mr-2"></i> Supprimer
-                  </button>
+                    <div class="py-1">
+                      <button
+                        v-if="isAdmin"
+                        class="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        @click="editTask(task.id)"
+                      >
+                        <i class="ri-pencil-line mr-2"></i> Éditer
+                      </button>
+                      <button
+                        v-if="isAdmin"
+                        class="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-gray-100"
+                        @click="prepareDeleteTask(task.id)"
+                      >
+                        <i class="ri-delete-bin-line mr-2"></i> Supprimer
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -109,13 +158,6 @@
         </div>
       </div>
     </div>
-    <!-- Optionnel : bouton pour ajouter une colonne -->
-    <!--
-      <div class="flex items-center justify-center min-w-[200px]">
-        <button class="text-indigo-600 hover:underline" @click="addColumn">+ Ajouter une colonne</button>
-      </div>
-      -->
-
     <TaskModal :is-open="isModalOpen" @close="isModalOpen = false" />
     <TasksTaskEdit
       :is-open="isEditModalOpen"
@@ -139,7 +181,7 @@ import { useProjectStore } from "~/stores/projectStore";
 import { useIsRole } from "~/composables/useIsRole";
 
 const props = defineProps<{ projectId: number }>();
-const { isAdmin, isEmploye } = useIsRole();
+const { isAdmin, isEmploye, isClient } = useIsRole();
 
 const taskStore = useTaskStore();
 const { tasks } = storeToRefs(taskStore);
@@ -221,12 +263,13 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Your existing styles */
+/* Your existing styles, potentially review and remove if Tailwind handles all */
 h2 {
-  margin-bottom: 1rem;
+  margin-bottom: 1rem; /* This can often be replaced by mb-4 or mb-6 Tailwind class */
 }
 
 button {
+  /* These styles are largely overridden by Tailwind classes directly on the button in the template */
   margin-top: 1rem;
   padding: 0.75rem 1.5rem;
   border-radius: 0.375rem;
@@ -235,6 +278,10 @@ button {
   transition: background-color 0.15s ease-in-out;
 }
 
+/* These specific color classes are well-defined by Tailwind's utility classes.
+   You might not need to explicitly define them in <style scoped> if they are
+   only used for dynamic class binding based on data.
+*/
 .bg-gray-200 {
   background-color: #e5e7eb;
 }
@@ -257,5 +304,9 @@ button {
 
 .text-green-700 {
   color: #16a34a;
+}
+
+.capitalize-first-letter::first-letter {
+  text-transform: uppercase;
 }
 </style>
