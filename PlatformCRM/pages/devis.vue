@@ -1,13 +1,15 @@
 <template>
-  <div class="p-8 overflow-x-hidden">
-    <div class="flex justify-between items-center mb-8">
-      <h1 class="text-2xl font-bold text-gray-800">
+  <div class="p-4 sm:p-8 overflow-x-hidden">
+    <div
+      class="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8"
+    >
+      <h1 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-0">
         {{ isAdmin ? "Gestion des devis" : "Mes devis" }}
       </h1>
       <div v-if="isAdmin">
         <button
           @click="showCreateQuote = true"
-          class="bg-indigo-500 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-md"
+          class="w-full sm:w-auto bg-indigo-500 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-md text-sm sm:text-base"
         >
           <i class="ri-add-line mr-2"></i> Créer un devis
         </button>

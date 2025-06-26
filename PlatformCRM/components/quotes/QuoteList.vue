@@ -1,5 +1,7 @@
 <template>
-  <div class="bg-white rounded-lg shadow-md">
+  <div
+    class="bg-white rounded-lg shadow-md w-0 sm:w-full lg:w-[750px] xl:w-full mx-auto"
+  >
     <div class="p-10">
       <div class="flex items-center justify-between mb-4">
         <div class="relative">
