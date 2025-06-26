@@ -70,7 +70,7 @@
                     <div class="font-semibold text-gray-900 mb-1">
                       {{ notificationTitle(notification.type) }}
                     </div>
-                    <div class="text-gray-700 text-sm">
+                    <div class="text-gray-700 text-sm truncate">
                       {{ notification.message }}
                     </div>
                     <div class="text-xs text-gray-400 mt-1">
