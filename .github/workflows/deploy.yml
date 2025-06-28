@@ -14,13 +14,13 @@ jobs:
       - name: Deploy on VPS
         uses: appleboy/ssh-action@v0.1.7
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_USER_PASSWORD: ${{ secrets.VPS_USER_PASSWORD }}
           VPS_IP: ${{ secrets.VPS_IP }}
           VPS_USER: ${{ secrets.VPS_USER }}
         with: 
           host: ${{ secrets.VPS_IP }}
           username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
+          password: ${{ secrets.VPS_USER_PASSWORD }}
           script: |
             # Aller dans le répertoire du projet
             cd /home/$VPS_USER/End-of-studyProject/PlatformCRM
