@@ -23,7 +23,7 @@ jobs:
           password: ${{ secrets.VPS_USER_PASSWORD }}
           script: |
             # Aller dans le répertoire du projet
-            cd /home/$VPS_USER/End-of-studyProject/PlatformCRM
+            cd ~/End-of-studyProject/PlatformCRM
             
             # Pull les dernières modifications depuis Git
             git pull origin develop
