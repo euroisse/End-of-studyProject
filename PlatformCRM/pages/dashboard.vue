@@ -1,185 +1,116 @@
 <template>
   <div class="flex-1 p-4 md:p-8 lg:p-12 xl:p-16">
-    <DashboardHeader v-if="isEmploye" />
-    <DashboardSummary v-if="isEmploye" />
+    <h1
+      v-if="isEmploye || isClient"
+      class="text-2xl font-bold text-gray-800 mb-2"
+    >
+      Tableau de bord
+    </h1>
+    <DashboardHeader v-if="isAdmin" />
+    <DashboardSummary
+      v-if="isEmploye || isClient || isAdmin"
+      :summaryData="dashboardData?.summary"
+    />
 
-    <div v-if="isEmploye">
-      <ProjectProgress :projects="projectProgress" class="mb-6" />
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <RecentMessage :messages="recentMessages" />
-        <clientInvoiceList :invoices="clientInvoices" />
-      </div>
+    <div v-if="loading" class="text-center py-8">
+      Chargement du tableau de bord...
     </div>
-
+    <div v-else-if="error" class="text-red-600 text-center py-8">
+      Erreur lors du chargement du tableau de bord: {{ error.message || error }}
+    </div>
     <div v-else>
-      <ClientProjectProgress class="mb-6" />
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <InvoiceList :invoices="employeeInvoices" />
-        <RecentMessage :messages="MessageClient" />
+      <div v-if="isEmploye">
+        <ProjectProgress
+          :projects="dashboardData?.projects || []"
+          class="mb-6"
+        />
+      </div>
+
+      <div v-else-if="isClient">
+        <ClientProjectProgress
+          :projects="dashboardData?.projects || []"
+          class="mb-6"
+        />
+      </div>
+      <div
+        v-if="isAdmin || isClient"
+        class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6"
+      >
+        <InvoiceList :invoices="dashboardData?.invoices || []" />
+        <QuoteList :quotes="dashboardData?.quotes || []" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from "vue";
 import DashboardHeader from "~/components/dashboard/DashboardHeader.vue";
 import DashboardSummary from "~/components/dashboard/DashboardSummary.vue";
 import ProjectProgress from "~/components/dashboard/ProjectProgress.vue";
-import RecentMessage from "~/components/dashboard/RecentMessage.vue";
 import InvoiceList from "~/components/dashboard/InvoiceList.vue";
 import ClientProjectProgress from "~/components/dashboard/ClientProjectProgress.vue";
-import clientInvoiceList from "~/components/dashboard/clientInvoiceList.vue";
+import { useProjectStore } from "#imports";
+import QuoteList from "~/components/dashboard/QuoteList.vue";
 
 definePageMeta({ layout: "admin" });
-const { isEmploye } = useIsRole();
+const { isEmploye, isAdmin, isClient } = useIsRole();
+interface DashboardApiResponse {
+  statusCode: number;
+  data: {
+    projects?: any[];
+    summary?: {
+      assignedProjectsCount?: number;
+      yourProjectsCount?: number;
+      yourInvoicesCount?: number;
+      totalProjects?: number;
+      yourQuotesCount?: number;
+      totalInvoices?: number;
+      totalClients?: number;
+      totalEmployees?: number;
+    };
+    invoices?: any[];
+    quotes?: any[];
+  };
+}
+const projectStore = useProjectStore();
+const dashboardData = ref<DashboardApiResponse["data"] | null>(null);
+const loading = ref(true);
+const error = ref<any>(null);
 
-// Données pour l'employé
-const projectProgress = [
-  {
-    name: "Projet E-commerce",
-    status: "En cours",
-    statusClass: "bg-blue-100 text-blue-600",
-    steps: [
-      {
-        name: "Analyse",
-        icon: "search-line",
-        completed: true,
-        date: "01/04/2025",
-      },
-      {
-        name: "Design",
-        icon: "pencil-ruler-line",
-        completed: true,
-        date: "05/04/2025",
-      },
-      {
-        name: "Développement",
-        icon: "code-line",
-        completed: true,
-        date: "10/04/2025",
-      },
-      {
-        name: "Tests",
-        icon: "flask-line",
-        completed: false,
-        date: "15/04/2025",
-      },
-      {
-        name: "Livraison",
-        icon: "rocket-line",
-        completed: false,
-        date: "20/04/2025",
-      },
-    ],
-  },
-  {
-    name: "Projet Marketing Digital",
-    status: "En attente",
-    statusClass: "bg-yellow-100 text-yellow-600",
-    steps: [
-      {
-        name: "Analyse",
-        icon: "search-line",
-        completed: true,
-        date: "05/04/2025",
-      },
-      {
-        name: "Design",
-        icon: "pencil-ruler-line",
-        completed: false,
-        date: "10/04/2025",
-      },
-      {
-        name: "Développement",
-        icon: "code-line",
-        completed: false,
-        date: "15/04/2025",
-      },
-      {
-        name: "Tests",
-        icon: "flask-line",
-        completed: false,
-        date: "20/04/2025",
-      },
-      {
-        name: "Livraison",
-        icon: "rocket-line",
-        completed: false,
-        date: "25/04/2025",
-      },
-    ],
-  },
-];
+onMounted(async () => {
+  const userString = localStorage.getItem("user");
+  if (!userString) {
+    console.warn(
+      "Utilisateur non connecté. Impossible de récupérer les données du tableau de bord."
+    );
+    error.value = { message: "Utilisateur non connecté." };
+    loading.value = false;
+    return;
+  }
+  try {
+    const user = JSON.parse(userString);
+    const userId = user.id;
 
-const recentMessages = [
-  {
-    sender: "Marie Dubois",
-    content: "Les maquettes ont été validées par le client",
-    time: "Il y a 2h",
-  },
-  {
-    sender: "Thomas Martin",
-    content: "Réunion de suivi prévue demain à 14h",
-    time: "Il y a 5h",
-  },
-  {
-    sender: "Julie Bernard",
-    content: "Nouvelle version déployée sur le serveur de test",
-    time: "Hier",
-  },
-];
+    const response = await $fetch<DashboardApiResponse>(
+      `/api/dashboard?userId=${userId}`
+    );
 
-const employeeInvoices = [
-  {
-    number: "Facture #2025-04",
-    dueDate: "25/04/2025",
-    status: "Payée",
-    statusClass: "bg-green-100 text-green-600",
-    amount: "2 500 €",
-  },
-  {
-    number: "Facture #2025-03",
-    dueDate: "11/04/2025",
-    status: "En attente",
-    statusClass: "bg-yellow-100 text-yellow-600",
-    amount: "1 800 €",
-  },
-];
+    dashboardData.value = response.data;
 
-const MessageClient = [
-  {
-    sender: "Sophie Martin",
-    content:
-      "Les maquettes sont prêtes pour validation. Pouvez-vous les examiner",
-    time: "Il y a 2h",
-  },
-  {
-    sender: "Thomas Dubois",
-    content: "Point d'étape sur le développement prévu demain à 14h.",
-    time: "Hier",
-  },
-];
-const clientInvoices = [
-  {
-    number: "Devis #2025-042",
-    date: "15 Avr 2025",
-    amount: "3,500",
-    paid: true,
-  },
-  {
-    number: "Devis #2025-041",
-    date: "08 Avr 2025",
-    amount: "2,800",
-    paid: true,
-  },
-  {
-    number: "Devis #2025-040",
-    date: "01 Avr 2025",
-    amount: "4,200",
-    paid: false,
-  },
-];
+    if ((isEmploye.value || isClient.value) && dashboardData.value?.projects) {
+      projectStore.fetchUserProjects(userId);
+    }
+  } catch (err: any) {
+    console.error(
+      "Erreur lors de la récupération des données du tableau de bord:",
+      err
+    );
+    error.value = err.data?.statusMessage || err.message;
+  } finally {
+    loading.value = false;
+  }
+});
 </script>
 
 <style scoped></style>

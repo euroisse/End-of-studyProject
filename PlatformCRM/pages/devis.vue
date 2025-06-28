@@ -16,7 +16,7 @@
 
     <QuotesQuoteList ref="quoteListRef" @preview="previewQuote" />
 
-    <quoteModal v-if="showCreateQuote" @close="handleQuoteModalClose" />
+    <QuoteModal v-if="showCreateQuote" @close="handleQuoteModalClose" />
     <PreviewQuoteModal
       v-if="showPreview && selectedQuote"
       :quoteId="selectedQuote.id"
@@ -29,9 +29,10 @@
 import { ref } from "vue";
 import PreviewQuoteModal from "~/pages/quotes/[id].vue";
 import QuotesQuoteList from "~/components/quotes/QuoteList.vue";
-import QuoteModal from "~/components/quotes/QuoteModal.vue";
+
 import { useIsRole } from "~/composables/useIsRole";
 import type { quote } from "~/types";
+import QuoteModal from "~/components/quotes/quoteModal.vue";
 definePageMeta({ layout: "admin" });
 
 const { isAdmin } = useIsRole();

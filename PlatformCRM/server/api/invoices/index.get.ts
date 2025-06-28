@@ -34,7 +34,7 @@ export default defineEventHandler(async (event) => {
         }
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: 'asc' // Tri par date de création,
       },
     });
 

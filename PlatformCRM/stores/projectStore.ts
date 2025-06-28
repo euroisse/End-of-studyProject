@@ -1,17 +1,18 @@
-import { defineStore,  } from "pinia";
-import type { ProjectStage, Project} from "~/generated/prisma";
-import type { ProjectWithProjectStages } from "~/types";
-
+// stores/projects.ts
+import { defineStore, } from "pinia";
+import type { ProjectStage, Project , Tasks} from "~/generated/prisma"; 
+import { ref } from 'vue'; 
+import type { ProjectStageWithTasks, ProjectWithProjectStages } from "~/types";
 export const useProjectStore = defineStore('projects', {
   state: () => ({
     selectedProject: ref<ProjectWithProjectStages | null>(null),
     projectStages: ref<ProjectStage[]>([]),
-    projects: ref<Project[]>([]),
+    projects: ref<ProjectWithProjectStages[]>([]), 
     projectToEdit: ref<ProjectWithProjectStages | null>(null),
-    selectedProjectStage: ref<ProjectStage | null>(null),
+   selectedProjectStage: ref<ProjectStageWithTasks | null>(null),
   }),
   actions: {
-    setSelectedProjectStage(stage: ProjectStage | null) {
+    setSelectedProjectStage(stage: ProjectStageWithTasks | null) {
       this.selectedProjectStage = stage;
     },
     setSelectedProjectToEdit(project: ProjectWithProjectStages | null) {
@@ -19,22 +20,27 @@ export const useProjectStore = defineStore('projects', {
     },
 
     async fetchProjects() {
-      const response = await $fetch<Project[]>('/api/Projects/projects',{
-        method: 'POST',
-        
-      });
-      this.projects = response;
+      try {
+        const response = await $fetch<ProjectWithProjectStages[]>('/api/Projects/projects');
+        this.projects = response;
+      } catch (error) {
+        console.error("Erreur lors de la récupération de tous les projets:", error);
+        this.projects = [];
+      }
     },
 
     async fetchProject(id: number) {
-      const response = await $fetch<ProjectWithProjectStages>(`/api/Projects/${id}`);
+      const response = await $fetch<ProjectWithProjectStages>(`/api/Projects/${id}`,{
+         query: { include: 'projectStages.tasks' } 
+      });
       this.selectedProject = response;
     },
 
     async updateProjectStage(stageId: number, stageData: Partial<ProjectStage>) {
-      const response = await $fetch<ProjectStage>(`/api/projectStage/${stageId}`, {
+      const response = await $fetch<ProjectStageWithTasks>(`/api/projectStage/${stageId}`, {
         method: 'PUT',
         body: stageData,
+         query: { include: 'tasks' }
       });
       const updatedStage = response;
       if (this.selectedProject && this.selectedProject.projectStages) {
@@ -44,10 +50,16 @@ export const useProjectStore = defineStore('projects', {
         }
       }
     },
-    
-    async fetchUserProjects(userId: number) { 
-      const response = await $fetch<Project[]>(`/api/Projects/user/${userId}`);
-      this.projects = response;
+
+    async fetchUserProjects(userId: number) {
+      try {
+     
+        const response = await $fetch<ProjectWithProjectStages[]>(`/api/Projects/user/${userId}`);
+        this.projects = response; 
+      } catch (error) {
+        console.error(`Erreur lors de la récupération des projets de l'utilisateur ${userId}:`, error);
+        this.projects = [];
+      }
     },
     async deleteProjectStage(stageId: number) {
       await $fetch(`/api/projectStage/${stageId}`, {
@@ -58,9 +70,10 @@ export const useProjectStore = defineStore('projects', {
       }
     },
     async updateProject(projectId: number, projectData: Partial<Project>) {
-      const response = await $fetch<ProjectWithProjectStages>(`/api/Projects/${projectId}`, { 
+      const response = await $fetch<ProjectWithProjectStages>(`/api/Projects/${projectId}`, {
         method: 'PUT',
         body: projectData,
+         query: { include: 'projectStages.tasks' } 
       });
       const updatedProject = response;
       this.selectedProject = updatedProject;

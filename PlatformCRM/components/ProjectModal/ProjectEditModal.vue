@@ -1,14 +1,24 @@
 <template>
-  <div class="modal-overlay overflow-y-auto" v-if="showModal">
-    <div class="modal-content container">
-      <div class="modal-header flex justify-between items-center mb-4">
-        <h2 class="text-xl font-bold">Modifier le projet</h2>
-        <button
-          @click="closeModal"
-          class="text-gray-500 hover:text-gray-700 focus:outline-none"
-        >
-          <i class="ri-close-line text-xl"></i>
-        </button>
+  <div
+    class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 z-50 flex items-center justify-center backdrop-blur-sm"
+    v-if="showModal"
+  >
+    <div
+      class="rounded-2xl shadow-2xl max-w-xl w-full p-0 transform transition-all bg-white"
+    >
+      <div class="p-6 rounded-t-2xl bg-blue-600">
+        <div class="flex justify-between items-center">
+          <div class="text-xl font-semibold text-white">
+            <h2 class="text-xl font-bold">Modifier le projet</h2>
+          </div>
+
+          <button
+            @click="closeModal"
+            class="text-blue-100 hover:text-white transition-colors duration-200"
+          >
+            <i class="ri-close-line text-2xl"></i>
+          </button>
+        </div>
       </div>
 
       <form @submit.prevent="updateProjectInStore" class="p-6">
@@ -24,7 +34,7 @@
                 id="title"
                 v-model="formData.title"
                 type="text"
-                class="w-full px-3 py-2 border rounded-xl shadow-sm focus:outline-none bg-white text-gray-900 border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 text-sm"
+                class="w-full px-3 py-2 z-10 border rounded-xl shadow-sm focus:outline-none focus:ring-2 bg-white text-gray-900 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 required
                 placeholder="EX: Renforce du site Web"
               />
@@ -41,7 +51,7 @@
               id="description"
               v-model="formData.description"
               rows="4"
-              class="w-full px-3 py-2 border rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-300 text-sm"
+              class="w-full px-3 py-2 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-300 focus:border-blue-500"
               placeholder="Decrivez votre projet en quelques mots..."
             ></textarea>
           </div>

@@ -1,6 +1,17 @@
 <template>
-  <div class="pt-4">
-    <h2 class="text-xl font-bold font-Roboto mb-6">Étapes du projet</h2>
+  <div class="mb-8 bg-white w-full rounded-sm flex-1 p-8 pt-4">
+    <h2 class="text-xl font-bold font-Roboto mb-6 ml-3">Étapes du projet</h2>
+    <div class="w-full mb-6">
+      <div class="h-4 bg-gray-200 rounded-full overflow-hidden">
+        <div
+          class="h-4 bg-indigo-500 transition-all duration-500"
+          :style="{ width: progressPercent + '%' }"
+        ></div>
+      </div>
+      <div class="text-right text-xs text-gray-600 mt-1">
+        {{ progressPercent }}% complété
+      </div>
+    </div>
     <div class="relative">
       <div
         class="absolute top-5 left-5 h-[calc(100%-40px)] w-0.5 bg-gray-200"
@@ -12,47 +23,45 @@
           class="relative flex"
         >
           <div
-            :class="`w-10 h-10 rounded-full flex items-center justify-center z-10
-            ${
-              step.status === 'TERMINE'
-                ? 'bg-green-500'
-                : step.status === 'EN_COURS'
-                ? 'bg-indigo-500'
-                : step.status === 'A_VENIR'
-                ? 'bg-gray-200'
-                : step.status === 'EN_ATTENTE'
-                ? 'bg-yellow-300'
-                : 'bg-gray-200'
-            } text-white font-medium text-[14px] font-Roboto`"
+            :class="`w-10 h-10 rounded-full flex items-center justify-center
+              ${
+                getProjectStageStatus(step.tasks) === 'TERMINE'
+                  ? 'bg-green-500'
+                  : getProjectStageStatus(step.tasks) === 'EN_COURS'
+                  ? 'bg-indigo-500'
+                  : getProjectStageStatus(step.tasks) === 'A_VENIR'
+                  ? 'bg-gray-200'
+                  : 'bg-gray-200'
+              } text-white font-medium text-[14px] font-Roboto`"
           >
-            <i :class="getIconClass(step.status)"></i>
+            <i :class="getIconClass(getProjectStageStatus(step.tasks))"></i>
           </div>
 
           <div
             class="ml-8 bg-gray-50 shadow-sm md:p-6 hover:shadow-md transition-shadow rounded-lg p-4 flex-1"
           >
             <div class="flex justify-between items-start mb-4">
-              <h1 class="font-medium text-[16px]">{{ step.title }}</h1>
+              <h1 class="font-medium text-[16px] capitalize">
+                {{ step.title }}
+              </h1>
               <span
                 :class="`px-3 py-1 rounded-full text-sm font-medium
-                ${
-                  step.status === 'TERMINE'
-                    ? 'bg-green-100 text-green-600'
-                    : step.status === 'EN_COURS'
-                    ? 'bg-indigo-100 text-indigo-600'
-                    : step.status === 'A_VENIR'
-                    ? 'bg-gray-100 text-gray-600'
-                    : step.status === 'EN_ATTENTE'
-                    ? 'bg-yellow-100 text-yellow-600'
-                    : 'bg-gray-100 text-gray-600'
-                }`"
+                  ${
+                    getProjectStageStatus(step.tasks) === 'TERMINE'
+                      ? 'bg-green-100 text-green-600'
+                      : getProjectStageStatus(step.tasks) === 'EN_COURS'
+                      ? 'bg-indigo-100 text-indigo-600'
+                      : getProjectStageStatus(step.tasks) === 'A_VENIR'
+                      ? 'bg-gray-100 text-gray-600'
+                      : 'bg-gray-100 text-gray-600'
+                  }`"
               >
-                {{ getStatusText(step.status) }}
+                {{ getStatusText(getProjectStageStatus(step.tasks)) }}
               </span>
             </div>
-
+            <div></div>
             <div class="flex justify-between items-center">
-              <p class="text-gray-500">{{ step.description }}</p>
+              <p class="text-gray-500 capitalize">{{ step.description }}</p>
               <div v-if="isAdmin" class="flex space-x-2">
                 <i
                   class="ri-pencil-line text-gray-600 cursor-pointer hover:text-indigo-600"
@@ -66,8 +75,20 @@
             </div>
 
             <p class="text-sm text-gray-500 mt-2">
-              Date de livraison estimée: {{ formatDate(step.updatedAt) }}
+              Date de livraison estimée: {{ formatDate(step.endDate) }}
             </p>
+
+            <div class="mt-3">
+              <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  class="h-2 bg-indigo-500 transition-all duration-500"
+                  :style="{ width: getStepProgress(step.tasks) + '%' }"
+                ></div>
+              </div>
+              <div class="text-xs text-gray-500 mt-1 text-right">
+                {{ getStepProgress(step.tasks) }}% des tâches terminées
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -94,46 +115,55 @@
     :is-open="showCreateStageProject"
     @close="showCreateStageProject = false"
     @stageAdded="stageAdded"
+    :project-start-date="formattedProjectStartDate"
+    :project-end-date="formattedProjectEndDate"
   />
 </template>
 
 <script setup lang="ts">
-import { ref, defineEmits } from "vue";
-import type { ProjectStage, ProjectStageStatus } from "~/generated/prisma";
+import { ref, defineEmits, computed } from "vue";
+import type { Tasks } from "~/generated/prisma";
 import ProjectStageModal from "./ProjectStageModal.vue";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useProjectStore } from "~/stores/projectStore";
 import AddModal from "~/pages/projects/ProjectStage/AddModal.vue";
+import type { ProjectStageWithTasks } from "~/types";
+
 const { isAdmin } = useIsRole();
 const emit = defineEmits(["refreshStages"]);
 const projectStore = useProjectStore();
 const showModal = ref(false);
-const selectedProjectStage = ref<ProjectStage | null>(null);
+const selectedProjectStage = ref<ProjectStageWithTasks | null>(null);
 const showCreateStageProject = ref(false);
+
+// Définit un type pour les statuts d'étape utilisés dans l'interface
+type ProjectStageStatus = "TERMINE" | "EN_COURS" | "A_VENIR";
+
+// Fonction pour obtenir le texte du statut de l'étape
 const getStatusText = (status: ProjectStageStatus) => {
   return (
     {
       TERMINE: "Terminé",
       EN_COURS: "En cours",
       A_VENIR: "À venir",
-      EN_ATTENTE: "En attente",
     }[status] || "Inconnu"
   );
 };
 
+// Fonction pour obtenir la classe d'icône en fonction du statut de l'étape
 const getIconClass = (status: ProjectStageStatus) => {
   return (
     {
       TERMINE: "ri-checkbox-circle-fill",
       EN_COURS: "ri-code-fill",
       A_VENIR: "ri-time-line",
-      EN_ATTENTE: "ri-pause-circle-line",
     }[status] || "ri-question-line"
   );
 };
 
-const formatDate = (date?: Date): string => {
+// Fonction pour formater les dates
+const formatDate = (date?: Date | null): string => {
   if (date) {
     try {
       return format(new Date(date), "dd/MM/yyyy", { locale: fr });
@@ -144,30 +174,65 @@ const formatDate = (date?: Date): string => {
   }
   return "";
 };
+// Propriétés calculées pour formater les dates de début du projet
+const formattedProjectStartDate = computed(() => {
+  if (projectStore.selectedProject?.startDate) {
+    return format(
+      new Date(projectStore.selectedProject.startDate),
+      "yyyy-MM-dd"
+    );
+  }
+  return undefined;
+});
 
-const editProjectStage = (stage: ProjectStage) => {
+// Propriété calculée pour formater la date de fin du projet
+const formattedProjectEndDate = computed(() => {
+  if (projectStore.selectedProject?.endDate) {
+    return format(new Date(projectStore.selectedProject.endDate), "yyyy-MM-dd");
+  }
+  return undefined;
+});
+
+// Fonction pour éditer une étape de projet
+const editProjectStage = (stage: ProjectStageWithTasks) => {
+  console.log("Édition de l'étape:", stage);
+  selectedProjectStage.value = stage;
   projectStore.setSelectedProjectStage(stage);
   showModal.value = true;
 };
 
+// Fonction pour fermer le modal
 const closeModal = () => {
   selectedProjectStage.value = null;
   showModal.value = false;
 };
 
-const handleSaveProjectStage = async (updatedStage: ProjectStage) => {
+// Fonction pour sauvegarder les modifications d'une étape de projet
+const handleSaveProjectStage = async (updatedStage: ProjectStageWithTasks) => {
   try {
-    await projectStore.updateProjectStage(updatedStage.id!, updatedStage);
+    await projectStore.updateProjectStage(updatedStage.id!, {
+      title: updatedStage.title,
+      description: updatedStage.description,
+    });
+    // Rafraîchir le projet pour mettre à jour les étapes et leurs statuts
+    if (projectStore.selectedProject) {
+      await projectStore.fetchProject(projectStore.selectedProject.id);
+    }
     closeModal();
   } catch (error) {
     console.error("Erreur lors de la mise à jour de l'étape:", error);
   }
 };
 
+// Fonction pour supprimer une étape de projet
 const deleteProjectStage = async (id: number) => {
   if (window.confirm("Êtes-vous sûr de vouloir supprimer cette étape ?")) {
     try {
       await projectStore.deleteProjectStage(id);
+      // Rafraîchir le projet pour mettre à jour les étapes et leurs statuts
+      if (projectStore.selectedProject) {
+        await projectStore.fetchProject(projectStore.selectedProject.id);
+      }
     } catch (error: any) {
       console.error(
         `Erreur lors de la suppression de l'étape: ${error.message}`
@@ -175,47 +240,62 @@ const deleteProjectStage = async (id: number) => {
     }
   }
 };
-const stageAdded = async (newStage: ProjectStage) => {
-  showCreateStageProject.value = true;
+
+// Fonction appelée lorsque l'utilisateur ajoute une nouvelle étape
+const stageAdded = async (newStage: ProjectStageWithTasks) => {
+  if (projectStore.selectedProject) {
+    // Recharge le projet pour avoir les étapes et tâches à jour
+    await projectStore.fetchProject(projectStore.selectedProject.id);
+  }
+  showCreateStageProject.value = false;
 };
 
-onMounted(() => {
-  console.log("ProjectsProjectTimeline mounted.");
-  console.log(
-    "projectStore.selectedProject in Timeline:",
-    projectStore.selectedProject
-  );
-  console.log(
-    "projectStages in Timeline:",
-    projectStore.selectedProject?.projectStages
-  );
-  console.log(
-    "projectStages length in Timeline:",
-    projectStore.selectedProject?.projectStages?.length
-  );
-});
+// La logique de statut de l'étape basée sur les tâches
+function getProjectStageStatus(tasks: Tasks[] = []): ProjectStageStatus {
+  if (!tasks || tasks.length === 0) return "A_VENIR";
+  if (tasks.every((task) => task.status === "TERMINE")) return "TERMINE";
+  if (tasks.some((task) => task.status === "EN_COURS")) return "EN_COURS";
+  if (tasks.some((task) => task.status === "A_FAIRE")) return "EN_COURS";
+  return "EN_COURS";
+}
 
-watch(
-  () => projectStore.selectedProject,
-  (newProject) => {
-    console.log(
-      "projectStore.selectedProject changed in Timeline:",
-      newProject
-    );
-    console.log(
-      "projectStages after change in Timeline:",
-      newProject?.projectStages
-    );
-    console.log(
-      "projectStages length after change in Timeline:",
-      newProject?.projectStages?.length
-    );
-  },
-  { deep: true }
-);
+// Fonction pour calculer le pourcentage de progression des tâches d'une étape
+function getStepProgress(tasks: Tasks[] = []): number {
+  if (!tasks || tasks.length === 0) return 0;
+  const total = tasks.length;
+  const done = tasks.filter((t) => t.status === "TERMINE").length;
+  return Math.round((done / total) * 100);
+}
+
+const progressPercent = computed(() => {
+  const stages = projectStore.selectedProject?.projectStages || [];
+  // On ne prend en compte que les étapes qui ont des tâches
+  const stagesWithTasks = stages.filter(
+    (stage) => stage.tasks && stage.tasks.length > 0
+  );
+  const totalStages = stagesWithTasks.length;
+  if (totalStages === 0) return 0;
+
+  const completedStages = stagesWithTasks.filter((stage) =>
+    stage.tasks.every((task) => task.status === "TERMINE")
+  ).length;
+
+  // Si au moins une étape est terminée, commence à remplir la barre (minimum 10%)
+  if (completedStages > 0 && completedStages < totalStages) {
+    const percent = Math.round((completedStages / totalStages) * 100);
+    return Math.max(percent, 10);
+  }
+  // Si toutes les étapes sont terminées, 100%
+  if (completedStages === totalStages) {
+    return 100;
+  }
+  // Sinon, 0%
+  return 0;
+});
 </script>
 
 <style scoped>
+/* Les styles restent les mêmes */
 .bg-a-venir {
   background-color: #e5e7eb;
   color: #4b5563;

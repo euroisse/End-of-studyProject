@@ -13,175 +13,217 @@ export type InvoiceWithQuote = Prisma.InvoiceGetPayload<{
 }>;
 
 export default async function generateInvoicePdf(invoice: InvoiceWithQuote) {
-  console.log("--- donnees de facture genere par le pdf ---");
-  console.log("Invoice Object:", JSON.stringify(invoice, null, 2));
-  console.log("Invoice Quote:", JSON.stringify(invoice.quote, null, 2));
-  console.log("Invoice Quote Stages:", JSON.stringify(invoice.quote?.stages, null, 2));
-
   try {
-    if (!invoice) {
-      console.log("Facture non trouvée pour l'ID donné.");
-      return;
-    }
+    if (!invoice) return;
 
-    const doc = new PDFDocument();
+    const doc = new PDFDocument({ margin: 40 });
     const outputPath = `invoices/facture_${invoice.invoiceNumber}.pdf`;
     doc.pipe(fs.createWriteStream(outputPath));
 
-    const textColor = "black";
+    // --- COULEURS ---
+    const darkBlue = "#004080";
+    const lightBlue = "#e3f0fc";
+    const textColor = "#222";
     const accentColor = "#E44933";
     const fontBase = "Helvetica";
     const fontBold = "Helvetica-Bold";
-
-    // Define margins 
     const leftMargin = 50;
-    const rightMargin = doc.page.width - 50; 
+    const rightMargin = doc.page.width - 50;
 
-    // --- En-tête ---
-    doc
-      .fontSize(24)
-      .font(fontBase)
-      .fillColor(accentColor) 
-      .text("FACTURE", { align: "left" });
+    // --- IMAGE EN-TÊTE ---
+    const logoPath = "assets/images/logo.jpg";
+    if (fs.existsSync(logoPath)) {
 
-    doc.moveDown(0.5);
-    doc
-      .fontSize(12)
-      .font(fontBase)
-      .fillColor(textColor) 
-      .text(`N°${invoice.invoiceNumber}`, { align: "left" });
-    doc.moveDown(1);
-
-    // --- Infos de l'entreprise ---
-    doc.fontSize(12).text("OPENINTECH", { align: "right" });
-    doc.text("YDE-SIMBOCK", { align: "right" });
-    doc.text(`Tel: 00000000`, { align: "right" });
-    doc.text(`Email: contact@gmail.com`, { align: "right" });
-    doc.moveDown(1);
-
-    // --- Infos du client ---
-    const clientName = invoice.quote?.customer?.name || invoice.User?.name || "Client Inconnu";
-    const clientCompany = invoice.quote?.customer?.company || "N/A";
-
-    doc.font(fontBold).text(`Facture à:`, { underline: true });
-    doc.font(fontBase).text(clientName);
-    doc.text(clientCompany);
-
-    const invoiceDate = new Date(invoice.invoiceDate).toLocaleDateString('fr-FR');
-   
-    const currentYForClientInfo = doc.y;
-    doc.text(`Date de facture: ${invoiceDate}`, leftMargin, currentYForClientInfo - doc.currentLineHeight(), { align: "right", width: rightMargin - leftMargin }); // Adjust Y to align with the last line of client info
-    doc.moveDown(2);
-
-    // --- Tableau d'articles ---
-    const tableTop = doc.y;
-    const itemColumnX = leftMargin;
-    const amountColumnX = doc.page.width - 130; 
-    const columnWidth = 180;
-    const amountWidth = 80;
-    const rowHeight = 20;
-
-    doc.font(fontBold).fontSize(10);
-    doc.text("DESCRIPTION", itemColumnX, tableTop, { width: columnWidth });
-    doc.text("MONTANT", amountColumnX, tableTop, {
-      width: amountWidth,
-      align: "right",
-    });
-
-    doc
-      .lineWidth(0.5)
-      .moveTo(itemColumnX, tableTop + rowHeight)
-      .lineTo(rightMargin, tableTop + rowHeight) 
-      .stroke();
-
-    let y = tableTop + rowHeight + 10;
-    let calculatedSubtotal = 0;
-
-    doc.font(fontBase).fontSize(10);
-    if (invoice.quote && invoice.quote.stages && invoice.quote.stages.length > 0) {
-      for (const stage of invoice.quote.stages) {
-        const description = stage.projectStage?.title || "Description non disponible";
-        const amount = stage.prix || 0;
-
-        doc.text(description, itemColumnX, y, { width: columnWidth });
-        doc.text(amount.toFixed(2), amountColumnX, y, {
-          width: amountWidth,
-          align: "right",
-        });
-        calculatedSubtotal += amount;
-        y += rowHeight;
-
-        doc
-          .lineWidth(0.5)
-          .moveTo(itemColumnX, y)
-          .lineTo(rightMargin, y) 
-          .stroke();
-        y += 15;
-      }
-    } else {
-      doc.text("Aucun article.", itemColumnX, y, { width: columnWidth });
-      y += rowHeight + 15;
+      // Watermark centré
+      doc.opacity(0.08);
+      doc.image(logoPath, doc.page.width / 2 - 180, doc.page.height / 2 - 180, { width: 360 });
+      doc.opacity(1);
     }
 
-    // --- Totaux (Taxe, TOTAL, Montant Payé, Solde Dû)
-    doc.moveDown(1);
-    doc.fontSize(10).font(fontBase);
+    // --- HEADER ---
+    // Titre et numéro
+    doc
+      .rect(0, 0, doc.page.width, 60)
+      .fill(darkBlue);
+    doc
+      .font(fontBold)
+      .fontSize(24)
+      .fillColor("white")
+      .text("FACTURE", leftMargin, 22, { align: "left" })
+      .fontSize(12)
+      .text(`N°${invoice.invoiceNumber}`, rightMargin - 120, 28, { align: "left", width: 120 });
 
-    const taxRate = 0.01;
-    const taxAmount = calculatedSubtotal * taxRate;
-    doc.moveDown(1)
-    // Taxe
-    let currentY = doc.y;
-    doc.text(`Taxe:`, leftMargin, currentY);
-    doc.text(`${taxAmount.toFixed(2)} CFA`, leftMargin, currentY, { align: "right", width: rightMargin - leftMargin });
-    doc.moveDown(0.5);
+    // --- INFOS ENTREPRISE AVEC ICÔNES ---
+    const infoY = 70;
+    doc
+      .fontSize(10)
+      .fillColor(darkBlue)
+      .font(fontBold)
+      .text("OPENINTECH", rightMargin - 120, infoY)
+      .font(fontBase)
+      .fillColor(textColor)
+      .text("YDE-SIMBOCK", rightMargin - 120, infoY + 16)
+      .text("000-000-000", rightMargin - 120, infoY + 32)
+      .text("contact@gmail.com", rightMargin - 120, infoY + 48);
 
-    // TOTAL
-    currentY = doc.y;
-    doc.fontSize(12).font(fontBold); 
-    doc.text(`TOTAL:`, leftMargin, currentY);
-    doc.text(`${invoice.totalAmount.toFixed(2)} CFA`, leftMargin, currentY, { align: "right", width: rightMargin - leftMargin });
-    doc.moveDown(0.5);
+    // --- INFOS CLIENT ---
+    const clientName = invoice.quote?.customer?.name || invoice.User?.name || "Client Inconnu";
+    const clientCompany = invoice.quote?.customer?.company || "";
+    const invoiceDate = new Date(invoice.invoiceDate).toLocaleDateString('fr-FR');
+    doc
+      .font(fontBold)
+      .fontSize(12)
+      .fillColor(darkBlue)
+      .text("Facturé à :", leftMargin, infoY)
+      .font(fontBase)
+      .fillColor(textColor)
+      .text(clientName, leftMargin, infoY + 16)
+      .text(clientCompany, leftMargin, infoY + 32)
+      .font(fontBold)
+      .fillColor(darkBlue)
+      .text("Date de facture :", leftMargin, infoY + 48)
+      .font(fontBase)
+      .fillColor(textColor)
+      .text(invoiceDate, leftMargin + 110, infoY + 48);
 
-    // Montant Payé
-    currentY = doc.y;
-    doc.fontSize(10).font(fontBase);
-    doc.text(`Montant Payé:`, leftMargin, currentY);
-    doc.text(`${invoice.amountPaid.toFixed(2)} CFA`, leftMargin, currentY, { align: "right", width: rightMargin - leftMargin });
-    doc.moveDown(0.5);
+    // --- TABLEAU DES ARTICLES ---
+    let tableTop = infoY + 80;
+    const colX = [leftMargin, leftMargin + 200, rightMargin - 130];
+    const rowHeight = 24;
 
-    // Solde Dû
-    currentY = doc.y;
-    const balanceDue = invoice.totalAmount - invoice.amountPaid;
-    doc.fontSize(10)
-       .fillColor(accentColor); 
-    doc.text(`Solde Dû:`, leftMargin, currentY);
-    doc.text(`${balanceDue.toFixed(2)} CFA`, leftMargin, currentY, { align: "right", width: rightMargin - leftMargin });
-    doc.fillColor(textColor); 
-    doc.moveDown(2);
+    // En-tête du tableau
+    doc
+      .fontSize(11)
+      .font(fontBold)
+      .fillColor("white")
+      .rect(leftMargin, tableTop, rightMargin - leftMargin, rowHeight)
+      .fillAndStroke(darkBlue, darkBlue)
+      .fillColor("white")
+      .text("DESCRIPTION", colX[0] + 8, tableTop + 7)
+      .text("MONTANT", colX[2], tableTop + 7, { width: 100, align: "right" });
 
-    // --- Méthode de Paiement et Signature ---
-    currentY = doc.y;
-    doc.fontSize(8).font(fontBase);
+    // Lignes du tableau
+    let y = tableTop + rowHeight;
+    let calculatedSubtotal = 0;
+    if (invoice.quote && invoice.quote.stages && invoice.quote.stages.length > 0) {
+      for (const [idx, stage] of invoice.quote.stages.entries()) {
+        // Alternance de fond
+        if (idx % 2 === 0) {
+          doc.rect(leftMargin, y, rightMargin - leftMargin, rowHeight).fill(lightBlue);
+        }
+        const description = stage.projectStage?.title || "Description non disponible";
+        const amount = stage.prix || 0;
+        doc
+          .font(fontBase)
+          .fontSize(10)
+          .fillColor(darkBlue)
+          .text(description, colX[0] + 8, y + 7)
+          .font(fontBold)
+          .text(amount + " CFA", colX[2], y + 7, { width: 100, align: "right" });
+        calculatedSubtotal += amount;
+        y += rowHeight;
+      }
+    } else {
+      doc
+        .font(fontBase)
+        .fontSize(10)
+        .fillColor(darkBlue)
+        .text("Aucun article.", colX[0] + 8, y + 7);
+      y += rowHeight;
+    }
 
-    // MÉTHODE DE PAIEMENT 
-    doc.text("MÉTHODE DE PAIEMENT", leftMargin, currentY, { underline: true });
+    // --- BLOC TOTAUX À GAUCHE ---
+    const blockY = y + 20;
+    doc
+      .rect(leftMargin, blockY, 220, 100)
+      .fill(lightBlue)
+      .strokeColor(darkBlue)
+      .lineWidth(1)
+      .stroke();
 
-    // SIGNATURE (right)
-    doc.font(fontBold).fontSize(10); 
-    doc.text("SIGNATURE", leftMargin, currentY, { align: "right", width: rightMargin - leftMargin });
-    
-    doc.moveDown(0.5); 
+    let lineY = blockY + 12;
+    doc
+      .font(fontBold)
+      .fontSize(11)
+      .fillColor(darkBlue)
+      .text("Sous-total :", leftMargin + 10, lineY)
+      .font(fontBase)
+      .fillColor(textColor)
+      .text(calculatedSubtotal + " CFA", leftMargin + 120, lineY, { width: 90, align: "right" });
 
-    currentY = doc.y;
-    doc.font(fontBase).fontSize(8); 
-    doc.text(`${invoice.paymentMethod}`, leftMargin, currentY); 
+    lineY += 18;
+    const taxRate = 0.1;
+    const taxAmount = Math.round(calculatedSubtotal * taxRate);
+    doc
+      .font(fontBold)
+      .fillColor(darkBlue)
+      .text("Taxe (10%) :", leftMargin + 10, lineY)
+      .font(fontBase)
+      .fillColor(textColor)
+      .text(taxAmount + " CFA", leftMargin + 120, lineY, { width: 90, align: "right" });
 
-    doc.text("_______________________", leftMargin, currentY, { align: "right", width: rightMargin - leftMargin }); 
+    lineY += 18;
+    doc
+      .font(fontBold)
+      .fillColor(darkBlue)
+      .text("Montant payé :", leftMargin + 10, lineY)
+      .font(fontBase)
+      .fillColor(textColor)
+      .text((invoice.amountPaid || 0) + " CFA", leftMargin + 120, lineY, { width: 90, align: "right" });
+
+    lineY += 18;
+    const total = calculatedSubtotal + taxAmount;
+    const balanceDue = invoice.balanceDue ?? (total - (invoice.amountPaid || 0));
+    doc
+      .font(fontBold)
+      .fillColor(accentColor)
+      .text("Solde dû :", leftMargin + 10, lineY)
+      .font(fontBold)
+      .fillColor(accentColor)
+      .text(balanceDue + " CFA", leftMargin + 120, lineY, { width: 90, align: "right" });
+
+    // --- MÉTHODE DE PAIEMENT ET SIGNATURE ---
+    let payY = blockY + 110;
+    doc.moveDown(1.5);
+    doc
+      .font(fontBold)
+      .fontSize(10)
+      .fillColor(darkBlue)
+      .text("Méthode de paiement :", leftMargin, payY);
+    doc
+      .font(fontBase)
+      .fillColor(textColor)
+      .text(invoice.paymentMethod || "N/A", leftMargin + 140, payY);
+
+    doc
+      .font(fontBold)
+      .fontSize(10)
+      .fillColor(darkBlue)
+      .text("Signature :", leftMargin, payY + 20);
+    doc
+      .font(fontBase)
+      .fillColor(textColor)
+      .text("_______________________", leftMargin + 140, payY + 20);
+
+    // --- FOOTER ---
+    doc
+      .fontSize(10)
+      .fillColor(darkBlue)
+      .text(
+        "OpenIntech Vous remercie pour votre confiance. Au plaisir de vous revoir !",
+        leftMargin,
+        720,
+        { align: "center" }
+      );
+
+    // Footer logo en bas à droite
+    if (fs.existsSync(logoPath)) {
+      doc.image(logoPath, doc.page.width - 80 - 40, doc.page.height - 80 - 30, { width: 80 });
+    }
 
     doc.end();
     console.log(`Facture ${invoice.invoiceNumber}.pdf générée avec succès à ${outputPath}`);
   } catch (error) {
     console.error("Erreur lors de la génération de la facture PDF :", error);
-  } 
+  }
 }

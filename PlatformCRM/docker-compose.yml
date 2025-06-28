@@ -1,0 +1,50 @@
+services: 
+  database: 
+    image: bitnami/postgresql
+    environment:
+      - POSTGRESQL_USERNAME=euroise_dev
+      - POSTGRESQL_PASSWORD=017663ad5fbecfad1363f81cb1fcb9c1
+      - POSTGRESQL_DATABASE=opencrm_db
+    ports:
+      - "6565:5432"
+    volumes:
+      - opencrm_data_volume:/bitnami/postgresql
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "euroise_dev"]
+      interval: 5s
+      timeout: 15s
+      retries: 5
+      start_period: 20s
+    networks:
+      - opencrm_network
+
+  reverse-proxy:
+    image: caddy:latest
+    container_name: reverse-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+    networks:
+      - opencrm_network
+
+  app:
+    build:
+      context: ./
+      target: build
+    command: npm run dev
+    env_file:
+      - ./.env.prod
+    depends_on:
+      - database
+    networks:
+      - opencrm_network
+
+networks:
+  opencrm_network:
+    external: true
+
+volumes: 
+  opencrm_data_volume:

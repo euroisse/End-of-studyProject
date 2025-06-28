@@ -1,7 +1,16 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <InvoicesHeaderComponent @create-invoice="openCreateInvoiceModal" />
-
+    <InvoicesHeaderComponent
+      @create-invoice="openCreateInvoiceModal"
+      v-if="isAdmin"
+    />
+    <header class="bg-white shadow-sm">
+      <div
+        class="max-w-7xl mx-auto px-4 py-6 flex flex-wrap justify-between items-center"
+      >
+        <h1 class="text-2xl font-bold text-gray-800">Mes Factures</h1>
+      </div>
+    </header>
     <main class="max-w-7xl mx-auto px-4 py-6">
       <InvoicesFilterSearch
         searchPlaceholder="Rechercher une facture..."
@@ -90,27 +99,69 @@
           </table>
         </div>
       </div>
-    </main>
+      <div
+        v-if="pagination.totalPages > 1"
+        class="flex justify-center mt-6 space-x-2 items-center"
+      >
+        <!-- Flèche gauche -->
+        <button
+          :disabled="pagination.page === 1"
+          @click="goToPreviousPage"
+          class="px-3 py-1 rounded bg-gray-200 text-gray-700 disabled:opacity-50"
+          title="Page précédente"
+        >
+          <i class="ri-arrow-left-s-line"></i>
+        </button>
 
-    <CreateInvoiceModal
-      v-if="showCreateInvoiceModal"
-      :quoteId="selectedQuoteIdForInvoice"
-      @close="showCreateInvoiceModal = false"
-      @success="handleInvoiceCreated"
-    />
+        <button
+          v-for="p in pagination.totalPages"
+          :key="p"
+          @click="goToPage(p)"
+          :class="[
+            'px-3 py-1 rounded',
+            p === pagination.page
+              ? 'bg-blue-600 text-white'
+              : 'bg-gray-200 text-gray-700',
+          ]"
+        >
+          {{ p }}
+        </button>
+
+        <!-- Flèche droite -->
+        <button
+          :disabled="pagination.page === pagination.totalPages"
+          @click="goToNextPage"
+          class="px-3 py-1 rounded bg-gray-200 text-gray-700 disabled:opacity-50"
+          title="Page suivante"
+        >
+          <i class="ri-arrow-right-s-line"></i>
+        </button>
+      </div>
+    </main>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, computed, onMounted } from "vue";
-import CreateInvoiceModal from "~/components/invoices/CreateInvoiceModal.vue";
-import type { Invoice } from "~/generated/prisma";
-
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+const { isAdmin } = useIsRole();
 definePageMeta({ layout: "admin" });
 const error = ref<any>(null);
-const invoices = ref<Invoice[]>([]);
+interface SimplifiedInvoice {
+  id: number;
+  invoiceNumber: string;
+  invoiceDate: string | Date;
+  totalAmount: number;
+}
+const invoices = ref<SimplifiedInvoice[]>([]);
 const loading = ref(false);
-
+const pagination = ref({
+  total: 0,
+  page: 1,
+  pageSize: 10,
+  totalPages: 1,
+});
 const showCreateInvoiceModal = ref(false);
 const selectedQuoteIdForInvoice = ref<number | null>(null);
 
@@ -118,7 +169,7 @@ const searchTerm = ref("");
 const sortField = ref("invoiceDate");
 const sortDirection = ref("desc");
 
-const fetchInvoices = async () => {
+const fetchInvoices = async (page = 1, pageSize = 10) => {
   loading.value = true;
   error.value = null;
   const userString = localStorage.getItem("user");
@@ -132,13 +183,12 @@ const fetchInvoices = async () => {
   try {
     const user = JSON.parse(userString);
     const userId = user.id;
-
-    const userRole = user.role;
-
-    const data = await $fetch<any>(
-      userRole === "ADMIN" ? "/api/invoices" : `/api/invoices/user/${userId}`
-    );
-    invoices.value = data.data || [];
+    // Utilise l'API de pagination
+    const res = await $fetch<any>("/api/invoices/pagination", {
+      params: { page, pageSize, id: userId },
+    });
+    invoices.value = res.data || [];
+    pagination.value = res.pagination;
   } catch (err: any) {
     error.value = err.data?.statusMessage || err.message;
   } finally {
@@ -198,21 +248,14 @@ const openCreateInvoiceModal = (quoteId: number | null) => {
   showCreateInvoiceModal.value = true;
 };
 
-const handleInvoiceCreated = (newInvoice: Invoice) => {
-  fetchInvoices();
-  showCreateInvoiceModal.value = false;
-};
-
 const downloadInvoice = async (invoiceNumber: string) => {
-  const response = await $fetch<Blob>(
-    `/api/file?invoiceNumber=${invoiceNumber}`
-  );
+  const response = await $fetch<Blob>(`/api/file?id=${invoiceNumber}`);
   console.log(response);
   const blob = new Blob([response], { type: "application/pdf" });
   const url = window.URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `invoices`;
+  link.download = `invoices.pdf`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -220,9 +263,29 @@ const downloadInvoice = async (invoiceNumber: string) => {
 };
 const formatDate = (dateString: string | Date) => {
   if (!dateString) return "";
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return "Date Invalide";
-  return date.toLocaleDateString("fr-FR");
+  try {
+    return format(new Date(dateString), "dd/MM/yyyy", { locale: fr });
+  } catch (e) {
+    console.error("Erreur de formatage de date:", e);
+    return "Date invalide";
+  }
+};
+const goToPage = (p: number) => {
+  pagination.value.page = p;
+  fetchInvoices(p, pagination.value.pageSize);
+};
+const goToPreviousPage = () => {
+  if (pagination.value.page > 1) {
+    pagination.value.page--;
+    fetchInvoices(pagination.value.page, pagination.value.pageSize);
+  }
+};
+
+const goToNextPage = () => {
+  if (pagination.value.page < pagination.value.totalPages) {
+    pagination.value.page++;
+    fetchInvoices(pagination.value.page, pagination.value.pageSize);
+  }
 };
 </script>
 

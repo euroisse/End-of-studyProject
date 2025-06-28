@@ -68,13 +68,49 @@
         </table>
       </div>
     </div>
+    <div
+      v-if="pagination.totalPages > 1"
+      class="flex justify-center mt-6 space-x-2 items-center"
+    >
+      <!-- Flèche gauche -->
+      <button
+        :disabled="pagination.page === 1"
+        @click="goToPage(pagination.page - 1)"
+        class="px-3 py-1 rounded bg-gray-200 text-gray-700 disabled:opacity-50"
+        title="Page précédente"
+      >
+        <i class="ri-arrow-left-s-line"></i>
+      </button>
+
+      <button
+        v-for="p in pagination.totalPages"
+        :key="p"
+        @click="goToPage(p)"
+        :class="[
+          'px-3 py-1 rounded',
+          p === pagination.page
+            ? 'bg-indigo-600 text-white'
+            : 'bg-gray-200 text-gray-700',
+        ]"
+      >
+        {{ p }}
+      </button>
+
+      <!-- Flèche droite -->
+      <button
+        :disabled="pagination.page === pagination.totalPages"
+        @click="goToPage(pagination.page + 1)"
+        class="px-3 py-1 rounded bg-gray-200 text-gray-700 disabled:opacity-50"
+        title="Page suivante"
+      >
+        <i class="ri-arrow-right-s-line"></i>
+      </button>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-import { format } from "date-fns";
-import { fr, id } from "date-fns/locale";
+import { ref, onMounted, watch } from "vue";
 
 interface SimplifiedInvoice {
   id: number;
@@ -82,21 +118,43 @@ interface SimplifiedInvoice {
   invoiceDate: string | Date;
 }
 
+const props = defineProps<{ quoteId: number }>();
+
 const invoices = ref<SimplifiedInvoice[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
 const pdf = ref(null);
-const fetchAllInvoices = async () => {
+const pagination = ref({
+  total: 0,
+  page: 1,
+  pageSize: 10,
+  totalPages: 1,
+});
+const fetchInvoicesPaginated = async (page = 1, pageSize = 10) => {
   loading.value = true;
   error.value = null;
   try {
-    const response: SimplifiedInvoice[] = await $fetch<SimplifiedInvoice[]>(
-      `/api/invoices`
-    );
+    const userString = localStorage.getItem("user");
+    if (!userString) {
+      error.value = "Utilisateur non connecté";
+      loading.value = false;
+      return;
+    }
+    const user = JSON.parse(userString);
+    const userId = user.id;
 
-    invoices.value = response || [];
+    const res = await $fetch<any>("/api/invoices/pagination", {
+      params: { page, pageSize, id: userId },
+    });
+
+    invoices.value = res.data || [];
+    pagination.value = res.pagination || {
+      total: 0,
+      page: 1,
+      pageSize: 10,
+      totalPages: 1,
+    };
   } catch (err: any) {
-    console.error("Erreur lors du chargement des factures:", err);
     error.value =
       err.data?.statusMessage ||
       err.message ||
@@ -105,19 +163,27 @@ const fetchAllInvoices = async () => {
     loading.value = false;
   }
 };
-
+const goToPage = (p: number) => {
+  pagination.value.page = p;
+  fetchInvoicesPaginated(p, pagination.value.pageSize);
+};
 onMounted(() => {
-  fetchAllInvoices();
+  fetchInvoicesPaginated();
 });
 
+watch(
+  () => props.quoteId,
+  async (newId) => {
+    if (newId) await fetchInvoicesPaginated();
+  },
+  { immediate: true }
+);
+
 const formatDate = (dateString: string | Date) => {
-  if (!dateString) return "N/A";
-  try {
-    return format(new Date(dateString), "dd MMMM", { locale: fr });
-  } catch (e) {
-    console.error("Erreur de formatage de date:", e);
-    return "Date invalide";
-  }
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return "Date Invalide";
+  return date.toLocaleDateString("fr-FR");
 };
 
 const downloadInvoice = async (invoiceNumber: string) => {

@@ -10,20 +10,25 @@ export default defineNuxtConfig({
     plugins: {
       tailwindcss: {},
       autoprefixer: {},
-    },},
-    app: {
-      head: {
-        title: 'OpenCRM',
-        meta: [
-          { charset: 'utf-8' },
-          { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-          {  name: 'description', content: 'CRM pour agences digitales' }
-        ],
-        link: [
-          {      rel: 'stylesheet',
-            href: 'https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css',
-       }
-        ]
-      }
+    },
+  },
+  devServer: {
+    port: 3300
+  },
+  app: {
+    head: {
+      title: 'OpenCRM',
+      meta: [
+        { charset: 'utf-8' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+        {  name: 'description', content: 'CRM pour agences digitales' }
+      ],
+      link: [
+        {      
+          rel: 'stylesheet',
+          href: 'https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css',
+        }
+      ]
     }
+  }
 })

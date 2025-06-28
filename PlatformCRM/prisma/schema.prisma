@@ -10,7 +10,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -33,9 +33,11 @@ model User {
   adresse        String?
   company        String?
   industry       String?
+  contacts       String?
   clientProjects Project[]            @relation("CustomerProjects")
   clientQuote    Quote[]
   clientInvoice  Invoice[]
+  notification   Notification[]       @relation("UserNotifications")
 
   // Role management
   UserRole UserRole[]
@@ -72,6 +74,7 @@ model Project {
   description   String?
   users         EmployeeOnProjects[]
   projectQuote  Quote[]
+  notification  Notification[]       @relation("ProjectNotifications")
   projectStages ProjectStage[]
   tasks         Tasks[]              @relation("ProjectTasks")
   startDate     DateTime             @default(now()) @map("start_date")
@@ -88,37 +91,34 @@ model EmployeeOnProjects {
 }
 
 model ProjectStage {
-  id          Int                @id @default(autoincrement())
-  project     Project            @relation(fields: [projectId], references: [id])
+  id          Int          @id @default(autoincrement())
+  project     Project      @relation(fields: [projectId], references: [id])
   projectId   Int
   title       String
   description String?
   stages      cout_stage[]
-  status      ProjectStageStatus @default(A_VENIR)
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
-}
-
-enum ProjectStageStatus {
-  EN_COURS
-  A_VENIR
-  TERMINE
-  EN_ATTENTE
+  tasks       Tasks[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  endDate     DateTime?    @map("end_date")
 }
 
 model Tasks {
-  id          Int          @id @default(autoincrement())
-  employee    User         @relation("AssignedTasks", fields: [employeeId], references: [id])
-  project     Project      @relation("ProjectTasks", fields: [projectId], references: [id])
-  projectId   Int
-  employeeId  Int
-  title       String
-  description String
-  effort      Int?
-  priority    TaskPriority @default(BASSE)
-  status      TaskStatus   @default(A_FAIRE)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id             Int          @id @default(autoincrement())
+  employee       User         @relation("AssignedTasks", fields: [employeeId], references: [id])
+  project        Project      @relation("ProjectTasks", fields: [projectId], references: [id])
+  projectId      Int
+  employeeId     Int
+  title          String
+  description    String
+  effort         Int?
+  projectStage   ProjectStage @relation(fields: [projectStageId], references: [id])
+  projectStageId Int
+  priority       TaskPriority @default(BASSE)
+  status         TaskStatus   @default(A_FAIRE)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  endDate        DateTime?    @map("end_date")
 }
 
 enum TaskStatus {
@@ -135,18 +135,19 @@ enum TaskPriority {
 }
 
 model Quote {
-  id            Int          @id @default(autoincrement())
-  number        String       @unique
-  status        quoteStatus  @default(EN_ATTENTE)
-  customer      User         @relation(fields: [customerId], references: [id])
+  id            Int            @id @default(autoincrement())
+  number        String         @unique
+  status        quoteStatus    @default(EN_ATTENTE)
+  customer      User           @relation(fields: [customerId], references: [id])
   customerId    Int
-  project       Project      @relation(fields: [projectId], references: [id])
+  project       Project        @relation(fields: [projectId], references: [id])
   projectId     Int
   totalPrice    Float
   newTotalPrice Float?
+  notification  Notification[] @relation("QuoteNotifications")
   stages        cout_stage[]
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   Invoice       Invoice[]
 }
 
@@ -167,18 +168,19 @@ enum quoteStatus {
 }
 
 model Invoice {
-  id            Int           @id @default(autoincrement())
-  invoiceNumber String        @unique
-  quote         Quote         @relation(fields: [quoteId], references: [id])
+  id            Int            @id @default(autoincrement())
+  invoiceNumber String         @unique
+  quote         Quote          @relation(fields: [quoteId], references: [id])
   quoteId       Int
   totalAmount   Float
   amountPaid    Float
   balanceDue    Float
-  invoiceDate   DateTime      @default(now())
-  createdAt     DateTime      @default(now())
-  User          User?         @relation(fields: [userId], references: [id])
-  userId        Int?
-  paymentMethod paymentMethod @default(Cash)
+  notification  Notification[] @relation("InvoiceNotifications")
+  invoiceDate   DateTime       @default(now())
+  createdAt     DateTime       @default(now())
+  User          User?          @relation(fields: [userId], references: [id])
+  userId        Int
+  paymentMethod paymentMethod  @default(Cash)
 }
 
 enum paymentMethod {
@@ -186,4 +188,26 @@ enum paymentMethod {
   MTNMoney
   BankTransfer
   Cash
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  message   String
+  type      String // 'devis_valide', 'projet_cree', 'facture_envoyee', etc.
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  // L'utilisateur concerné (client, admin ou employé)
+  user   User? @relation("UserNotifications", fields: [userId], references: [id])
+  userId Int?
+
+  // Lien optionnel vers un devis, projet ou facture
+  quote     Quote?   @relation("QuoteNotifications", fields: [quoteId], references: [id])
+  quoteId   Int?
+  project   Project? @relation("ProjectNotifications", fields: [projectId], references: [id])
+  projectId Int?
+  invoice   Invoice? @relation("InvoiceNotifications", fields: [invoiceId], references: [id])
+  invoiceId Int?
+
+  @@index([userId])
 }

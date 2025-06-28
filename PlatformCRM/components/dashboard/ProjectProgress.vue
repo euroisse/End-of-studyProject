@@ -1,55 +1,53 @@
 <template>
-  <div class="bg-white rounded-lg shadow-md p-6 overflow-x-auto">
+  <div class="bg-white rounded-lg shadow-md p-6">
     <h2 class="text-lg font-semibold mb-4">Avancement des projets</h2>
-    <div class="space-y-8 min-w-[600px]">
+    <div v-if="projects.length === 0" class="text-gray-500 text-center py-4">
+      Aucun projet attribué pour le moment.
+    </div>
+    <div v-else class="space-y-12 min-w-[600px]">
       <div
-        v-for="(project, index) in projects"
-        :key="index"
-        class="border-b pb-6 last:border-b-0 last:pb-0 md:items-center"
+        v-for="project in projects"
+        :key="project.id"
+        class="border-b pb-6 last:border-b-0 last:pb-0"
       >
-        <div class="mb-2 md:mb-0 md:flex-1">
-          <div class="flex items-center mb-1 md:block md:mb-2">
-            <div class="flex justify-between">
-              <h3 class="font-medium text-gray-800">{{ project.name }}</h3>
-              <span
-                :class="`px-2 py-1 rounded-full text-xs ${project.statusClass}`"
-                >{{ project.status }}</span
-              >
-            </div>
-          </div>
-          <div class="flex items-center space-x-2 md:space-x-4">
+        <div class="mb-4">
+          <h3 class="font-semibold text-gray-800 text-lg">
+            {{ project.title }}
+          </h3>
+        </div>
+        <div class="flex items-center justify-center relative">
+          <template
+            v-for="(stage, stageIndex) in project.projectStages"
+            :key="stage.id"
+          >
+            <!-- Ligne de progression -->
             <div
-              v-for="(step, stepIndex) in project.steps"
-              :key="stepIndex"
-              class="flex-1 relative"
-            >
-              <div class="flex items-center">
-                <div
-                  :class="`w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center ${
-                    step.completed ? 'bg-green-500' : 'bg-gray-200'
-                  }`"
-                >
-                  <i
-                    :class="`ri-${step.icon} ${
-                      step.completed ? 'text-white' : 'text-gray-500'
-                    } text-sm md:text-base`"
-                  ></i>
-                </div>
-                <div
-                  v-if="stepIndex < project.steps.length - 1"
-                  :class="`flex-1 h-0.5 md:h-1 mx-1 md:mx-2 ${
-                    step.completed ? 'bg-green-500' : 'bg-gray-200'
-                  }`"
-                ></div>
+              v-if="stageIndex !== 0"
+              class="h-1 bg-gray-300 flex-1 mx-1"
+              style="min-width: 40px"
+            ></div>
+            <!-- Etape -->
+            <div class="flex flex-col items-center min-w-[70px]">
+              <div
+                :class="[
+                  'w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold relative z-10 transition-colors duration-300 shadow',
+                  getStageColor(getProjectStageStatus(stage.tasks || [])),
+                ]"
+              >
+                <i
+                  :class="
+                    getIconClass(getProjectStageStatus(stage.tasks || []))
+                  "
+                  class="text-2xl"
+                ></i>
               </div>
               <div
-                class="absolute -bottom-5 left-0 text-xs text-gray-500 md:static md:text-sm md:mt-2"
+                class="mt-2 text-xs text-gray-700 text-center font-medium w-16 truncate"
               >
-                <div>{{ step.name }}</div>
-                <div class="whitespace-nowrap">{{ step.date }}</div>
+                {{ stage.title }}
               </div>
             </div>
-          </div>
+          </template>
         </div>
       </div>
     </div>
@@ -57,19 +55,64 @@
 </template>
 
 <script setup lang="ts">
+import type { Project, Tasks } from "~/generated/prisma";
+
+type ProjectStageStatus = "A_VENIR" | "EN_COURS" | "TERMINE" | "EN_ATTENTE";
+
+interface ProjectStage {
+  id: number;
+  projectId: number;
+  title: string;
+  description: string;
+  tasks?: Tasks[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ExtendedProject extends Project {
+  projectStages: ProjectStage[];
+}
+
 defineProps<{
-  projects: {
-    name: string;
-    status: string;
-    statusClass: string;
-    steps: {
-      name: string;
-      icon: string;
-      completed: boolean;
-      date: string;
-    }[];
-  }[];
+  projects: ExtendedProject[];
 }>();
+
+function getProjectStageStatus(tasks: Tasks[] = []): ProjectStageStatus {
+  // console.log("Tâches reçues pour l'étape :", tasks);
+  if (!tasks || tasks.length === 0) return "A_VENIR";
+  if (tasks.every((task) => task.status === "TERMINE")) return "TERMINE";
+  if (tasks.some((task) => task.status === "EN_COURS")) return "EN_COURS";
+  if (tasks.some((task) => task.status === "A_FAIRE")) return "EN_COURS";
+  return "EN_COURS";
+}
+
+const getIconClass = (status: ProjectStageStatus) => {
+  return (
+    {
+      TERMINE: "ri-checkbox-circle-fill",
+      EN_COURS: "ri-code-fill",
+      A_VENIR: "ri-time-line",
+      EN_ATTENTE: "ri-pause-circle-line",
+    }[status] || "ri-question-line"
+  );
+};
+
+const getStageColor = (status: ProjectStageStatus) => {
+  return (
+    {
+      TERMINE: "bg-green-500",
+      EN_COURS: "bg-indigo-500",
+      A_VENIR: "bg-gray-300",
+      EN_ATTENTE: "bg-yellow-400",
+    }[status] || "bg-gray-300"
+  );
+};
+
+console.log("Projets reçus dans ProjectProgress :", projects);
 </script>
 
-<style scoped></style>
+<style scoped>
+.min-w-\[70px\] {
+  min-width: 70px;
+}
+</style>

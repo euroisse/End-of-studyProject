@@ -1,0 +1,10 @@
+node_modules
+.git
+.gitignore
+.env # Si vous ne voulez pas copier votre fichier .env local dans l'image
+dist
+build
+.nuxt
+.output/public # Si Nuxt sort un dossier public séparé qui n'est pas nécessaire pour le serveur
+npm-debug.log
+yarn-error.log

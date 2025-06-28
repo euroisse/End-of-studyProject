@@ -1,33 +1,44 @@
 <template>
-  <div class="bg-white rounded-lg shadow-md p-6 h-full">
+  <div class="bg-white rounded-lg shadow-md p-6 h-full w-full flex flex-col">
     <div class="flex justify-between items-center mb-6">
-      <h2 class="text-lg font-semibold text-gray-800">Factures</h2>
-      <Button
-        content="Voir tout"
-        customClass="text-indigo-600 hover:text-indigo-700 text-sm font-medium cursor-pointer whitespace-nowrap"
-      />
+      <h2 class="text-lg font-bold text-gray-800">Factures</h2>
+      <NuxtLink
+        v-if="isClient"
+        to="/factures"
+        class="text-gray-600 hover:text-indigo-700 text-sm font-medium cursor-pointer whitespace-nowrap"
+      >
+        Voir tout
+      </NuxtLink>
     </div>
 
-    <div class="space-y-4">
+    <div>
       <div
-        v-for="(invoice, index) in invoices"
-        :key="index"
-        class="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+        v-if="invoices.length === 0"
+        class="col-span-full text-gray-500 text-center py-4"
       >
-        <div class="flex items-center">
-          <i class="ri-bill-line text-indigo-600 mr-4"></i>
-          <div>
-            <h4 class="font-medium">{{ invoice.number }}</h4>
-            <p class="text-sm text-gray-500">Échéance: {{ invoice.dueDate }}</p>
-          </div>
-        </div>
-        <div class="flex items-center">
-          <span
-            class="px-3 py-1 rounded-full text-sm font-medium"
-            :class="invoice.statusClass"
-            >{{ invoice.status }}</span
+        Aucune facture disponible pour le moment.
+      </div>
+      <div v-else class="w-full grid grid-cols-1 sm:grid-cols-1 gap-4">
+        <div
+          v-for="invoice in invoices"
+          :key="invoice.id"
+          class="flex items-center gap-4 p-4 bg-[#F9FAFB] rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-transparent hover:border-indigo-400 cursor-pointer"
+        >
+          <div
+            class="flex-shrink-0 flex items-center justify-center w-14 h-14 rounded-full bg-gray-100"
           >
-          <span class="ml-4 font-medium">{{ invoice.amount }}</span>
+            <i class="ri-bill-line text-gray-600 text-2xl"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between">
+              <h4 class="font-semibold text-gray-800 truncate">
+                {{ invoice.invoiceNumber }}
+              </h4>
+            </div>
+            <div class="text-xs text-gray-500 mt-1">
+              Date : {{ formatDate(invoice.invoiceDate) }}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -36,15 +47,29 @@
 
 <script setup lang="ts">
 import Button from "../iu/Button.vue";
-defineProps<{
-  invoices: {
-    number: string;
-    dueDate: string;
-    status: string;
-    statusClass: string;
-    amount: string;
-  }[];
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+const { isClient } = useIsRole();
+interface SimplifiedInvoice {
+  id: number;
+  invoiceNumber: string;
+  invoiceDate: string | Date;
+  totalAmount: number;
+}
+
+const props = defineProps<{
+  invoices: SimplifiedInvoice[];
 }>();
+
+const formatDate = (dateString: string | Date) => {
+  if (!dateString) return "N/A";
+  try {
+    return format(new Date(dateString), "dd/MM/yyyy", { locale: fr });
+  } catch (e) {
+    console.error("Erreur de formatage de date:", e);
+    return "Date invalide";
+  }
+};
 </script>
 
 <style scoped></style>

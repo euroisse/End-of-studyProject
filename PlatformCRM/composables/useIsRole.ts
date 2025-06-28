@@ -4,7 +4,6 @@ export const useIsRole = () => {
   const userString = ref<string | null>(null);
 
   onMounted(() => {
-    if (import.meta.server) return
     userString.value = localStorage.getItem('user');
   });
 
@@ -35,15 +34,13 @@ export const useIsRole = () => {
   const userName = computed(() => {
     return user.value?.name ?? null;
   });
-const loggedInEmployeeId = computed(() => {
-    return user.value?.employeeId ?? null;
-  });
-  console.log(loggedInEmployeeId.value);
+
+  
   return {
     isEmploye,
     isClient,
     isAdmin,
     userName,
-    loggedInEmployeeId,
+    
   };
 };

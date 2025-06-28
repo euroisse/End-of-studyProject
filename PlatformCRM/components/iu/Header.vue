@@ -1,7 +1,9 @@
 <template>
   <header class="fixed top-0 left-0 right-0 bg-white shadow-md z-50">
     <div class="container mx-auto px-6 py-4 flex items-center justify-between">
-      <div class="flex items-center">
+      <div
+        class="flex items-center gap-4 flex-shrink-0 h-12 border-b bg-white border-gray-200"
+      >
         <h1 class="text-2xl font-bold text-indigo-700">OpenCRM</h1>
       </div>
       <div
@@ -32,13 +34,6 @@
               content="Se connecter"
               customClass="text-indigo-500 hover:text-indigo-800 font-medium whitespace-nowrap cursor-pointer !rounded-button"
               @click="$emit('open-login')"
-            />
-
-            <Button
-              v-if="!isLoggedIn"
-              content=" Créer un compte"
-              customClass="bg-indigo-500 hover:bg-indigo-800 text-white px-4 py-2 rounded-lg shadow-md transition-all whitespace-nowrap cursor-pointer !rounded-button"
-              @click="$emit('open-register')"
             />
             <NuxtLink v-if="isLoggedIn" to="/dashboard">
               <Button
@@ -80,7 +75,7 @@ const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value;
 };
 const { isLoggedIn, updateLoginStatus } = useIsLogin();
-
+const { isAdmin } = useIsRole();
 defineEmits(["open-login", "open-register"]);
 
 const handleLogout = () => {

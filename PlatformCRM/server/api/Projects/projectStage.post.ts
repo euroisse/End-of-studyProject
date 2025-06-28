@@ -1,14 +1,11 @@
+// server/api/Projects/projectStage.ts
 import prisma from '~/server/database';
-import type { ProjectStage, ProjectStageStatus } from '~/generated/prisma';
-
 
 export default defineEventHandler(async (event) => {
-
   if (event.node.req.method === 'POST') {
-
     try {
       const body = await readBody(event);
-      const { projectId, title, description, status } = body;
+      const { projectId, title, description, tasks,endDate  } = body;
 
       if (!projectId || !title) {
         throw createError({
@@ -18,7 +15,7 @@ export default defineEventHandler(async (event) => {
       }
 
       const projectExists = await prisma.project.findUnique({
-        where: { id: Number(projectId) }, // Assurez-vous que projectId est bien un nombre ici
+        where: { id: Number(projectId) },
       });
 
       if (!projectExists) {
@@ -28,28 +25,42 @@ export default defineEventHandler(async (event) => {
         });
       }
 
-      const newProjectStage: ProjectStage = await prisma.projectStage.create({
+      const newProjectStage = await prisma.projectStage.create({
         data: {
           projectId: Number(projectId),
-            title: title as string,
-            description: description as string | undefined,
-            status: status as ProjectStageStatus | undefined,
+          title: title as string,
+          description: description as string | undefined,
+           endDate: endDate ? new Date(endDate) : null,
+          tasks: tasks && Array.isArray(tasks) && tasks.length > 0
+            ? {
+                create: tasks.map((task: any) => ({
+                  title: task.title,
+                  description: task.description,
+                  employeeId: task.employeeId,
+                  projectId: Number(projectId), 
+                  priority: task.priority ?? 'BASSE',
+                  status: task.status ?? 'A_FAIRE',
+                  effort: task.effort,
+                 
+                })),
+              }
+            : undefined, 
         },
+        include: { tasks: true }, 
       });
 
       return newProjectStage;
     } catch (error: any) {
-        console.error('Error creating project stage:', error);
-        return createError({
+      console.error('Error creating project stage:', error);
+      return createError({
         statusCode: error.statusCode || 500,
         statusMessage: error.message || 'Failed to create project stage',
       });
     }
   } else {
-
     throw createError({
-        statusCode: 405,
-        statusMessage: 'Method Not Allowed',
+      statusCode: 405,
+      statusMessage: 'Method Not Allowed',
     });
-    }
+  }
 });

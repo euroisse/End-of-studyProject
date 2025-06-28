@@ -23,7 +23,7 @@
           </div>
           <div
             v-if="isSubMenuOpen(item.label)"
-            class="bg-white absolute left-full top-0 shadow-md rounded-md w-48 p-3 z-20"
+            class="bg-white absolute left-full shadow-md rounded-md w-48 p-3"
           >
             <NuxtLink
               v-for="child in item.children"
@@ -39,7 +39,7 @@
         </template>
         <template v-else-if="item.label === 'Déconnexion'">
           <button
-            @click="showLogoutConfirmation = true"
+            @click="$emit('logout')"
             class="flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 w-full text-left"
           >
             <i :class="`${item.icon} w-5`"></i>
@@ -81,43 +81,15 @@
         </template>
       </template>
     </nav>
-
-    <div
-      v-if="showLogoutConfirmation"
-      class="fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center z-30"
-    >
-      <div class="bg-white rounded-md shadow-lg p-6">
-        <p class="mb-4 text-lg font-semibold text-gray-800">
-          Êtes-vous sûr de vouloir vous déconnecter ?
-        </p>
-        <div class="flex justify-end space-x-2">
-          <button
-            @click="showLogoutConfirmation = false"
-            class="px-4 py-2 text-gray-600 bg-gray-200 rounded-md hover:bg-gray-300"
-          >
-            Annuler
-          </button>
-          <button
-            @click="logoutUser"
-            class="px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700"
-          >
-            Déconnexion
-          </button>
-        </div>
-      </div>
-    </div>
   </aside>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 
 const route = useRoute();
-const router = useRouter();
-
-const showLogoutConfirmation = ref(false);
-
+const emit = defineEmits(["logout"]);
 const activeSubMenu = ref<string | null>(null);
 
 const { isEmploye, isClient, isAdmin } = useIsRole();
@@ -141,16 +113,7 @@ const employeMenu: MenuItem[] = [
     to: "/dashboard",
     icon: "ri-dashboard-line",
   },
-  { label: "Clients", to: "/clients", icon: "ri-user-3-line" },
   { label: "Projets", to: "/projects", icon: "ri-projector-2-line" },
-  {
-    label: "Factures & Devis",
-    icon: "ri-file-line",
-    children: [
-      { label: "Factures", to: "/factures" },
-      { label: "Devis", to: "/devis" },
-    ],
-  },
   {
     label: "Messages",
     to: "/messages",
@@ -187,17 +150,14 @@ const clientMenu: MenuItem[] = [
 ];
 
 const adminMenu: MenuItem[] = [
-  { label: "Projets", to: "/projects", icon: "ri-projector-2-line" },
-
-  { label: "Clients", to: "/clients", icon: "ri-user-3-line" },
   {
-    label: "Factures & Devis",
-    icon: "ri-file-line",
-    children: [
-      { label: "Factures", to: "/factures" },
-      { label: "Devis", to: "/devis" },
-    ],
+    label: "Tableau de bord",
+    to: "/dashboard",
+    icon: "ri-dashboard-line",
   },
+  { label: "Projets", to: "/projects", icon: "ri-projector-2-line" },
+  { label: "Devis", to: "/devis", icon: "ri-file-line" },
+  { label: "Utilisateurs", to: "/utilisateurs", icon: "ri-group-line" },
   { label: "Déconnexion", icon: "ri-logout-box-line" },
 ];
 
@@ -223,15 +183,27 @@ const toggleSubMenu = (label: string) => {
 };
 
 const isSubMenuOpen = (label: string) => activeSubMenu.value === label;
-const isActive = (path: string) => route.path === path;
+const isActive = (path: string) => {
+  // Active si le chemin correspond exactement OU si on est sur une sous-page
+  if (path === "/projects") {
+    return route.path === "/projects" || route.path.startsWith("/projects/");
+  }
+  if (path === "/utilisateurs") {
+    return (
+      route.path === "/utilisateurs" ||
+      route.path.startsWith("/employee/") ||
+      route.path.startsWith("/clients/")
+    );
+  }
+  if (path === "/devis") {
+    // Active sur /devis et toutes les pages de détail de devis
+    return route.path === "/devis" || route.path.startsWith("/quotes/");
+  }
+  return route.path === path;
+};
 const isChildActive = (item: MenuItem) =>
   item.children?.some((child: ChildMenuItem) => isActive(child.to));
 const getNotificationCount = (path: string) => (path === "/messages" ? 3 : 0);
-const logoutUser = () => {
-  localStorage.removeItem("user");
-  console.log("Déconnexion de l'utilisateur...");
-  router.push("/");
-};
 
 watch(() => route.path, closeSubMenus);
 
@@ -245,7 +217,7 @@ onMounted(() => {
   });
 
   const currentPath = route.path;
-  for (const item of [...employeMenu, ...clientMenu]) {
+  for (const item of [...clientMenu]) {
     if (item.children?.some((child) => child.to === currentPath)) {
       activeSubMenu.value = item.label;
       break;

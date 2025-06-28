@@ -1,26 +1,20 @@
 <template>
   <div
     v-if="project"
-    class="bg-white rounded-lg shadow-sm p-4 md:p-6 hover:shadow-md transition-shadow grid grid-cols-1 gap-y-3 md:gap-y-4"
+    class="bg-white rounded-lg shadow-sm p-4 md:p-6 hover:shadow-md transition-shadow grid grid-cols-1 gap-y-2 md:gap-y-4"
   >
     <div class="flex justify-between items-start">
       <h3 class="text-base font-semibold text-gray-800 sm:text-lg">
         {{ project.title }}
       </h3>
-      <span
-        :class="getStatusClass(project.status)"
-        class="px-2 py-1 md:px-1 md:py-1 rounded-full text-xs font-medium"
-      >
-        {{ project.status }}
-      </span>
     </div>
 
     <div>
-      <span class="flex items-center text-gray-500 text-sm">
-        <i class="ri-building-2-fill text-base text-gray-500 sm:text-sm"></i>
-        {{ project.customer?.name }}
+      <span class="flex items-center text-gray-500 text-sm mb-2">
+        <i class="ri-user-2-line text-base text-gray-500 sm:text-sm mr-2"></i>
+        {{ project.customer.name }}
       </span>
-      <div class="flex justify-between text-xs text-gray-600 mb-1 md:mb-2">
+      <div class="flex justify-between text-xs text-gray-600 mb-3 md:mb-2">
         <span>Progression</span>
         <span>{{ calculateProgress }}%</span>
       </div>
@@ -33,12 +27,12 @@
     </div>
 
     <div class="flex justify-between items-center text-xs text-gray-600">
-      <span>Mise à jour: {{ formattedLastUpdate }}</span>
+      <span>Mise à jour : {{ formattedLastUpdate }}</span>
       <button
         @click="goToProjectDetails(project.id)"
-        class="text-indigo-600 hover:text-indigo-800 cursor-pointer"
+        class="text-gray-600 hover:text-indigo-800 cursor-pointer"
       >
-        <i class="ri-arrow-right-s-line"></i>
+        <i class="ri-arrow-right-s-line text-lg"></i>
       </button>
     </div>
   </div>
@@ -50,39 +44,62 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useRouter } from "vue-router";
 
-import type { Project } from "~/types";
-const { isEmploye } = useIsRole();
+import type { ProjectWithProjectStages } from "~/types";
+
 const props = defineProps<{
-  project: Project;
-  getStatusClass: (
-    status: "EN_COURS" | "A_VENIR" | "TERMINE" | "EN_ATTENTE"
-  ) => string;
+  project: ProjectWithProjectStages;
 }>();
 
-const { project, getStatusClass } = props;
+const { project } = props;
 const router = useRouter();
 
 const formattedLastUpdate = computed(() => {
-  if (!project.updatedAt) return "Non défini";
+  if (!project.startDate) return "Non défini";
 
-  const date = new Date(project.updatedAt);
+  const date = new Date(project.startDate);
   if (isNaN(date.getTime())) return "Date invalide";
 
   return format(date, "dd MMMM yyyy", { locale: fr });
 });
 
+const isStageCompleted = (stage: any) => {
+  // Une étape sans tâche n'est pas prise en compte dans la progression
+  if (!stage.tasks || stage.tasks.length === 0) return false;
+  // Toutes les tâches doivent être terminées
+  return stage.tasks.every((task: any) => task.status === "TERMINE");
+};
+
 const calculateProgress = computed(() => {
   if (!project.projectStages || project.projectStages.length === 0) {
     return 0;
   }
-  const completedStages = project.projectStages.filter(
-    (stage) => stage.status === "TERMINE"
-  ).length;
-  return Math.round((completedStages / project.projectStages.length) * 100);
+  // On ne prend en compte que les étapes qui ont des tâches
+  const stagesWithTasks = project.projectStages.filter(
+    (stage: any) => stage.tasks && stage.tasks.length > 0
+  );
+  const totalStages = stagesWithTasks.length;
+  if (totalStages === 0) return 0;
+
+  const completedStages = stagesWithTasks.filter(isStageCompleted).length;
+
+  // Si au moins une étape est terminée, commence à remplir la barre (minimum 10%)
+  if (completedStages > 0 && completedStages < totalStages) {
+    const percent = Math.round((completedStages / totalStages) * 100);
+    return Math.max(percent, 10);
+  }
+
+  // Si toutes les étapes sont terminées, 100%
+  if (completedStages === totalStages) {
+    return 100;
+  }
+
+  // Sinon, 0%
+  return 0;
 });
 
 const goToProjectDetails = (id: number) => {
   console.log("Navigating to project ID:", id);
+  // projectStore.setSelectedProjectToEdit(project);
   router.push(`/projects/${id}`);
 };
 </script>

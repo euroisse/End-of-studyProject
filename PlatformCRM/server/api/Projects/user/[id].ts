@@ -1,5 +1,6 @@
 import prisma from '~/server/database';
 import type { Project } from '~/generated/prisma';
+import tasks from '../../Tasks/tasks';
 
 
 export default defineEventHandler(async (event) => {
@@ -48,8 +49,12 @@ export default defineEventHandler(async (event) => {
                             employee: true,
                         },
                     },
-                    projectStages: true,
-                    tasks: { 
+                    projectStages: {
+                        include: {
+                            tasks: true,
+                        },
+                    },
+                    tasks: {
                         include: {
                             employee: true
                         }
@@ -64,7 +69,11 @@ export default defineEventHandler(async (event) => {
                 },
                 include: {
                     customer: true,
-                    projectStages: true,
+                    projectStages: {
+                        include: {
+                            tasks: true,
+                        },
+                    },
                     users: { 
                         include: {
                             employee: true,
@@ -86,7 +95,10 @@ export default defineEventHandler(async (event) => {
                 },
                 include: {
                     customer: true,
-                    projectStages: true,
+                    projectStages: {
+                        include: {
+                            tasks: true,
+                    },},
                     tasks: {
                         where: { employeeId: userId }, 
                         include: {          

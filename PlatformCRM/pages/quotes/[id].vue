@@ -3,14 +3,11 @@
     <div v-if="quoteDetails">
       <div class="flex items-center justify-between mb-4">
         <div class="flex items-center">
-          <button
-            @click="$router.back()"
-            class="text-gray-400 hover:text-gray-600"
-          >
-            <i class="ri-arrow-go-back-line mr-2"></i>
-          </button>
+          <NuxtLink to="/devis" class="text-gray-400 hover:text-gray-600">
+            <i class="ri-arrow-left-s-line text-xl mr-2 mt-1"></i>
+          </NuxtLink>
           <h1 class="text-2xl font-bold text-gray-800 mr-6">
-            Devis #{{ quoteDetails.number }}
+            Devis <span class="text-green-500">#{{ quoteDetails.number }}</span>
           </h1>
           <button
             v-if="quoteDetails.status === 'EN_ATTENTE' && isClient"
@@ -42,71 +39,98 @@
         </div>
       </div>
 
-      <p class="text-gray-600 font-bold">
-        Client: {{ quoteDetails.customer?.name || "N/A" }}
+      <p class="text-gray-600 font-bold ml-3 mb-1 tracking-wider">
+        Client:
+        <span class="text-gray-600 font-normal capitalize tracking-wider">{{
+          quoteDetails.customer?.name || "N/A"
+        }}</span>
       </p>
-      <p class="text-gray-600 font-bold">
-        Projet: {{ quoteDetails.project?.title || "N/A" }}
+      <p class="text-gray-600 font-bold ml-3 mb-1 tracking-wider">
+        Projet:
+        <span class="text-gray-600 font-normal capitalize tracking-wider">
+          {{ quoteDetails.project?.title || "N/A" }}</span
+        >
       </p>
-      <p class="text-gray-600 font-bold">
-        Date de livraison estimée:
-        {{
-          quoteDetails.dateLivraison
-            ? formatDate(quoteDetails.dateLivraison)
-            : "N/A"
-        }}
+      <p class="text-gray-600 font-bold ml-3 mb-1 tracking-wider">
+        Date:
+        <span class="text-gray-600 font-normal capitalize tracking-wider">
+          {{
+            quoteDetails.createdAt ? formatDate(quoteDetails.createdAt) : "N/A"
+          }}</span
+        >
       </p>
-      <p
-        class="text-lg font-bold mt-4"
-        :class="quoteDetails.newTotalPrice ? 'text-red-600' : 'text-gray-800'"
-      >
+      <p class="text-lg font-bold mt-4 ml-3 text-gray-800">
         Prix Total:
-        {{
-          formatPrice(
-            quoteDetails.newTotalPrice !== null &&
-              quoteDetails.newTotalPrice !== undefined
-              ? quoteDetails.newTotalPrice
-              : quoteDetails.totalPrice
-          )
-        }}
-        CFA
+        <span
+          v-if="quoteDetails.newTotalPrice"
+          class="line-through text-gray-500 mr-2"
+        >
+          {{ formatPrice(quoteDetails.totalPrice) }} CFA
+        </span>
+        <span
+          :class="quoteDetails.newTotalPrice ? 'text-red-600' : 'text-gray-800'"
+        >
+          {{
+            formatPrice(
+              quoteDetails.newTotalPrice !== null &&
+                quoteDetails.newTotalPrice !== undefined
+                ? quoteDetails.newTotalPrice
+                : quoteDetails.totalPrice
+            )
+          }}
+          CFA
+        </span>
       </p>
     </div>
     <div v-else class="text-center py-8">
       <p class="text-gray-500">Chargement des détails du devis...</p>
     </div>
 
-    <div class="space-y-6 mt-6" v-if="quoteDetails">
-      <h2 class="text-xl font-semibold text-gray-700">Étapes du devis</h2>
-      <div class="relative border-l-2 border-gray-200 pl-6 space-y-10">
+    <div class="space-y-6 mt-10" v-if="quoteDetails">
+      <h2 class="text-2xl font-semibold text-gray-800 ml-3">Étapes du devis</h2>
+      <div class="relative pl-8 py-2">
+        <div
+          class="absolute left-[17px] top-0 bottom-0 w-1 bg-blue-200 rounded-full"
+        ></div>
+
         <div
           v-for="(stage, index) in quoteDetails.stages"
           :key="stage.projectStageId"
-          class="relative"
+          class="relative mb-8 last:mb-0"
         >
-          <span
-            class="absolute -left-[9px] top-1.5 w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow"
-          ></span>
-          <div class="bg-gray-50 p-4 rounded-xl shadow-sm">
-            <div class="flex justify-between items-center mb-1">
-              <h3 class="text-lg font-medium text-gray-800">
+          <div
+            class="absolute -left-1 top-0 flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 text-white shadow-lg"
+          >
+            <i :class="getStageIcon(index)"></i>
+          </div>
+
+          <div
+            class="bg-white p-5 rounded-xl shadow-md border border-gray-200 ml-8"
+          >
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="text-xl font-semibold text-blue-700">
                 {{ stage.projectStage.title }}
               </h3>
-              <span class="text-blue-600 font-semibold">
-                {{ stage.prix }} CFA
+              <span class="text-blue-600 font-bold text-lg whitespace-nowrap">
+                {{ formatPrice(stage.prix) }} CFA
               </span>
             </div>
-            <p class="text-gray-600 text-sm">
-              {{ stage.projectStage.description || "Pas de description." }}
+            <p class="text-gray-700 text-base leading-relaxed">
+              {{
+                stage.projectStage.description ||
+                "Pas de description détaillée pour cette étape."
+              }}
             </p>
           </div>
         </div>
-        <p v-if="quoteDetails.stages.length === 0" class="text-gray-500">
+        <p
+          v-if="quoteDetails.stages.length === 0"
+          class="text-gray-500 text-center py-4 ml-8"
+        >
           Aucune étape définie pour ce devis.
         </p>
       </div>
     </div>
-
     <hr class="my-10 border-gray-200" />
 
     <div class="flex justify-end">
@@ -119,14 +143,30 @@
         Créer une Facture
       </button>
     </div>
-    <InvoiceTable v-if="quoteDetails" :quoteId="quoteDetails.id" />
 
-    <div v-else class="text-center text-gray-600 py-4">
+    <InvoiceTable
+      v-if="quoteDetails && isAdmin && quoteDetails.status !== 'EN_ATTENTE'"
+      :quoteId="quoteDetails.id"
+      :key="quoteDetails.id"
+    />
+
+    <div
+      v-else-if="
+        quoteDetails && isAdmin && quoteDetails.status === 'EN_ATTENTE'
+      "
+      class="text-center text-gray-600 py-4"
+    >
+      <p>Les factures seront affichées une fois le devis validé.</p>
+    </div>
+
+    <div v-else-if="!quoteDetails" class="text-center text-gray-600 py-4">
       <p>Chargement des factures du devis...</p>
     </div>
+
     <CreateInvoiceModal
       v-if="showCreateInvoiceModal && selectedQuoteForInvoice"
       :quoteId="selectedQuoteForInvoice.id"
+      :quoteTotalPrice="getDisplayPrice(selectedQuoteForInvoice)"
       @close="showCreateInvoiceModal = false"
       @success="handleInvoiceCreationSuccess"
     />
@@ -142,6 +182,7 @@ import { useQuoteStore } from "#imports";
 import type { quote } from "~/types";
 import CreateInvoiceModal from "~/components/invoices/CreateInvoiceModal.vue";
 import InvoiceTable from "~/components/invoices/InvoiceTable.vue";
+import { NuxtLink } from "#components";
 
 definePageMeta({ layout: "admin" });
 
@@ -151,6 +192,7 @@ const { isClient, isAdmin } = useIsRole();
 const quoteDetails = ref<quote | null>(null);
 const showCreateInvoiceModal = ref(false);
 const selectedQuoteForInvoice = ref<quote | null>(null);
+
 watch(
   () => route.params.id,
   async (newId) => {
@@ -180,7 +222,7 @@ async function fetchQuoteData(id: number) {
 const formatDate = (dateStr: string) => {
   if (!dateStr) return "N/A";
   try {
-    return format(new Date(dateStr), "dd MMMM yyyy à HH:mm", { locale: fr });
+    return format(new Date(dateStr), "dd MMMM 'à' HH:mm", { locale: fr });
   } catch (e) {
     console.error("Erreur de formatage de date:", e);
     return "Date invalide";
@@ -193,7 +235,20 @@ const formatPrice = (price: number): string => {
     maximumFractionDigits: 2,
   });
 };
-
+const getDisplayPrice = (quoteItem: quote): number => {
+  if (
+    quoteItem.newTotalPrice !== undefined &&
+    quoteItem.newTotalPrice !== null
+  ) {
+    return quoteItem.newTotalPrice;
+  } else if (
+    quoteItem.totalPrice !== undefined &&
+    quoteItem.totalPrice !== null
+  ) {
+    return quoteItem.totalPrice;
+  }
+  return 0;
+};
 const statusClass = (status: string) => {
   switch (status) {
     case "ACCEPTE":
@@ -207,10 +262,23 @@ const statusClass = (status: string) => {
   }
 };
 
+const getStageIcon = (index: number) => {
+  const icons = [
+    "ri-lightbulb-line",
+    "ri-pencil-ruler-2-line",
+    "ri-tools-line",
+    "ri-check-double-line",
+    "ri-flag-line",
+    "ri-arrow-right-circle-line",
+  ];
+  return icons[index] || "ri-arrow-right-circle-line";
+};
+
 const downloadPDF = async () => {
-  if (quoteDetails.value) {
-    console.log("Télécharger PDF pour le devis :", quoteDetails.value.id);
-  }
+  if (!quoteDetails.value) return;
+  const id = quoteDetails.value.id;
+  const url = `/api/quotes/${id}/pdf`;
+  window.open(url, "_blank");
 };
 
 async function validateQuote() {
@@ -220,7 +288,7 @@ async function validateQuote() {
       await fetchQuoteData(quoteDetails.value.id);
       console.log(`Le devis ${quoteDetails.value.id} validé avec succès`);
     } catch (error) {
-      console.log("Erreur lors de la validation", error);
+      console.error("Erreur lors de la validation", error);
     }
   }
 }
@@ -234,3 +302,5 @@ const handleInvoiceCreationSuccess = async () => {
   await fetchQuoteData(Number(route.params.id));
 };
 </script>
+
+<style scoped></style>

@@ -1,0 +1,45 @@
+name: Deploy to VPS
+on: 
+    push:
+        branches:
+            - develop
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Deploy on VPS
+        uses: appleboy/ssh-action@v0.1.7
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_IP: ${{ secrets.VPS_IP }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+        with: 
+          host: ${{ secrets.VPS_IP }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            # Aller dans le répertoire du projet
+            cd /home/$VPS_USER/End-of-studyProject/PlatformCRM
+            
+            # Pull les dernières modifications depuis Git
+            git pull origin develop
+            
+            # Arrêter les conteneurs existants
+            docker compose down
+            
+            # Builder l'image de l'application avec les dernières modifications
+            docker compose build --no-cache app
+            
+            # Démarrer les services avec docker-compose
+            docker compose up -d
+            
+            # Nettoyer les anciennes images non utilisées
+            docker image prune -f
+            
+            # Afficher les logs pour vérifier le déploiement
+            docker compose logs --tail=20
+      

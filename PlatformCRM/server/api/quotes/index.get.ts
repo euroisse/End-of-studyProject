@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
         stages: true, 
       },
       orderBy: {
-        createdAt: 'desc'
+        createdAt: 'asc'
       }
     });
 
