@@ -9,8 +9,7 @@ RUN corepack enable
 COPY package.json ./
 
 # Install dependencies
-RUN apk add --no-cache netcat-openbsd dos2unix openssl && \
-    npm install -g prisma && \
+RUN npm install -g prisma && \
     npm install
 
 # Copy the entire project
@@ -23,12 +22,21 @@ ENV DATABASE_URL=$DATABASE_URL
 RUN dos2unix ./scripts/deploy.sh && \
     chmod +x ./scripts/deploy.sh
 
-RUN npm run build
-
 
 #Définir le point d'entrée
 SHELL [ "/bin/sh", "-c" ]
 ENTRYPOINT [ "/bin/sh", "./scripts/deploy.sh" ]
+
+# Declare build arguments
+ARG PORT
+ARG HOST
+
+# Set environment variables from build arguments
+ENV PORT=${PORT}
+ENV HOST=${HOST}
+ENV NODE_ENV="prod"
+
+EXPOSE ${PORT}
 
 # Build Stage 2
 
