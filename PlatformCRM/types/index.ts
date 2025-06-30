@@ -224,3 +224,51 @@ export interface EmployeeDisplayData {
   post?: string;
   project?: string;
 }
+
+export interface Notification {
+  id: number;
+  message: string;
+  type: string; 
+  read: boolean;
+  createdAt: string; 
+  // Champs optionnels qui peuvent être présents selon le type de notification
+  userId: number;
+  quoteId?: number;
+  projectId?: number;
+  invoiceId?: number;
+  taskId?: number;
+
+  
+  
+  quote?: {
+    id: number;
+    number: string;
+    status: string;
+  
+  };
+  project?: {
+    id: number;
+    title: string;
+   name: string;
+  };
+  invoice?: {
+    id: number;
+    invoiceNumber: string;
+    
+  };
+  task?: {
+    id: number;
+    title: string;
+    status: string;
+   
+  };
+}
+
+export interface ContactMessage{
+  id:number;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  createdAt: string;
+}

@@ -1,220 +1,163 @@
 <template>
-  <div class="min-h-screen transition-colors duration-300 bg-gray-50">
-    <div class="p-4 transition-spacing duration-300">
-      <div class="flex justify-between items-center mb-8">
-        <div></div>
-        <div>
-          <button
-            v-if="isAdmin"
-            @click="isModalOpen = true"
-            class="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-          >
-            Ajouter une Tâche
-          </button>
-        </div>
-      </div>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 my-8">
-      <div
-        class="p-4 rounded-xl border bg-white border-gray-200 transition-colors duration-200"
-      >
-        <div class="flex items-center justify-between">
-          <div class="p-3 rounded-lg bg-blue-500/10">
-            <i class="ri-file-text-line text-blue-500"></i>
-          </div>
-          <span class="text-sm text-gray-500">Tous les statuts</span>
-        </div>
-        <div class="mt-4">
-          <p class="text-sm text-gray-500">Toutes les tâches combinées</p>
-          <p class="text-2xl font-bold mt-1 text-gray-800">
-            {{ currentProjectTasks.length }}
-          </p>
-        </div>
-      </div>
-      <div
-        class="p-4 rounded-xl border bg-white border-gray-200 transition-colors duration-200"
-      >
-        <div class="flex items-center justify-between">
-          <div
-            class="p-3 rounded-lg"
-            :class="{
-              'bg-gray-200': filteredTasks('A_FAIRE').length === 0,
-              'bg-gray-500/10': filteredTasks('A_FAIRE').length > 0,
-            }"
-          >
-            <i
-              class="ri-time-line w-6 h-6"
-              :class="{
-                'text-gray-400': filteredTasks('A_FAIRE').length === 0,
-                'text-gray-700': filteredTasks('A_FAIRE').length > 0,
-              }"
-            ></i>
-          </div>
-          <span class="text-sm text-gray-500"> Statut(To Do) </span>
-        </div>
-        <div class="mt-4">
-          <p class="text-sm text-gray-500">Tâches à Faire</p>
-          <p class="text-2xl font-bold mt-1 text-gray-800">
-            {{ filteredTasks("A_FAIRE").length }}
-          </p>
-        </div>
-      </div>
-      <div
-        class="p-4 rounded-xl border bg-white border-gray-200 transition-colors duration-200"
-      >
-        <div class="flex items-center justify-between">
-          <div
-            class="p-3 rounded-lg"
-            :class="{
-              'bg-gray-200': filteredTasks('EN_COURS').length === 0,
-              'bg-yellow-500/10': filteredTasks('EN_COURS').length > 0,
-            }"
-          >
-            <i
-              class="ri-hourglass-fill"
-              :class="{
-                'text-gray-400': filteredTasks('EN_COURS').length === 0,
-                'text-yellow-800': filteredTasks('EN_COURS').length > 0,
-              }"
-            ></i>
-          </div>
-          <span class="text-sm text-gray-500"> Statut(In Progress) </span>
-        </div>
-        <div class="mt-4">
-          <p class="text-sm text-gray-500">Tâches En Cours</p>
-          <p class="text-2xl font-bold mt-1 text-gray-800">
-            {{ filteredTasks("EN_COURS").length }}
-          </p>
-        </div>
-      </div>
-      <div
-        class="p-4 rounded-xl border bg-white border-gray-200 transition-colors duration-200"
-      >
-        <div class="flex items-center justify-between">
-          <div
-            class="p-3 rounded-lg"
-            :class="{
-              'bg-gray-200': filteredTasks('TERMINE').length === 0,
-              'bg-green-500/10': filteredTasks('TERMINE').length > 0,
-            }"
-          >
-            <i
-              class="w-6 h-6 ri-check-line"
-              :class="{
-                'text-gray-400': filteredTasks('TERMINE').length === 0,
-                'text-green-800': filteredTasks('TERMINE').length > 0,
-              }"
-            ></i>
-          </div>
-          <span class="text-sm text-gray-500"> Statut(Completed) </span>
-        </div>
-        <div class="mt-4">
-          <p class="text-sm text-gray-500">Tâches Terminées</p>
-          <p class="text-2xl font-bold mt-1 text-gray-800">
-            {{ filteredTasks("TERMINE").length }}
-          </p>
-        </div>
-      </div>
-    </div>
-
+  <div
+    class="min-h-screen transition-colors duration-300 bg-gray-50 p-4 sm:p-6"
+  >
     <div
-      class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 my-8"
-    ></div>
-
-    <div v-if="currentProjectTasks.length > 0" class="mt-8 space-y-6">
-      <h2
-        v-if="isEmploye"
-        class="text-xl font-semibold text-gray-800 mb-4 capitalize"
-      >
-        {{ project?.title || `Projet ID: ${projectId}` }}
+      class="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8"
+    >
+      <h2 class="text-xl sm:text-2xl font-bold text-indigo-700 mb-4 sm:mb-0">
+        Tableau Kanban
       </h2>
-      <div class="grid w-full grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6">
-        <div
-          v-for="task in currentProjectTasks"
-          :key="task.id"
-          class="bg-white w-full rounded-xl shadow-md p-4 flex justify-between items-start"
-        >
-          <div>
-            <h4 class="text-lg font-semibold text-gray-800 mb-2 capitalize">
-              {{ task.title }}
-            </h4>
-            <p class="text-sm text-gray-600 mb-2 capitalize">
-              {{ task.description }}
-            </p>
-            <div class="flex items-center text-sm mb-2">
-              <span class="mr-4">
-                Priorité :
-                <strong
-                  :class="{
-                    'text-red-500': task.priority === 'HAUTE',
-                    'text-yellow-500': task.priority === 'MOYENNE',
-                    'text-green-500': task.priority === 'BASSE',
-                  }"
-                  >{{ task.priority }}</strong
-                >
-              </span>
-              <span v-if="task.effort !== null" class="mr-4">
-                Effort : <strong>{{ task.effort }} h</strong></span
+      <button
+        v-if="isAdmin"
+        @click="isModalOpen = true"
+        class="w-full sm:w-auto bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded focus:outline-none focus:shadow-outline text-sm sm:text-base"
+      >
+        Ajouter une Tâche
+      </button>
+    </div>
+
+    <div class="grid xl:flex gap-4 sm:gap-6 overflow-x-auto pb-4">
+      <div
+        v-for="col in columns"
+        :key="col.status"
+        class="flex-1 min-w-[280px] sm:min-w-[300px] bg-gray-50 rounded-xl shadow-md p-4 border border-gray-200"
+        @dragover.prevent
+        @drop="onDrop(col.status)"
+      >
+        <div class="flex items-center justify-between mb-4">
+          <span class="font-bold text-lg" :class="col.color">{{
+            col.label
+          }}</span>
+          <span class="text-xs text-gray-500"
+            >{{ filteredTasks(col.status).length }} tâche(s)</span
+          >
+        </div>
+
+        <div class="flex flex-col gap-3">
+          <div
+            v-for="task in filteredTasks(col.status)"
+            :key="task.id"
+            class="bg-white border rounded-lg p-3 shadow-sm cursor-grab"
+            draggable="true"
+            @dragstart="onDragStart(task)"
+          >
+            <div class="flex justify-between items-center mb-2">
+              <h4
+                class="text-base font-semibold text-gray-800 capitalize-first-lette"
               >
-              <span v-if="task.employee">
-                Assigné à : <strong> 👤 {{ task.employee.name }}</strong></span
-              >
-            </div>
-            <div class="text-xs text-gray-500">
-              ID du Projet : {{ task.projectId }}
-            </div>
-            <div class="mt-2">
+                {{ task.title }}
+              </h4>
               <span
-                class="inline-flex items-center justify-center px-3 py-2 text-xs font-bold rounded-full"
-                :class="[
-                  task.status === 'A_FAIRE' ? 'bg-gray-200 text-gray-700' : '',
-                  task.status === 'EN_COURS'
-                    ? 'bg-yellow-200 text-yellow-700'
-                    : '',
-                  task.status === 'TERMINE'
-                    ? 'bg-green-200 text-green-700'
-                    : '',
-                ]"
+                v-if="isAdmin || isClient"
+                class="text-xs font-bold px-2 py-1 rounded-xl"
+                :class="{
+                  'bg-gray-200 text-gray-700': task.status === 'A_FAIRE',
+                  'bg-yellow-200 text-yellow-700': task.status === 'EN_COURS',
+                  'bg-green-200 text-green-700': task.status === 'TERMINE',
+                }"
               >
                 {{ task.status }}
               </span>
-              <select
-                v-if="isEmploye"
-                v-model="task.status"
-                @change="updateTaskStatus(task.id, task.status)"
-                class="ml-4 text-sm rounded-md border-gray-300 bg-white px-3 py-2 shadow-md focus:border-indigo-500 focus:ring-indigo-500"
-              >
-                <option value="A_FAIRE">À Faire</option>
-                <option value="EN_COURS">En Cours</option>
-                <option value="TERMINE">Terminé</option>
-              </select>
             </div>
-          </div>
-          <div v-if="isAdmin" class="flex flex-col items-end">
-            <button
-              class="text-gray-400 hover:text-blue-600 focus:outline-none"
-              @click="
-                taskStore.setTaskToEditId(task.id);
-                isEditModalOpen = true;
-              "
+            <p class="text-sm text-gray-600 mb-3 capitalize-first-lette">
+              {{ task.description }}
+            </p>
+
+            <div
+              class="flex flex-wrap items-center gap-x-3 gap-y-3 text-xs text-gray-500 mb-3"
             >
-              <i class="ri-pencil-line"></i>
-            </button>
-            <button
-              class="text-gray-400 hover:text-red-600 focus:outline-none"
-              @click="prepareDeleteTask(task.id)"
+              <span
+                class="font-bold text-xs py-1 rounded flex items-center gap-1"
+              >
+                Priorité:
+                <span
+                  :class="{
+                    'text-red-700': task.priority === 'HAUTE',
+                    'text-yellow-700': task.priority === 'MOYENNE',
+                    'text-green-700': task.priority === 'BASSE',
+                  }"
+                  class="ml-1"
+                >
+                  {{ task.priority }}
+                </span>
+              </span>
+              <span v-if="task.employee">👤 {{ task.employee.name }}</span>
+              <span v-if="task.effort !== null" class="ml-1"
+                >Effort: {{ task.effort }} h</span
+              >
+            </div>
+
+            <div
+              class="flex justify-between items-center text-xs text-gray-500"
             >
-              <i class="ri-delete-bin-line"></i>
-            </button>
+              <span>ID du Projet : {{ task.projectId }}</span>
+              <div class="relative flex items-center" v-if="isEmploye">
+                <span
+                  class="inline-flex items-center justify-center px-3 py-2 text-xs font-bold rounded-full mr-2"
+                  :class="[
+                    task.status === 'A_FAIRE'
+                      ? 'bg-gray-200 text-gray-700'
+                      : '',
+                    task.status === 'EN_COURS'
+                      ? 'bg-yellow-200 text-yellow-700'
+                      : '',
+                    task.status === 'TERMINE'
+                      ? 'bg-green-200 text-green-700'
+                      : '',
+                  ]"
+                >
+                  {{ task.status }}
+                </span>
+                <select
+                  v-if="isEmploye"
+                  v-model="task.status"
+                  @change="updateTaskStatus(task.id, task.status)"
+                  class="text-sm rounded-md border-gray-300 bg-white px-2 py-1 shadow-md focus:border-indigo-500 focus:ring-indigo-500"
+                >
+                  <option value="A_FAIRE">À Faire</option>
+                  <option value="EN_COURS">En Cours</option>
+                  <option value="TERMINE">Terminé</option>
+                </select>
+
+                <div class="ml-3">
+                  <button
+                    v-if="isAdmin"
+                    class="text-gray-400 hover:text-gray-700"
+                    @click.stop="toggleMenu(task.id)"
+                    type="button"
+                  >
+                    <i class="ri-more-2-fill text-lg"></i>
+                  </button>
+                  <div
+                    v-if="openedMenuId === task.id"
+                    class="absolute right-0 top-full mt-1 z-20 w-44 origin-top-right rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none bg-white"
+                    @click.stop
+                  >
+                    <div class="py-1">
+                      <button
+                        v-if="isAdmin"
+                        class="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        @click="editTask(task.id)"
+                      >
+                        <i class="ri-pencil-line mr-2"></i> Éditer
+                      </button>
+                      <button
+                        v-if="isAdmin"
+                        class="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-gray-100"
+                        @click="prepareDeleteTask(task.id)"
+                      >
+                        <i class="ri-delete-bin-line mr-2"></i> Supprimer
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-
-    <div v-else class="text-center text-gray-500 mt-8">
-      Aucune tâche trouvée pour ce projet.
-    </div>
-
     <TaskModal :is-open="isModalOpen" @close="isModalOpen = false" />
     <TasksTaskEdit
       :is-open="isEditModalOpen"
@@ -232,14 +175,13 @@
 import { useTaskStore } from "#imports";
 import { storeToRefs } from "pinia";
 import { onMounted, computed, ref } from "vue";
-import type { Task } from "~/types";
+import type { Task, TaskStatus } from "~/types";
 import TaskModal from "../Tasks/TaskModal.vue";
+import { useProjectStore } from "~/stores/projectStore";
+import { useIsRole } from "~/composables/useIsRole";
 
-const props = defineProps<{
-  projectId: number;
-}>();
-
-const { isAdmin, isEmploye } = useIsRole();
+const props = defineProps<{ projectId: number }>();
+const { isAdmin, isEmploye, isClient } = useIsRole();
 
 const taskStore = useTaskStore();
 const { tasks } = storeToRefs(taskStore);
@@ -260,6 +202,12 @@ const currentProjectTasks = computed(() => {
   return tasks.value.filter((task) => task.projectId === props.projectId);
 });
 
+const columns: { status: TaskStatus; label: string; color: string }[] = [
+  { status: "A_FAIRE", label: "À Faire", color: "text-gray-700" },
+  { status: "EN_COURS", label: "En Cours", color: "text-yellow-700" },
+  { status: "TERMINE", label: "Terminé", color: "text-green-700" },
+];
+
 const filteredTasks = (status: Task["status"]) => {
   return currentProjectTasks.value.filter((task) => task.status === status);
 };
@@ -268,6 +216,26 @@ const prepareDeleteTask = (taskId: number) => {
   taskToDeleteId.value = taskId;
   isDeleteConfirmationOpen.value = true;
 };
+
+const editTask = (taskId: number) => {
+  taskStore.setTaskToEditId(taskId);
+  isEditModalOpen.value = true;
+};
+
+// Drag & Drop
+const draggedTask = ref<Task | null>(null);
+
+function onDragStart(task: Task) {
+  draggedTask.value = task;
+}
+function onDrop(newStatus: Task["status"]) {
+  return async () => {
+    if (draggedTask.value && draggedTask.value.status !== newStatus) {
+      await updateTaskStatus(draggedTask.value.id, newStatus);
+      draggedTask.value = null;
+    }
+  };
+}
 
 const updateTaskStatus = async (taskId: number, newStatus: Task["status"]) => {
   try {
@@ -282,15 +250,26 @@ const updateTaskStatus = async (taskId: number, newStatus: Task["status"]) => {
     );
   }
 };
+const openedMenuId = ref<number | null>(null);
+function toggleMenu(taskId: number) {
+  openedMenuId.value = openedMenuId.value === taskId ? null : taskId;
+}
+// Fermer le menu si on clique ailleurs
+onMounted(() => {
+  document.addEventListener("click", (e) => {
+    openedMenuId.value = null;
+  });
+});
 </script>
 
 <style scoped>
-/* Your existing styles */
+/* Your existing styles, potentially review and remove if Tailwind handles all */
 h2 {
-  margin-bottom: 1rem;
+  margin-bottom: 1rem; /* This can often be replaced by mb-4 or mb-6 Tailwind class */
 }
 
 button {
+  /* These styles are largely overridden by Tailwind classes directly on the button in the template */
   margin-top: 1rem;
   padding: 0.75rem 1.5rem;
   border-radius: 0.375rem;
@@ -299,6 +278,10 @@ button {
   transition: background-color 0.15s ease-in-out;
 }
 
+/* These specific color classes are well-defined by Tailwind's utility classes.
+   You might not need to explicitly define them in <style scoped> if they are
+   only used for dynamic class binding based on data.
+*/
 .bg-gray-200 {
   background-color: #e5e7eb;
 }
@@ -321,5 +304,9 @@ button {
 
 .text-green-700 {
   color: #16a34a;
+}
+
+.capitalize-first-letter::first-letter {
+  text-transform: uppercase;
 }
 </style>

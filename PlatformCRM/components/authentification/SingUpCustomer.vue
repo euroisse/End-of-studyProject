@@ -7,7 +7,7 @@
     <div>
       <label
         for="register-name"
-        class="block text-sm font-medium text-gray-700 mb-1 capitalize"
+        class="block text-sm font-medium text-gray-700 mb-1"
         >Nom complet</label
       >
       <div class="relative">

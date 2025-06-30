@@ -1,5 +1,7 @@
 <template>
-  <div class="bg-white rounded-lg shadow-md">
+  <div
+    class="bg-white rounded-lg shadow-md w-0 sm:w-full lg:w-[750px] xl:w-full mx-auto"
+  >
     <div class="p-10">
       <div class="flex items-center justify-between mb-4">
         <div class="relative">
@@ -29,104 +31,168 @@
           <p class="text-gray-500">Aucun devis disponible</p>
         </div>
 
-        <div v-else class="overflow-x-auto overflow-y-auto">
-          <table class="w-full min-w-[700px]">
-            <thead>
-              <tr class="bg-gray-50">
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Numéro
-                </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Projet
-                </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Prix
-                </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Statut
-                </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr
-                v-for="quoteItem in filteredQuotes"
-                :key="quoteItem.id"
-                class="hover:bg-gray-50"
-              >
-                <td
-                  class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
-                >
-                  {{ quoteItem.number }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {{ quoteItem.projectName || "N/A" }}
-                </td>
-                <td
-                  class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-500"
-                >
-                  {{ getDisplayPrice(quoteItem) }} FCFA
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <span
-                    :class="[
-                      'inline-block px-2 py-1 text-xs rounded-full font-medium',
-                      statusClass(quoteItem.status),
-                    ]"
+        <div v-else>
+          <div class="hidden sm:block overflow-x-auto overflow-y-auto">
+            <table class="w-full min-w-[700px]">
+              <thead>
+                <tr class="bg-gray-50">
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    {{ quoteItem.status }}
-                  </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <div class="flex space-x-6">
-                    <router-link
-                      :to="`/quotes/${quoteItem.id}`"
-                      class="text-green-600 hover:text-green-900 cursor-pointer relative"
+                    Numéro
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Projet
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Prix
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Statut
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr
+                  v-for="quoteItem in filteredQuotes"
+                  :key="quoteItem.id"
+                  class="hover:bg-gray-50"
+                >
+                  <td
+                    class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
+                  >
+                    {{ quoteItem.number }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {{ quoteItem.projectName || "N/A" }}
+                  </td>
+                  <td
+                    class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-500"
+                  >
+                    {{ getDisplayPrice(quoteItem) }} FCFA
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <span
+                      :class="[
+                        'inline-block px-2 py-1 text-xs rounded-full font-medium',
+                        statusClass(quoteItem.status),
+                      ]"
                     >
-                      <i
-                        class="ri-eye-line"
-                        :class="{
-                          'text-yellow-500': quoteItem.status === 'EN_ATTENTE',
-                        }"
-                      ></i>
-                      <span
-                        v-if="quoteItem.status === 'EN_ATTENTE'"
-                        class="absolute -top-1 -right-1 bg-yellow-500 rounded-full w-2 h-2"
-                        title="Action requise"
-                      ></span>
-                    </router-link>
-                    <button
-                      v-if="isAdmin && quoteItem.status !== 'ACCEPTE'"
-                      @click="openEditPricesModal(quoteItem)"
-                      class="text-indigo-600 hover:text-indigo-900 cursor-pointer"
-                    >
-                      <i class="ri-edit-line"></i>
-                    </button>
+                      {{ quoteItem.status }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div class="flex space-x-6">
+                      <router-link
+                        :to="`/quotes/${quoteItem.id}`"
+                        class="text-green-600 hover:text-green-900 cursor-pointer relative"
+                      >
+                        <i
+                          class="ri-eye-line"
+                          :class="{
+                            'text-yellow-500':
+                              quoteItem.status === 'EN_ATTENTE',
+                          }"
+                        ></i>
+                        <span
+                          v-if="quoteItem.status === 'EN_ATTENTE'"
+                          class="absolute -top-1 -right-1 bg-yellow-500 rounded-full w-2 h-2"
+                          title="Action requise"
+                        ></span>
+                      </router-link>
+                      <button
+                        v-if="isAdmin && quoteItem.status !== 'ACCEPTE'"
+                        @click="openEditPricesModal(quoteItem)"
+                        class="text-indigo-600 hover:text-indigo-900 cursor-pointer"
+                      >
+                        <i class="ri-edit-line"></i>
+                      </button>
 
-                    <button
-                      v-if="isAdmin && quoteItem.status !== 'ACCEPTE'"
-                      @click="openDeleteModal(quoteItem)"
-                      class="text-red-600 hover:text-red-900 cursor-pointer"
-                    >
-                      <i class="ri-delete-bin-line"></i>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                      <button
+                        v-if="isAdmin && quoteItem.status !== 'ACCEPTE'"
+                        @click="openDeleteModal(quoteItem)"
+                        class="text-red-600 hover:text-red-900 cursor-pointer"
+                      >
+                        <i class="ri-delete-bin-line"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="sm:hidden grid grid-cols-1 gap-4">
+            <div
+              v-for="quoteItem in filteredQuotes"
+              :key="quoteItem.id"
+              class="bg-white p-4 rounded-lg shadow-md"
+            >
+              <div class="flex justify-between items-center mb-2">
+                <h3 class="font-bold text-lg">Devis #{{ quoteItem.number }}</h3>
+                <span
+                  :class="[
+                    'inline-block px-2 py-1 text-xs rounded-full font-medium',
+                    statusClass(quoteItem.status),
+                  ]"
+                >
+                  {{ quoteItem.status }}
+                </span>
+              </div>
+              <div class="text-sm text-gray-700 mb-1">
+                <span class="font-semibold">Projet:</span>
+                {{ quoteItem.projectName || "N/A" }}
+              </div>
+              <div class="text-sm text-gray-700 mb-3">
+                <span class="font-semibold">Prix:</span>
+                {{ getDisplayPrice(quoteItem) }} FCFA
+              </div>
+              <div class="flex justify-end space-x-4">
+                <router-link
+                  :to="`/quotes/${quoteItem.id}`"
+                  class="text-green-600 hover:text-green-900 cursor-pointer relative"
+                >
+                  <i
+                    class="ri-eye-line text-lg"
+                    :class="{
+                      'text-yellow-500': quoteItem.status === 'EN_ATTENTE',
+                    }"
+                  ></i>
+                  <span
+                    v-if="quoteItem.status === 'EN_ATTENTE'"
+                    class="absolute -top-1 -right-1 bg-yellow-500 rounded-full w-2 h-2"
+                    title="Action requise"
+                  ></span>
+                </router-link>
+                <button
+                  v-if="isAdmin && quoteItem.status !== 'ACCEPTE'"
+                  @click="openEditPricesModal(quoteItem)"
+                  class="text-indigo-600 hover:text-indigo-900 cursor-pointer"
+                >
+                  <i class="ri-edit-line text-lg"></i>
+                </button>
+
+                <button
+                  v-if="isAdmin && quoteItem.status !== 'ACCEPTE'"
+                  @click="openDeleteModal(quoteItem)"
+                  class="text-red-600 hover:text-red-900 cursor-pointer"
+                >
+                  <i class="ri-delete-bin-line text-lg"></i>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="flex justify-center mt-4 space-x-2">
           <button
