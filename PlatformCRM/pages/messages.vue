@@ -1,5 +1,8 @@
 <template>
-  <div class="min-h-screen bg-gray-50 py-8 px-2 sm:px-6 lg:px-12">
+  <div
+    class="min-h-screen bg-gray-50 py-8 px-2 sm:px-6 lg:px-12"
+    v-if="isAdmin"
+  >
     <div class="max-w-full w-full mx-auto">
       <h1 class="text-2xl font-bold mb-6">Message de contacts</h1>
       <div v-if="messages.length === 0" class="text-gray-500">
@@ -36,6 +39,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import type { ContactMessage } from "~/types";
 definePageMeta({ layout: "admin" });
+const { isAdmin } = useIsRole();
 const messages = ref<any[]>([]);
 
 onMounted(async () => {

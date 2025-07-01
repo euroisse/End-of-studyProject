@@ -119,12 +119,6 @@ const employeMenu: MenuItem[] = [
     icon: "ri-dashboard-line",
   },
   { label: "Projets", to: "/projects", icon: "ri-projector-2-line" },
-  {
-    label: "Messages",
-    to: "/messages",
-    icon: "ri-chat-3-line",
-    badge: true,
-  },
   { label: "Paramètres", to: "/parametres", icon: "ri-settings-3-line" },
   { label: "Déconnexion", icon: "ri-logout-box-line" },
 ];
@@ -136,6 +130,12 @@ const clientMenu: MenuItem[] = [
     icon: "ri-dashboard-line",
   },
   { label: "Projets", to: "/projects", icon: "ri-projector-2-line" },
+  {
+    label: "Messages",
+    to: "/messages",
+    icon: "ri-chat-3-line",
+    badge: true,
+  },
   {
     label: "Factures & Devis",
     icon: "ri-file-line",

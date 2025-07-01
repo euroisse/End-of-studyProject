@@ -94,7 +94,7 @@ export type Task = {
   employeeId?: number | null;
   priority: 'BASSE' | 'MOYENNE' | 'HAUTE';
   endDate?: Date | null;
-  status: 'A_FAIRE' | 'EN_COURS' | 'TERMINE' | 'ANNULE' | 'EN_ATTENTE';
+  status: TaskStatus;
   effort?: number | null;
   employee?: { id: number; name: string } | null;
   project?: { id: number; name: string; title: string } | null;
@@ -125,7 +125,7 @@ export interface State {
 export interface TaskUpdatePayload extends Omit<Partial<Task>, 'id' | 'employee' | 'project'> { }
 
 
-export type TaskStatus = 'A_FAIRE' | 'EN_COURS' | 'TERMINE' | 'ANNULE' | 'EN_ATTENTE';
+export type TaskStatus = "A_FAIRE" | "EN_COURS" | "ANNULE" | "EN_ATTENTE" | "TERMINE";
 
 export interface QuoteStageInput {
   projectStageId: number;
