@@ -1,12 +1,14 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center">
-    <div class="w-full max-w-xl py-10">
+  <div
+    class="container px-4 md:px-10 xl:px-20 min-h-screen flex items-center justify-center"
+  >
+    <div class="container w-full max-w-xl py-10">
       <h1 class="text-5xl font-bold mb-6 text-indigo-700 text-center">
         Contactez-nous
       </h1>
       <form
         @submit.prevent="handleSubmit"
-        class="bg-white p-10 rounded-lg shadow-md border"
+        class="bg-white container p-10 rounded-lg shadow-md border"
       >
         <div class="mb-5">
           <label class="block mb-1 font-semibold text-gray-700"

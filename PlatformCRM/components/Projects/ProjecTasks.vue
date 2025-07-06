@@ -17,7 +17,7 @@
       </button>
     </div>
 
-    <div class="grid xl:flex gap-4 sm:gap-6 overflow-x-auto pb-4">
+    <div class="grid xl:flex gap-4 sm:gap-6 pb-4">
       <div
         v-for="col in columns"
         :key="col.status"
@@ -92,6 +92,7 @@
               class="flex justify-between items-center text-xs text-gray-500"
             >
               <span>ID du Projet : {{ task.projectId }}</span>
+
               <div class="relative flex items-center" v-if="isEmploye">
                 <span
                   class="inline-flex items-center justify-center px-3 py-2 text-xs font-bold rounded-full mr-2"
@@ -110,7 +111,7 @@
                   {{ task.status }}
                 </span>
                 <select
-                  v-if="isEmploye"
+                  v-if="task.status !== 'TERMINE'"
                   v-model="task.status"
                   @change="updateTaskStatus(task.id, task.status)"
                   class="text-sm rounded-md border-gray-300 bg-white px-2 py-1 shadow-md focus:border-indigo-500 focus:ring-indigo-500"
@@ -119,37 +120,34 @@
                   <option value="EN_COURS">En Cours</option>
                   <option value="TERMINE">Terminé</option>
                 </select>
+              </div>
 
-                <div class="ml-3">
-                  <button
-                    v-if="isAdmin"
-                    class="text-gray-400 hover:text-gray-700"
-                    @click.stop="toggleMenu(task.id)"
-                    type="button"
-                  >
-                    <i class="ri-more-2-fill text-lg"></i>
-                  </button>
-                  <div
-                    v-if="openedMenuId === task.id"
-                    class="absolute right-0 top-full mt-1 z-20 w-44 origin-top-right rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none bg-white"
-                    @click.stop
-                  >
-                    <div class="py-1">
-                      <button
-                        v-if="isAdmin"
-                        class="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        @click="editTask(task.id)"
-                      >
-                        <i class="ri-pencil-line mr-2"></i> Éditer
-                      </button>
-                      <button
-                        v-if="isAdmin"
-                        class="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-gray-100"
-                        @click="prepareDeleteTask(task.id)"
-                      >
-                        <i class="ri-delete-bin-line mr-2"></i> Supprimer
-                      </button>
-                    </div>
+              <div class="ml-3 relative" v-if="isAdmin">
+                <button
+                  class="text-gray-400 hover:text-gray-700"
+                  @click.stop="toggleMenu(task.id)"
+                  type="button"
+                >
+                  <i class="ri-more-2-fill text-lg"></i>
+                </button>
+                <div
+                  v-if="openedMenuId === task.id"
+                  class="absolute right-0 top-full mt-1 z-20 w-44 origin-top-right rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none bg-white"
+                  @click.stop
+                >
+                  <div class="py-1">
+                    <button
+                      class="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      @click="editTask(task.id)"
+                    >
+                      <i class="ri-pencil-line mr-2"></i> Éditer
+                    </button>
+                    <button
+                      class="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-gray-100"
+                      @click="prepareDeleteTask(task.id)"
+                    >
+                      <i class="ri-delete-bin-line mr-2"></i> Supprimer
+                    </button>
                   </div>
                 </div>
               </div>
@@ -182,7 +180,7 @@ import { useIsRole } from "~/composables/useIsRole";
 
 const props = defineProps<{ projectId: number }>();
 const { isAdmin, isEmploye, isClient } = useIsRole();
-
+console.log("Valeur de isAdmin:", isAdmin.value);
 const taskStore = useTaskStore();
 const { tasks } = storeToRefs(taskStore);
 
@@ -226,11 +224,27 @@ const editTask = (taskId: number) => {
 const draggedTask = ref<Task | null>(null);
 
 function onDragStart(task: Task) {
-  draggedTask.value = task;
+  if (task.status !== "TERMINE") {
+    // Empêche le glisser si la tâche est "TERMINE"
+    draggedTask.value = task;
+  }
 }
 function onDrop(newStatus: Task["status"]) {
   return async () => {
-    if (draggedTask.value && draggedTask.value.status !== newStatus) {
+    if (
+      draggedTask.value &&
+      draggedTask.value.status !== newStatus &&
+      newStatus !== "TERMINE"
+    ) {
+      // Empêche le dépôt dans "TERMINE" si la tâche n'est pas déjà "TERMINE"
+      await updateTaskStatus(draggedTask.value.id, newStatus);
+      draggedTask.value = null;
+    } else if (
+      draggedTask.value &&
+      draggedTask.value.status !== newStatus &&
+      newStatus === "TERMINE"
+    ) {
+      // Autorise le dépôt dans "TERMINE" uniquement si la tâche glissée n'est pas déjà "TERMINE"
       await updateTaskStatus(draggedTask.value.id, newStatus);
       draggedTask.value = null;
     }
@@ -239,6 +253,16 @@ function onDrop(newStatus: Task["status"]) {
 
 const updateTaskStatus = async (taskId: number, newStatus: Task["status"]) => {
   try {
+    const taskToUpdate = tasks.value.find((task) => task.id === taskId);
+    if (
+      taskToUpdate &&
+      taskToUpdate.status === "TERMINE" &&
+      newStatus !== "TERMINE"
+    ) {
+      // Empêche de changer le statut de "TERMINE" vers autre chose
+      console.warn("Impossible de changer le statut d'une tâche terminée.");
+      return;
+    }
     await taskStore.updateTaskStatus(taskId, newStatus);
     if (project.value && project.value.id) {
       await projectStore.fetchProject(project.value.id);
@@ -252,7 +276,13 @@ const updateTaskStatus = async (taskId: number, newStatus: Task["status"]) => {
 };
 const openedMenuId = ref<number | null>(null);
 function toggleMenu(taskId: number) {
-  openedMenuId.value = openedMenuId.value === taskId ? null : taskId;
+  const task = tasks.value.find((t) => t.id === taskId);
+  if (task && task.status !== "TERMINE") {
+    // Ouvre le menu uniquement si la tâche n'est pas "TERMINE"
+    openedMenuId.value = openedMenuId.value === taskId ? null : taskId;
+  } else {
+    openedMenuId.value = null; // Ferme le menu si la tâche est "TERMINE"
+  }
 }
 // Fermer le menu si on clique ailleurs
 onMounted(() => {
