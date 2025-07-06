@@ -23,7 +23,7 @@
         </div>
       </div>
 
-      <div class="md:w-1/2 p-6 md:p-8 flex items-center">
+      <div class="md:w-1/2 justify-center flex items-center">
         <Login @login="handleLogin" />
       </div>
     </div>
