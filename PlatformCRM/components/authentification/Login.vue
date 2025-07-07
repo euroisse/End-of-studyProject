@@ -73,11 +73,11 @@
         {{ isLoading ? "Connexion en cours..." : "Se connecter" }}
       </button>
 
-      <div class="relative flex items-center py-2">
+      <!-- <div class="relative flex items-center py-2">
         <div class="flex-grow border-t border-gray-300"></div>
         <span class="flex-shrink mx-4 text-gray-400 text-sm">ou</span>
         <div class="flex-grow border-t border-gray-300"></div>
-      </div>
+      </div> -->
 
       <!-- <div class="grid grid-cols-2 gap-4">
         <button
