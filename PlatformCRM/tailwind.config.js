@@ -18,11 +18,6 @@ export default {
       xxl: "1440px",
       xxl: "1600px",
     },
-    maxWidth: {
-      "screen-xl": "1280px",
-      "screen-xxl": "1440px",
-      "screen-xxxl": "1600px",
-    },
     extend: {
       padding: {
         "5p": "5%",
