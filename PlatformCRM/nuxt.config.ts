@@ -2,7 +2,7 @@
 export default defineNuxtConfig({
   components: true,
   compatibilityDate: '2024-11-01',
-  devtools: { enabled: true },
+  devtools: { enabled: false },
   css: ['~/assets/css/main.css',  'swiper/css',
     'swiper/css/pagination',],
   modules: ['@nuxtjs/tailwindcss', '@pinia/nuxt'],
