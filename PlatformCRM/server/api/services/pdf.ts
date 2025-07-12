@@ -63,7 +63,7 @@ export default async function generateInvoicePdf(invoice: InvoiceWithQuote) {
       .font(fontBase)
       .fillColor(textColor)
       .text("YDE-SIMBOCK", rightMargin - 120, infoY + 16)
-      .text("000-000-000", rightMargin - 120, infoY + 32)
+      .text("+237 656 488 879", rightMargin - 120, infoY + 32)
       .text("contact@gmail.com", rightMargin - 120, infoY + 48);
 
     // --- INFOS CLIENT ---

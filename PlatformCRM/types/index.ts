@@ -94,7 +94,7 @@ export type Task = {
   employeeId?: number | null;
   priority: 'BASSE' | 'MOYENNE' | 'HAUTE';
   endDate?: Date | null;
-  status: 'A_FAIRE' | 'EN_COURS' | 'TERMINE' | 'ANNULE' | 'EN_ATTENTE';
+  status: TaskStatus;
   effort?: number | null;
   employee?: { id: number; name: string } | null;
   project?: { id: number; name: string; title: string } | null;
@@ -125,7 +125,7 @@ export interface State {
 export interface TaskUpdatePayload extends Omit<Partial<Task>, 'id' | 'employee' | 'project'> { }
 
 
-export type TaskStatus = 'A_FAIRE' | 'EN_COURS' | 'TERMINE' | 'ANNULE' | 'EN_ATTENTE';
+export type TaskStatus = "A_FAIRE" | "EN_COURS" | "ANNULE" | "EN_ATTENTE" | "TERMINE";
 
 export interface QuoteStageInput {
   projectStageId: number;
@@ -223,4 +223,52 @@ export interface EmployeeDisplayData {
   email: string;
   post?: string;
   project?: string;
+}
+
+export interface Notification {
+  id: number;
+  message: string;
+  type: string; 
+  read: boolean;
+  createdAt: string; 
+  // Champs optionnels qui peuvent être présents selon le type de notification
+  userId: number;
+  quoteId?: number;
+  projectId?: number;
+  invoiceId?: number;
+  taskId?: number;
+
+  
+  
+  quote?: {
+    id: number;
+    number: string;
+    status: string;
+  
+  };
+  project?: {
+    id: number;
+    title: string;
+   name: string;
+  };
+  invoice?: {
+    id: number;
+    invoiceNumber: string;
+    
+  };
+  task?: {
+    id: number;
+    title: string;
+    status: string;
+   
+  };
+}
+
+export interface ContactMessage{
+  id:number;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  createdAt: string;
 }

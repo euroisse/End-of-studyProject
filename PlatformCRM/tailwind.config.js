@@ -9,24 +9,42 @@ export default {
     "./error.vue",
   ],
   theme: {
-    screens:{
-      sm: "340px",
-      md:"540px",
-      lg:"768px",
-      xl:"1180px"
+    screens: {
+      xs: "480px",
+      sm: "640px",
+      md: "768px",
+      lg: "1024px",
+      xl: "1280px",
+      xxl: "1440px",
+      xxl: "1600px",
     },
-    extend: {},
-    fontFamily:{
+    maxWidth: {
+      "screen-xl": "1280px",
+      "screen-xxl": "1440px",
+      "screen-xxxl": "1600px",
+    },
+    extend: {
+      padding: {
+        "5p": "5%",
+        "10p": "10%",
+        "15p": "15%",
+        "5vw": "5vw",
+        "10vw": "10vw",
+      },
+    },
+    fontFamily: {
       Roboto: "Roboto, sans-serif",
-      Montserrat: "Montserrat, sans-serif"
+      Montserrat: "Montserrat, sans-serif",
     },
-    container:{
-      center:true,
-      padding:{
-        DEFAULT:"12px",
-        md:"32px"
-      }
-    },},
+    container: {
+      center: true,
+      DEFAULT: "1rem",
+      sm: "2rem",
+      md: "3rem",
+      lg: "4rem",
+      xl: "6rem",
+      "2xl": "8rem",
+    },
+  },
   plugins: [],
-}
-
+};

@@ -1,5 +1,5 @@
 <template>
-  <aside class="w-64 bg-white shadow-lg fixed h-screen">
+  <aside class="w-64 bg-white shadow-lg fixed h-screen z-20">
     <div class="p-6">
       <h1 class="text-2xl font-bold text-indigo-600">OpenCRM</h1>
     </div>
@@ -7,7 +7,7 @@
       <template v-for="item in currentMenuItems" :key="item.label">
         <template v-if="item.children">
           <div
-            class="flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 cursor-pointer"
+            class="relative flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 cursor-pointer"
             @click="toggleSubMenu(item.label)"
             :class="{
               'bg-indigo-50 text-indigo-600 border-r-4 border-indigo-600 font-semibold':
@@ -24,6 +24,7 @@
           <div
             v-if="isSubMenuOpen(item.label)"
             class="bg-white absolute left-full shadow-md rounded-md w-48 p-3"
+            @click.stop
           >
             <NuxtLink
               v-for="child in item.children"
@@ -54,6 +55,7 @@
               'bg-indigo-50 text-indigo-600 border-r-4 border-indigo-600 font-semibold':
                 isActive(item.to),
             }"
+            @click="handleMenuClick(item)"
           >
             <i :class="`${item.icon} w-5`"></i>
             <span class="mx-4">{{ item.label }}</span>
@@ -87,10 +89,13 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from "vue";
 import { useRoute } from "vue-router";
+import { useIsRole } from "~/composables/useIsRole";
+import { useNotificationStore } from "~/stores/notificationMessage";
 
 const route = useRoute();
 const emit = defineEmits(["logout"]);
 const activeSubMenu = ref<string | null>(null);
+const notificationStore = useNotificationStore();
 
 const { isEmploye, isClient, isAdmin } = useIsRole();
 
@@ -114,12 +119,6 @@ const employeMenu: MenuItem[] = [
     icon: "ri-dashboard-line",
   },
   { label: "Projets", to: "/projects", icon: "ri-projector-2-line" },
-  {
-    label: "Messages",
-    to: "/messages",
-    icon: "ri-chat-3-line",
-    badge: true,
-  },
   { label: "Paramètres", to: "/parametres", icon: "ri-settings-3-line" },
   { label: "Déconnexion", icon: "ri-logout-box-line" },
 ];
@@ -132,18 +131,18 @@ const clientMenu: MenuItem[] = [
   },
   { label: "Projets", to: "/projects", icon: "ri-projector-2-line" },
   {
+    label: "Messages",
+    to: "/messages",
+    icon: "ri-chat-3-line",
+    badge: true,
+  },
+  {
     label: "Factures & Devis",
     icon: "ri-file-line",
     children: [
       { label: "Factures", to: "/factures" },
       { label: "Devis", to: "/devis" },
     ],
-  },
-  {
-    label: "Messages",
-    to: "/messages",
-    icon: "ri-chat-3-line",
-    badge: true,
   },
   { label: "Profil", to: "/profil", icon: "ri-user-line" },
   { label: "Déconnexion", icon: "ri-logout-box-line" },
@@ -157,12 +156,18 @@ const adminMenu: MenuItem[] = [
   },
   { label: "Projets", to: "/projects", icon: "ri-projector-2-line" },
   { label: "Devis", to: "/devis", icon: "ri-file-line" },
+  {
+    label: "Messages",
+    to: "/messages",
+    icon: "ri-chat-3-line",
+    badge: true,
+  },
   { label: "Utilisateurs", to: "/utilisateurs", icon: "ri-group-line" },
   { label: "Déconnexion", icon: "ri-logout-box-line" },
 ];
 
 const currentMenuItems = computed<MenuItem[]>(() => {
-  console.log(isEmploye.value, isClient.value, isAdmin.value);
+  // console.log(isEmploye.value, isClient.value, isAdmin.value); // Keep for debugging if needed
   if (isEmploye.value) {
     return employeMenu;
   } else if (isClient.value) {
@@ -183,8 +188,8 @@ const toggleSubMenu = (label: string) => {
 };
 
 const isSubMenuOpen = (label: string) => activeSubMenu.value === label;
+
 const isActive = (path: string) => {
-  // Active si le chemin correspond exactement OU si on est sur une sous-page
   if (path === "/projects") {
     return route.path === "/projects" || route.path.startsWith("/projects/");
   }
@@ -196,34 +201,56 @@ const isActive = (path: string) => {
     );
   }
   if (path === "/devis") {
-    // Active sur /devis et toutes les pages de détail de devis
-    return route.path === "/devis" || route.path.startsWith("/quotes/");
+    return route.path === "/devis" || route.path.startsWith("/devis/");
   }
   return route.path === path;
 };
+
 const isChildActive = (item: MenuItem) =>
   item.children?.some((child: ChildMenuItem) => isActive(child.to));
-const getNotificationCount = (path: string) => (path === "/messages" ? 3 : 0);
+
+onMounted(async () => {
+  try {
+    const res = await $fetch<{ count: number }>("/api/messages/unread-count");
+    notificationStore.setUnreadMessages(res.count);
+  } catch {
+    notificationStore.setUnreadMessages(0);
+  }
+});
+
+const getNotificationCount = (path: string) => {
+  if (path === "/messages") {
+    return notificationStore.unreadMessages;
+  }
+  return 0;
+};
 
 watch(() => route.path, closeSubMenus);
 
 onMounted(() => {
   document.addEventListener("click", (event) => {
-    if (
-      document.querySelector("aside")?.contains(event.target as Node) === false
-    ) {
+    const sidebar = document.querySelector("aside");
+    if (sidebar && !sidebar.contains(event.target as Node)) {
       closeSubMenus();
     }
   });
 
-  const currentPath = route.path;
-  for (const item of [...clientMenu]) {
-    if (item.children?.some((child) => child.to === currentPath)) {
+  const allMenuItems = [...employeMenu, ...clientMenu, ...adminMenu];
+  for (const item of allMenuItems) {
+    if (item.children?.some((child) => isActive(child.to))) {
       activeSubMenu.value = item.label;
       break;
     }
   }
 });
+
+function handleMenuClick(item: MenuItem) {
+  if (item.to === "/messages") {
+    // Marquer comme lu côté backend et mettre le compteur à 0
+    notificationStore.setUnreadMessages(0);
+    $fetch("/api/messages/mark-read", { method: "POST" });
+  }
+}
 </script>
 
 <style scoped>

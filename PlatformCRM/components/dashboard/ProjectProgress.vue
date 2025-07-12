@@ -30,7 +30,7 @@
             <div class="flex flex-col items-center min-w-[70px]">
               <div
                 :class="[
-                  'w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold relative z-10 transition-colors duration-300 shadow',
+                  'w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold relative transition-colors duration-300 shadow',
                   getStageColor(getProjectStageStatus(stage.tasks || [])),
                 ]"
               >

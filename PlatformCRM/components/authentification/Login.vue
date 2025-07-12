@@ -1,6 +1,6 @@
 <template>
-  <form @submit.prevent="login">
-    <div class="space-y-4">
+  <form @submit.prevent="login" class="p-6">
+    <div class="space-y-6">
       <h2 class="text-2xl font-bold text-gray-800 mb-6">
         Connectez-vous à votre compte
       </h2>
@@ -59,11 +59,11 @@
         </div>
       </div>
 
-      <div class="flex justify-end">
+      <!-- <div class="flex justify-end">
         <a href="#" class="text-sm text-blue-600 hover:underline"
           >Mot de passe oublié ?</a
         >
-      </div>
+      </div> -->
 
       <button
         type="submit"
@@ -73,13 +73,13 @@
         {{ isLoading ? "Connexion en cours..." : "Se connecter" }}
       </button>
 
-      <div class="relative flex items-center py-2">
+      <!-- <div class="relative flex items-center py-2">
         <div class="flex-grow border-t border-gray-300"></div>
         <span class="flex-shrink mx-4 text-gray-400 text-sm">ou</span>
         <div class="flex-grow border-t border-gray-300"></div>
-      </div>
+      </div> -->
 
-      <div class="grid grid-cols-2 gap-4">
+      <!-- <div class="grid grid-cols-2 gap-4">
         <button
           type="button"
           class="flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 py-2.5 px-4 rounded-lg hover:bg-gray-50 transition whitespace-nowrap cursor-pointer"
@@ -94,7 +94,7 @@
           <i class="ri-linkedin-fill text-blue-700"></i>
           <span>LinkedIn</span>
         </button>
-      </div>
+      </div> -->
 
       <div v-if="loginError" class="text-red-600 text-sm mt-3">
         {{ loginError }}

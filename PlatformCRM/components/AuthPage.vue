@@ -3,7 +3,7 @@
     class="min-h-screen bg-gradient-to-br from-indigo-50 to-blue-100 flex items-center justify-center p-4"
   >
     <div
-      class="w-full max-w-5xl bg-white rounded-xl shadow-xl overflow-hidden flex flex-col md:flex-row"
+      class="bg-white rounded-xl shadow-xl overflow-hidden flex flex-col md:flex-row max-w-2xl"
     >
       <div class="md:w-1/2 relative h-64 md:h-auto overflow-hidden">
         <img
@@ -23,7 +23,7 @@
         </div>
       </div>
 
-      <div class="md:w-1/2 p-6 md:p-8 flex items-center">
+      <div class="md:w-1/2 justify-center flex items-center">
         <Login @login="handleLogin" />
       </div>
     </div>
