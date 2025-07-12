@@ -25,20 +25,14 @@ onMounted(async () => {
   };
 
   try {
-    const { data, error: apiError } = await useFetch("/api/auth/seed-admin", {
+    const response = await $fetch("/api/auth/seed-admin", {
       method: "POST",
       body: adminData,
     });
 
-    if (apiError.value) {
-      error.value =
-        apiError.value.data?.message ||
-        "Erreur lors de la création de l'admin.";
-      loading.value = false;
-      return;
-    }
+    console.log("data", response)
 
-    if (data.value?.alreadyExists) {
+    if (response?.alreadyExists) {
       error.value = "Un compte admin existe déjà. Veuillez vous connecter.";
       success.value = null;
     } else {
@@ -46,8 +40,9 @@ onMounted(async () => {
         "Admin créé avec succès. Cliquez sur 'Se connecter' pour accéder à votre compte.";
       error.value = null;
     }
-    // navigateTo("/dashboard");
+    navigateTo("/");
   } catch (e) {
+    console.log('error', e)
     error.value = "Erreur réseau ou serveur.";
   } finally {
     loading.value = false;
