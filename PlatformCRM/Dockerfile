@@ -22,11 +22,6 @@ ENV DATABASE_URL=$DATABASE_URL
 RUN dos2unix ./scripts/deploy.sh && \
     chmod +x ./scripts/deploy.sh
 
-
-#Définir le point d'entrée
-SHELL [ "/bin/sh", "-c" ]
-ENTRYPOINT [ "/bin/sh", "./scripts/deploy.sh" ]
-
 # Declare build arguments
 ARG PORT
 ARG HOST
@@ -38,19 +33,6 @@ ENV NODE_ENV="prod"
 
 EXPOSE ${PORT}
 
-# Build Stage 2
-
-FROM node:22-alpine AS runner
-WORKDIR /app
-
-# Only `.output` folder is needed from the build stage
-COPY --from=build /app/.output/ ./
-
-
-# Change the port and host
-ENV PORT=80
-ENV HOST=0.0.0.0
-
-EXPOSE 80
-
-CMD ["node", "/app/server/index.mjs"]
+#Définir le point d'entrée
+SHELL [ "/bin/sh", "-c" ]
+ENTRYPOINT [ "/bin/sh", "./scripts/deploy.sh" ]

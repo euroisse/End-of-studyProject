@@ -1,3 +1,10 @@
-manager.openintech.app{
+manager.openintech.app {
     reverse_proxy app:3300
+
+    # Headers de sécurité
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        X-XSS-Protection "1; mode=block"
+    }
 }

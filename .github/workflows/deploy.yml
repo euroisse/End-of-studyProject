@@ -31,15 +31,17 @@ jobs:
             # Arrêter les conteneurs existants
             docker compose down
             
-            # Builder l'image de l'application avec les dernières modifications
-            docker compose build --no-cache app
-            
             # Démarrer les services avec docker-compose
             docker compose up -d
             
-            # Nettoyer les anciennes images non utilisées
-            docker image prune -f
+            # Mettre à jour la base de données
+            npx prisma migrate deploy
+
+            # Générer les modèles Prisma
+            npx prisma generate
+
+            # Redémarrer les services
+            pm2 restart all
             
             # Afficher les logs pour vérifier le déploiement
-            docker compose logs --tail=20
       

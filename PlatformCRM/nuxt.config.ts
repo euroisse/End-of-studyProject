@@ -13,7 +13,12 @@ export default defineNuxtConfig({
     },
   },
   devServer: {
-    port: 3300
+    https: false,
+    port: 3000,
+    host: '0.0.0.0'
+  },
+  nitro: {
+    preset: 'node'
   },
   app: {
     head: {

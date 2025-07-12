@@ -18,4 +18,7 @@ npx prisma migrate deploy
 
 echo "Prisma migrations deployed"
 
-exec "$@"
+# Démarrer l'application
+echo "Starting the application..."
+
+npm run dev
