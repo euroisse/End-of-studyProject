@@ -160,7 +160,7 @@
               </div>
               <div class="flex justify-end space-x-4">
                 <router-link
-                  :to="`/devis/${quoteItem.id}`"
+                  :to="`/quotes/${quoteItem.id}`"
                   class="text-green-600 hover:text-green-900 cursor-pointer relative"
                 >
                   <i
