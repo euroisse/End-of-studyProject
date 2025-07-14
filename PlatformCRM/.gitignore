@@ -29,6 +29,6 @@ generated_/prisma
 
 prisma/dev*
 
-invoices/
+/invoices/
 
-quotes/
+/quotes/

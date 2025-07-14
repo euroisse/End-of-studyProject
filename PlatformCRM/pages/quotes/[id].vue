@@ -145,9 +145,10 @@
     </div>
 
     <InvoiceTable
+      ref="invoiceTableRef"
       v-if="quoteDetails && isAdmin && quoteDetails.status !== 'EN_ATTENTE'"
       :quoteId="quoteDetails.id"
-      :key="quoteDetails.id"
+      :key="`invoice-table-${quoteDetails.id}-${invoiceTableKey}`"
     />
 
     <div
@@ -192,6 +193,8 @@ const { isClient, isAdmin } = useIsRole();
 const quoteDetails = ref<quote | null>(null);
 const showCreateInvoiceModal = ref(false);
 const selectedQuoteForInvoice = ref<quote | null>(null);
+const invoiceTableKey = ref(0);
+const invoiceTableRef = ref(null);
 
 watch(
   () => route.params.id,
@@ -300,6 +303,13 @@ const openCreateInvoiceModal = (quoteId: number) => {
 
 const handleInvoiceCreationSuccess = async () => {
   await fetchQuoteData(Number(route.params.id));
+  // Force le rafraîchissement du composant InvoiceTable
+  invoiceTableKey.value++;
+  
+  // Méthode alternative : appeler directement la fonction refresh du composant
+  // if (invoiceTableRef.value) {
+  //   invoiceTableRef.value.refreshInvoices();
+  // }
 };
 </script>
 

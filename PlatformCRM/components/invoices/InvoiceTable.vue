@@ -199,6 +199,16 @@ const downloadInvoice = async (invoiceNumber: string) => {
   document.body.removeChild(link);
   window.URL.revokeObjectURL(url);
 };
+
+// Expose la fonction de rafraîchissement pour usage externe
+const refreshInvoices = () => {
+  fetchInvoicesPaginated(pagination.value.page, pagination.value.pageSize);
+};
+
+// Exposer la fonction via defineExpose pour permettre l'accès depuis le parent
+defineExpose({
+  refreshInvoices
+});
 </script>
 
 <style scoped></style>
